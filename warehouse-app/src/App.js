@@ -450,30 +450,37 @@ export default function App() {
   
   const hasLoadedData = useRef(false);
 
-  useEffect(() => {
+    useEffect(() => {
     const loadInitialData = async () => {
-      setLoading(true);
-      const data = await api.fetchAllData();
-      if (data) {
-          hasLoadedData.current = true; // ✅ Ставим флаг ПЕРЕД setState
-          setWarehouses(data.warehouses || []);
-          setItems(data.items || []);
-          setItemTypes(data.itemTypes || []);
-          
-          if ((data.warehouses || []).length > 0) {
+        setLoading(true);
+        const data = await api.fetchAllData();
+        if (data) {
+        hasLoadedData.current = true; // ✅ Ставим флаг ПЕРЕД setState
+        setWarehouses(data.warehouses || []);
+        setItems(data.items || []);
+        setItemTypes(data.itemTypes || []);
+        
+        if ((data.warehouses || []).length > 0) {
             setSelectedWarehouseId(data.warehouses[0].id);
-          } else {
+        } else {
             setSelectedWarehouseId(null);
-          }
-      }
-      setLoading(false);
+        }
+        }
+        setLoading(false);
     };
     loadInitialData();
-  }, []);
+    }, []);
 
-  // Autosave effect
-  useEffect(() => {
-  }, []);
+    // ✅ Автоматическое сохранение при изменении данных
+    useEffect(() => {
+    if (!hasLoadedData.current) return;
+    const fullState = {
+        warehouses,
+        items,
+        itemTypes
+    };
+    api.saveAllData(fullState);
+    }, [warehouses, items, itemTypes]);
 
 
   const handleSaveWarehouse = async (data) => {
