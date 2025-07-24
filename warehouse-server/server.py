@@ -10,7 +10,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",                                 # локальный React
     "https://my-project-navy-theta.vercel.app",              # Vercel-деплой
-    "https://72309dfdf5fb.ngrok-free.app",                   # ngrok-прокси
+    "https://warehouse-vlad.ngrok.io",                   # ngrok-прокси
 ]
 
 # ✅ Настройка CORS
