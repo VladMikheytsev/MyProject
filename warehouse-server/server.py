@@ -9,7 +9,7 @@ app = FastAPI()
 origins = [
     "http://localhost:3000",
     "https://my-project-sable-iota.vercel.app"
-    "https://eac8bb8b9f5f.ngrok-free.app",
+    "https://e11116600382.ngrok-free.app",
 ]
 
 app.add_middleware(
