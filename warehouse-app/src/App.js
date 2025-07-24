@@ -11,7 +11,7 @@ const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height
 
 
 // --- API Configuration 111---
-const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
+const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
 // const API_BASE_URL = "https://<your-ngrok-address>.ngrok-free.app";
 
 const api = {
