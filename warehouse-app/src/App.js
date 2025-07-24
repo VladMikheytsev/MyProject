@@ -11,32 +11,32 @@ const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height
 
 
 // --- API Configuration 111---
-const API_BASE_URL = process.env.REACT_APP_API_BASE; 
+const API_BASE_URL = https://warehouse-vlad.ngrok.io; 
 // const API_BASE_URL = "https://<your-ngrok-address>.ngrok-free.app";
 
 const api = {
-    fetchAllData: async () => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/data`);
-            if (!response.ok) throw new Error("Network response was not ok");
-            return await response.json();
-        } catch (error) {
-            console.error("Ошибка при загрузке данных:", error);
-            return null;
-        }
-    },
-    saveAllData: async (fullState) => {
-        try {
-            await fetch(`${API_BASE_URL}/api/data`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fullState),
-            });
-            console.log("Данные успешно отправлены на сервер.");
-        } catch (error) {
-            console.error("Ошибка при сохранении данных:", error);
-        }
-    },
+  fetchAllData: async () => {
+    try {
+      const response = await fetch(`${API_BASE_URL}/api/data`);
+      if (!response.ok) throw new Error("Network response was not ok");
+      return await response.json();
+    } catch (error) {
+      console.error("Ошибка при загрузке данных:", error);
+      return null;
+    }
+  },
+  saveAllData: async (fullState) => {
+    try {
+      await fetch(`${API_BASE_URL}/api/data`, {
+        method: 'POST',
+        headers: { 'Content-Type': 'application/json' },
+        body: JSON.stringify(fullState),
+      });
+      console.log("Данные успешно отправлены на сервер.");
+    } catch (error) {
+      console.error("Ошибка при сохранении данных:", error);
+    }
+  },
 };
 
 

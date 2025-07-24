@@ -1,25 +1,25 @@
 import json
 import os
-from fastapi import FastAPI
+from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.responses import JSONResponse
 from typing import Dict, Any
 
 app = FastAPI()
 
-# 🔒 Разрешённые источники для CORS
+# ✅ Разрешённые источники CORS
 origins = [
-    "http://localhost:3000",                                 # локальный React
-    "https://my-project-navy-theta.vercel.app",              # Vercel-деплой
-    "https://warehouse-vlad.ngrok.io",                   # ngrok-прокси
+    "http://localhost:3000",                          # локальный React
+    "https://my-project-navy-theta.vercel.app",       # Vercel-деплой
+    "https://warehouse-vlad.ngrok.io",                # постоянный ngrok-домен
 ]
 
-# ✅ Настройка CORS
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=origins,        # ⚠️ обязательно HTTPS-URL отдельно
+    allow_origins=origins,            # ← конкретные разрешённые домены
     allow_credentials=True,
-    allow_methods=["*"],          # ← разрешить все методы: GET, POST, OPTIONS и т.д.
-    allow_headers=["*"],          # ← разрешить все заголовки (в т.ч. Content-Type)
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # 📁 Путь до JSON-файла
@@ -68,9 +68,17 @@ async def get_all_data():
 
 # 📥 Обновление данных
 @app.post("/api/data")
-async def update_all_data(data: Dict[str, Any]):
+async def update_all_data(data: Dict[str, Any], request: Request):
+    print("📥 POST /api/data — данные получены:")
+    print(json.dumps(data, indent=2, ensure_ascii=False))
+
     if data == DEFAULT_DATA:
         print("⛔️ Получены дефолтные данные — не сохраняю.")
         return {"status": "skipped"}
     save_db(data)
     return {"status": "success"}
+
+# 🔧 Preflight-запрос OPTIONS (по желанию)
+@app.options("/api/data")
+async def options_handler():
+    return JSONResponse(status_code=200, content={"ok": True})
