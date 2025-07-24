@@ -1,5 +1,76 @@
 {
-    "warehouses": [],
-    "items": [],
-    "itemTypes": []
+    "warehouses": [
+        {
+            "name": "1",
+            "address": "1",
+            "hours": "1",
+            "gate_code": "1",
+            "lock_code": "1",
+            "id": 1753394687667,
+            "places": [
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 35,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
+        }
+    ],
+    "items": [
+        {
+            "name": "ыфыф",
+            "type": "Jdhdhdh",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": 1753394687667,
+            "placeId": 17,
+            "id": 1753395309951
+        },
+        {
+            "name": "Hdhdhdhhd",
+            "type": "Jdhdhdh",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": 1753394687667,
+            "placeId": 18,
+            "id": 1753395325089
+        }
+    ],
+    "itemTypes": [
+        {
+            "name": "Jdhdhdh",
+            "color": "#4dbbcc",
+            "id": 1753395272328
+        }
+    ]
 }
