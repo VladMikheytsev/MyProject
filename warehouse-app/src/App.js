@@ -661,79 +661,62 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     );
 };
 
-// --- НОВЫЙ КОМПОНЕНТ: Модальное окно для сканирования QR-кода ---
+// --- ИЗМЕНЕННЫЙ КОМПОНЕНТ: Модальное окно для сканирования QR-кода через Telegram ---
 const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
-    const scannerRef = useRef(null);
+    const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, error
     const [scanError, setScanError] = useState('');
 
-    useEffect(() => {
-        const scriptId = 'html5-qrcode-script';
-        
-        const initializeScanner = () => {
-            if (!window.Html5QrcodeScanner) {
-                console.error("Html5QrcodeScanner is not loaded.");
-                setScanError("Не удалось загрузить библиотеку сканера.");
-                return;
-            }
-            
-            if (scannerRef.current) {
-                return;
-            }
+    const startScan = () => {
+        if (window.Telegram && window.Telegram.WebApp) {
+            const tg = window.Telegram.WebApp;
 
-            const qrCodeScanner = new window.Html5QrcodeScanner(
-                "qr-reader",
-                { fps: 10, qrbox: { width: 250, height: 250 } },
-                false
-            );
-
-            scannerRef.current = qrCodeScanner;
-
-            const onScanSuccess = (decodedText, decodedResult) => {
-                setScanError('');
-                if (decodedText === itemToVerify.id) {
-                    qrCodeScanner.clear().then(onSuccess).catch(error => console.error("Failed to clear scanner.", error));
+            const onQrTextReceived = (eventData) => {
+                tg.closeScanQrPopup();
+                if (eventData.data === itemToVerify.id) {
+                    tg.offEvent('qrTextReceived', onQrTextReceived);
+                    onSuccess();
                 } else {
+                    setScanStatus('error');
                     setScanError(`Неверный QR-код. Отсканирован другой товар.`);
+                    tg.offEvent('qrTextReceived', onQrTextReceived);
                 }
             };
 
-            const onScanFailure = (error) => {
-                if (!error.includes("QR code not found")) {
-                     setScanError('Ошибка сканирования. Попробуйте еще раз.');
-                }
-            };
+            tg.onEvent('qrTextReceived', onQrTextReceived);
             
-            qrCodeScanner.render(onScanSuccess, onScanFailure);
-        };
+            tg.showScanQrPopup({
+                text: `Наведите на QR-код товара "${itemToVerify.name}"`
+            });
+            setScanStatus('scanning');
+            setScanError('');
 
-        if (!document.getElementById(scriptId)) {
-            const script = document.createElement('script');
-            script.id = scriptId;
-            script.src = "https://unpkg.com/html5-qrcode";
-            script.onload = () => initializeScanner();
-            script.onerror = () => setScanError("Не удалось загрузить скрипт сканера.");
-            document.body.appendChild(script);
         } else {
-            initializeScanner();
+            setScanStatus('error');
+            setScanError('Сканер доступен только в приложении Telegram.');
+            console.error('Telegram WebApp API not found.');
         }
-
-        return () => {
-            if (scannerRef.current && typeof scannerRef.current.clear === 'function') {
-                scannerRef.current.clear().catch(error => {
-                    console.error("Failed to clear scanner on unmount.", error);
-                });
-            }
-        };
-    }, [itemToVerify, onSuccess]);
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative text-center">
                 <button onClick={onCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><XIcon /></button>
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Проверка позиции</h2>
-                <p className="mb-4 text-gray-600">Отсканируйте QR-код для позиции: <span className="font-bold">"{itemToVerify.name}"</span></p>
-                <div id="qr-reader" className="w-full border rounded-lg overflow-hidden"></div>
-                {scanError && <p className="mt-4 text-center text-red-600 font-semibold bg-red-100 p-2 rounded-lg">{scanError}</p>}
+                <p className="mb-6 text-gray-600">Нажмите кнопку, чтобы отсканировать QR-код для позиции: <span className="font-bold">"{itemToVerify.name}"</span></p>
+                
+                <button 
+                    onClick={startScan} 
+                    disabled={scanStatus === 'scanning'}
+                    className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold transition disabled:bg-gray-400"
+                >
+                    {scanStatus === 'scanning' ? 'Камера активна...' : 'Сканировать QR-код'}
+                </button>
+
+                {scanError && <p className="mt-4 text-red-600 font-semibold bg-red-100 p-3 rounded-lg">{scanError}</p>}
+                
+                <p className="mt-4 text-sm text-gray-500">
+                    Для сканирования будет использована камера вашего устройства через приложение Telegram.
+                </p>
             </div>
         </div>
     );
@@ -883,7 +866,7 @@ export default function App() {
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [movingItem, setMovingItem] = useState(null); 
-  const [verifyingItem, setVerifyingItem] = useState(null); // <-- НОВОЕ: Для проверки QR
+  const [verifyingItem, setVerifyingItem] = useState(null);
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1030,10 +1013,9 @@ export default function App() {
     setMovingItem(null);
   };
 
-  // --- НОВЫЙ ОБРАБОТЧИК: Успешная проверка QR-кода ---
   const handleVerificationSuccess = () => {
-    setMovingItem(verifyingItem); // Теперь этот товар готов к перемещению
-    setVerifyingItem(null);      // Закрываем сканер
+    setMovingItem(verifyingItem);
+    setVerifyingItem(null);
   };
   
   const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
