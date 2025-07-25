@@ -1,4 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
+import { useReactToPrint } from 'react-to-print';
+import QRCode from 'qrcode';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -20,6 +22,7 @@ const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18"
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
 const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
+const PrintIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 
 
 // --- API Configuration ---
@@ -135,6 +138,62 @@ const PalletStats = ({ places = [], items = [] }) => {
         </div>
     );
 };
+
+// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
+const QRCodePrintModal = ({ item, user, onClose }) => {
+    const [qrCodeUrl, setQrCodeUrl] = useState('');
+    const printRef = useRef();
+
+    const handlePrint = useReactToPrint({
+        content: () => printRef.current,
+        documentTitle: `QR-Code-${item.name}`,
+    });
+    
+    useEffect(() => {
+        const generateQr = async () => {
+            const printDate = new Date().toLocaleDateString('ru-RU');
+            const userName = `${user.firstName} ${user.lastName}`;
+            const qrString = `ID: ${item.id}\nНаименование: ${item.name}\nДата печати: ${printDate}\nПользователь: ${userName}`;
+            try {
+                const url = await QRCode.toDataURL(qrString, {
+                    width: 256,
+                    margin: 2,
+                });
+                setQrCodeUrl(url);
+            } catch (err) {
+                console.error('Не удалось сгенерировать QR-код:', err);
+            }
+        };
+        generateQr();
+    }, [item, user]);
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
+                <div ref={printRef} className="text-center p-4">
+                    <h2 className="text-xl font-bold mb-1 text-gray-800">{item.name}</h2>
+                    <p className="text-sm text-gray-500 mb-4">ID: {item.id}</p>
+                    {qrCodeUrl ? (
+                        <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
+                    ) : (
+                        <div className="w-64 h-64 bg-gray-200 animate-pulse mx-auto"></div>
+                    )}
+                    <div className="text-xs text-gray-500 mt-4">
+                        <p>Дата печати: {new Date().toLocaleString('ru-RU')}</p>
+                        <p>Пользователь: {user.firstName} {user.lastName}</p>
+                    </div>
+                </div>
+                <div className="flex justify-center space-x-4 mt-6">
+                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
+                    <button onClick={handlePrint} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
+                        <PrintIcon /> Печать
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Модальные окна ---
 const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
@@ -1250,6 +1309,7 @@ export default function App() {
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
   const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
+  const [itemToPrint, setItemToPrint] = useState(null); // <-- НОВОЕ СОСТОЯНИЕ ДЛЯ QR-КОДА
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
@@ -1643,13 +1703,12 @@ export default function App() {
                                 {assignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                    const isUnplaced = item.placeId === null; // --- ИЗМЕНЕНИЕ: Проверка на неразмещенную позицию
+                                    const isUnplaced = item.placeId === null;
                                     
                                     return (
                                         <div 
                                             key={item.id} 
-                                            onClick={() => isActionableUser && setItemToAction(item)} 
-                                            // --- ИЗМЕНЕНИЕ: Условный стиль для неразмещенных позиций
+                                            onClick={() => isActionableUser && setItemToAction(item)}
                                             className={`${isUnplaced ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'} p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer transition' : ''}`}
                                         >
                                             <div className="flex items-start gap-3">
@@ -1657,7 +1716,6 @@ export default function App() {
                                                 <div>
                                                     <p className="font-bold text-gray-800">{item.name}</p>
                                                     <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                    {/* --- ИЗМЕНЕНИЕ: Условный текст для неразмещенных позиций --- */}
                                                     {isUnplaced ? (
                                                         <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
                                                     ) : (
@@ -1665,7 +1723,10 @@ export default function App() {
                                                     )}
                                                 </div>
                                             </div>
-                                            <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                            <div className="flex items-center">
+                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                            </div>
                                         </div>
                                 )})}
                             </div>
@@ -1687,7 +1748,10 @@ export default function App() {
                                                     <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
                                                 </div>
                                             </div>
-                                            <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                            <div className="flex items-center">
+                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                            </div>
                                         </div>
                                     )})}
                                 </div>
@@ -1719,6 +1783,9 @@ export default function App() {
       {/* Модальное окно для перемещения/списания */}
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
       
+      {/* Модальное окно для печати QR-кода */}
+      {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
+
       {/* Новые модальные окна для сценариев */}
       {isScenariosModalOpen && <ScenariosModal onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onOpenView={() => { setScenariosModalOpen(false); setViewScenariosModalOpen(true); }} onClose={() => setScenariosModalOpen(false)} />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
