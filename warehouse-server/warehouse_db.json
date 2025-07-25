@@ -8,6 +8,15 @@
             "lock_code": "1",
             "id": 1753407392679,
             "places": []
+        },
+        {
+            "name": "G",
+            "address": "B",
+            "hours": "B",
+            "gate_code": "B",
+            "lock_code": "B",
+            "id": 1753408690390,
+            "places": []
         }
     ],
     "items": [],
@@ -27,6 +36,5 @@
             "name": "Коробки",
             "color": "#f97316"
         }
-    ],
-    "users": []
+    ]
 }
