@@ -13,13 +13,6 @@ const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heig
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
 const ContactsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/><line x1="8" y1="2" x2="8" y2="4"/><line x1="16" y1="2" x2="16" y2="4"/></svg>;
 const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-const ScenariosIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="18" height="18" rx="2" ry="2"></rect><line x1="3" y1="9" x2="21" y2="9"></line><line x1="9" y1="21" x2="9" y2="9"></line></svg>;
-const ArrowRightIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="5" y1="12" x2="19" y2="12"></line><polyline points="12 5 19 12 12 19"></polyline></svg>;
-const ArrowLeftIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="19" y1="12" x2="5" y2="12"></line><polyline points="12 19 5 12 12 5"></polyline></svg>;
-const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 11.08V12a10 10 0 1 1-5.93-9.14"></path><polyline points="22 4 12 14.01 9 11.01"></polyline></svg>;
-const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
-const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
-const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 
 
 // --- API Configuration ---
@@ -920,183 +913,6 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     );
 };
 
-// --- [НОВЫЕ КОМПОНЕНТЫ] Модальные окна для сценариев ---
-const ScenariosModal = ({ onOpenCreate, onOpenView, onClose }) => {
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Управление сценариями</h2>
-                <div className="space-y-4">
-                    <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                        <FilePlusIcon /> Создать сценарий
-                    </button>
-                    <button onClick={onOpenView} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-gray-600 text-white font-semibold hover:bg-gray-700 transition shadow-md">
-                        <EyeIcon /> Просмотреть сценарии
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) => {
-    const [step, setStep] = useState(1);
-    const [fromWarehouseId, setFromWarehouseId] = useState(warehouses[0]?.id || null);
-    const [toWarehouseId, setToWarehouseId] = useState(null);
-    const [selectedItems, setSelectedItems] = useState({}); // { itemId: quantity }
-    const [driverId, setDriverId] = useState(null);
-
-    const drivers = users.filter(u => u.role === 'Водитель');
-
-    const handleItemToggle = (item) => {
-        const newSelectedItems = { ...selectedItems };
-        if (newSelectedItems[item.id]) {
-            delete newSelectedItems[item.id];
-        } else {
-            const quantity = prompt(`Введите количество для "${item.name}":`, item.quantity);
-            if (quantity && !isNaN(quantity) && Number(quantity) > 0 && Number(quantity) <= item.quantity) {
-                newSelectedItems[item.id] = Number(quantity);
-            }
-        }
-        setSelectedItems(newSelectedItems);
-    };
-
-    const handleNext = () => {
-        if (Object.keys(selectedItems).length === 0) {
-            alert('Выберите хотя бы одну позицию для перемещения.');
-            return;
-        }
-        setStep(2);
-    };
-
-    const handleCreate = () => {
-        if (!toWarehouseId || !driverId) {
-            alert('Выберите склад-получатель и водителя.');
-            return;
-        }
-        onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId });
-    };
-    
-    const itemsOnWarehouse = fromWarehouseId ? items.filter(i => i.warehouseId === fromWarehouseId) : [];
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
-                {step === 1 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
-                        <div className="space-y-4">
-                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
-                                {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                            </select>
-                            <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
-                                {itemsOnWarehouse.map(item => (
-                                    <div key={item.id} onClick={() => handleItemToggle(item)} className={`p-3 rounded-lg cursor-pointer flex justify-between items-center ${selectedItems[item.id] ? 'bg-blue-100 border-blue-500 border' : 'bg-white hover:bg-gray-100'}`}>
-                                        <span>{item.name} (Доступно: {item.quantity})</span>
-                                        {selectedItems[item.id] && <span className="font-bold text-blue-700">Выбрано: {selectedItems[item.id]}</span>}
-                                    </div>
-                                ))}
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center mt-8">
-                            <button onClick={onClose} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><XIcon /></button>
-                            <button onClick={handleNext} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700"><ArrowRightIcon /></button>
-                        </div>
-                    </div>
-                )}
-                {step === 2 && (
-                    <div>
-                        <h2 className="text-2xl font-bold mb-4">Шаг 2: Назначение</h2>
-                        <div className="space-y-4">
-                            <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
-                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
-                                    <option value="" disabled>Выберите склад</option>
-                                    {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                                </select>
-                            </div>
-                             <div>
-                                <label className="block text-sm font-medium text-gray-700 mb-1">Водитель:</label>
-                                <select value={driverId || ''} onChange={e => setDriverId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
-                                    <option value="" disabled>Выберите водителя</option>
-                                    {drivers.map(d => <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>)}
-                                </select>
-                            </div>
-                        </div>
-                        <div className="flex justify-between items-center mt-8">
-                            <button onClick={() => setStep(1)} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><ArrowLeftIcon /></button>
-                            <button onClick={handleCreate} disabled={!toWarehouseId || !driverId} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400"><CheckCircleIcon /></button>
-                        </div>
-                    </div>
-                )}
-            </div>
-        </div>
-    );
-};
-
-const ViewScenariosModal = ({ scenarios, warehouses, users, currentUser, onUpdateStatus, onClose }) => {
-    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
-    const getDriverName = (id) => {
-        const driver = users.find(u => u.id === id);
-        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
-    };
-
-    const userScenarios = currentUser.role === 'Водитель'
-        ? scenarios.filter(s => s.driverId === currentUser.id)
-        : scenarios;
-
-    const StatusIndicator = ({ status }) => {
-        if (status === 'accepted') {
-            return <span className="flex items-center gap-1 text-yellow-600"><ClockIcon /> В работе</span>;
-        }
-        if (status === 'completed') {
-            return <span className="flex items-center gap-1 text-green-600"><CheckCircleIcon /> Завершено</span>;
-        }
-        return <span className="text-gray-600">Новый</span>;
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Просмотр сценариев</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
-                </div>
-                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                    {userScenarios.length > 0 ? userScenarios.map(s => (
-                        <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
-                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
-                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
-                                </div>
-                                <div className="text-sm font-semibold">
-                                    <StatusIndicator status={s.status} />
-                                </div>
-                            </div>
-                            <div className="mt-2 pt-2 border-t">
-                                <p className="font-semibold text-sm mb-1">Позиции:</p>
-                                <ul className="list-disc list-inside text-sm text-gray-700">
-                                    {Object.entries(s.items).map(([itemId, quantity]) => {
-                                        const item = items.find(i => i.id === itemId);
-                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
-                                    })}
-                                </ul>
-                            </div>
-                            {currentUser.id === s.driverId && (
-                                <div className="mt-4 flex gap-4">
-                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
-                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
-                                </div>
-                            )}
-                        </div>
-                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
-                </div>
-            </div>
-        </div>
-    );
-};
 
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
@@ -1230,7 +1046,6 @@ export default function App() {
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
   const [itemTypes, setItemTypes] = useState([]);
-  const [scenarios, setScenarios] = useState([]);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
@@ -1244,9 +1059,6 @@ export default function App() {
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
   const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
-  const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
-  const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
-  const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1272,7 +1084,6 @@ export default function App() {
       hasLoadedData.current = false;
       setWarehouses([]);
       setItems([]);
-      setScenarios([]);
       setSelectedWarehouseId(null);
   };
 
@@ -1343,7 +1154,6 @@ export default function App() {
                 setWarehouses(appData.warehouses || []);
                 setItems(appData.items || []);
                 setItemTypes(appData.itemTypes || []);
-                setScenarios(appData.scenarios || []);
                 setUsers(usersData || []);
                 hasLoadedData.current = true;
             } catch (error) {
@@ -1368,9 +1178,9 @@ export default function App() {
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
-    const fullState = { warehouses, items, itemTypes, scenarios };
+    const fullState = { warehouses, items, itemTypes };
     api.saveAppData(fullState);
-  }, [warehouses, items, itemTypes, scenarios, currentUser, loading]);
+  }, [warehouses, items, itemTypes, currentUser, loading]);
 
 
   // --- Обработчики действий в приложении ---
@@ -1422,21 +1232,6 @@ export default function App() {
         setItemToAction(null); // Закрываем модальное окно
     }
   };
-  
-  const handleCreateScenario = (scenarioData) => {
-    const newScenario = {
-      ...scenarioData,
-      id: crypto.randomUUID(),
-      status: 'new', // 'new', 'accepted', 'completed'
-    };
-    setScenarios(prev => [...prev, newScenario]);
-    setCreateScenarioModalOpen(false);
-  };
-
-  const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
-    setScenarios(prev => prev.map(s => s.id === scenarioId ? { ...s, status: newStatus } : s));
-  };
-
 
   const handleVerificationSuccess = (verifiedItem) => {
     setMovingItem(verifiedItem);
@@ -1576,9 +1371,6 @@ export default function App() {
                 </div>
 
                 <div className="space-y-4">
-                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
-                        <ScenariosIcon /> Сценарии
-                    </button>
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon /> Переместить позицию по QR
                     </button>
@@ -1669,11 +1461,6 @@ export default function App() {
       
       {/* Модальное окно для перемещения/списания */}
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
-      
-      {/* Новые модальные окна для сценариев */}
-      {isScenariosModalOpen && <ScenariosModal onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onOpenView={() => { setScenariosModalOpen(false); setViewScenariosModalOpen(true); }} onClose={() => setScenariosModalOpen(false)} />}
-      {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
-      {isViewScenariosModalOpen && <ViewScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={handleUpdateScenarioStatus} onClose={() => setViewScenariosModalOpen(false)} />}
 
     </div>
   );
