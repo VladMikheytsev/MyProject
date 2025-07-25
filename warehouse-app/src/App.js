@@ -1349,6 +1349,7 @@ export default function App() {
                 setWarehouses(appData.warehouses || []);
                 setItems(appData.items || []);
                 setItemTypes(appData.itemTypes || []);
+                // --- ИЗМЕНЕНИЕ: Загрузка сценариев с сервера ---
                 setScenarios(appData.scenarios || []);
                 setUsers(usersData || []);
                 hasLoadedData.current = true;
@@ -1371,11 +1372,15 @@ export default function App() {
     initializeApp();
   }, []);
 
+  // --- ИЗМЕНЕНИЕ: Этот эффект теперь отправляет ВСЕ данные, включая сценарии, на сервер при любом изменении ---
   useEffect(() => {
+    // Не сохранять данные, пока они не загружены с сервера или нет пользователя
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
     const fullState = { warehouses, items, itemTypes, scenarios };
-    api.saveAppData(fullState);
+    api.saveAppData(fullState).catch(error => {
+      console.error("Ошибка при автоматическом сохранении данных:", error);
+    });
   }, [warehouses, items, itemTypes, scenarios, currentUser, loading]);
 
 
@@ -1435,11 +1440,13 @@ export default function App() {
       id: crypto.randomUUID(),
       status: 'new', // 'new', 'accepted', 'completed'
     };
+    // Обновление состояния вызовет эффект сохранения данных
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
+    // Обновление состояния вызовет эффект сохранения данных
     setScenarios(prev => prev.map(s => s.id === scenarioId ? { ...s, status: newStatus } : s));
   };
 
