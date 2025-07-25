@@ -356,9 +356,7 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
 
     const handleChange = (e) => { 
         const { name, value } = e.target;
-        const isWarehouseSelect = name === 'warehouseId';
-        const processedValue = isWarehouseSelect ? Number(value) : value;
-        setNewItem(prev => ({ ...prev, [name]: processedValue, placeId: isWarehouseSelect ? null : prev.placeId })); 
+        setNewItem(prev => ({ ...prev, [name]: value, placeId: name === 'warehouseId' ? null : prev.placeId })); 
     };
     const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID() }); };
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
@@ -560,8 +558,7 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
     
     const handleChange = (e) => {
         const { name, value } = e.target;
-        const processedValue = (name === 'assignedWarehouseId' && value !== 'office') ? Number(value) : value;
-        setUserData(prev => ({ ...prev, [name]: processedValue }));
+        setUserData(prev => ({ ...prev, [name]: value }));
     };
 
     return (
@@ -948,17 +945,6 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
     const [selectedItems, setSelectedItems] = useState({}); // { itemId: quantity }
     const [driverId, setDriverId] = useState(null);
 
-    // [FIX]: Добавлен useEffect для корректного сброса состояния при смене склада-отправителя
-    useEffect(() => {
-        // При смене склада-отправителя, сбрасываем выбранные позиции и водителя
-        setSelectedItems({});
-        setDriverId(null);
-        // Если новый склад-отправитель совпадает с уже выбранным получателем, сбрасываем получателя
-        if (toWarehouseId !== null && toWarehouseId === fromWarehouseId) {
-            setToWarehouseId(null);
-        }
-    }, [fromWarehouseId]);
-
     const drivers = users.filter(u => u.role === 'Водитель');
 
     const handleItemToggle = (item) => {
@@ -990,10 +976,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
         onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId });
     };
     
-    // [FIX]: Фильтруем только те товары, которые размещены на складе (имеют placeId)
-    const itemsOnWarehouse = fromWarehouseId 
-        ? items.filter(i => i.warehouseId === fromWarehouseId && i.placeId !== null) 
-        : [];
+    const itemsOnWarehouse = fromWarehouseId ? items.filter(i => i.warehouseId === fromWarehouseId) : [];
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
@@ -1002,16 +985,16 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
                         <div className="space-y-4">
-                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
+                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                             <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
-                                {itemsOnWarehouse.length > 0 ? itemsOnWarehouse.map(item => (
+                                {itemsOnWarehouse.map(item => (
                                     <div key={item.id} onClick={() => handleItemToggle(item)} className={`p-3 rounded-lg cursor-pointer flex justify-between items-center ${selectedItems[item.id] ? 'bg-blue-100 border-blue-500 border' : 'bg-white hover:bg-gray-100'}`}>
                                         <span>{item.name} (Доступно: {item.quantity})</span>
                                         {selectedItems[item.id] && <span className="font-bold text-blue-700">Выбрано: {selectedItems[item.id]}</span>}
                                     </div>
-                                )) : <p className="text-center text-gray-500 py-4">На этом складе нет размещенных позиций для перемещения.</p>}
+                                ))}
                             </div>
                         </div>
                         <div className="flex justify-between items-center mt-8">
@@ -1026,7 +1009,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
-                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
+                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
@@ -1059,14 +1042,14 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
 
 const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onClose }) => {
     const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
-    const getUserName = (userId) => {
-        const user = users.find(u => u.id === userId);
-        return user ? `${user.firstName} ${user.lastName}` : 'Не назначен';
+    const getDriverName = (id) => {
+        const driver = users.find(u => u.id === id);
+        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
     };
 
-    const userScenarios = (currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада')
-        ? scenarios
-        : scenarios.filter(s => s.driverId === currentUser.id);
+    const userScenarios = currentUser.role === 'Водитель'
+        ? scenarios.filter(s => s.driverId === currentUser.id)
+        : scenarios;
 
     const StatusIndicator = ({ status }) => {
         if (status === 'accepted') {
@@ -1086,51 +1069,35 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                    {userScenarios.length > 0 ? userScenarios.map(s => {
-                        const isDriverForScenario = currentUser.role === 'Водитель' && currentUser.id === s.driverId;
-                        const isAdminOrWorker = currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада';
-
-                        return (
-                            <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
-                                <div className="flex justify-between items-start mb-3">
-                                    <div>
-                                        <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
-                                        <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
-                                    </div>
-                                    <div className="text-sm font-semibold">
-                                        <StatusIndicator status={s.status} />
-                                    </div>
+                    {userScenarios.length > 0 ? userScenarios.map(s => (
+                        <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
+                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
+                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
                                 </div>
-                                <div className="space-y-3">
-                                    <div className="pt-2 border-t">
-                                        <p className="font-semibold text-sm mb-1">Участники:</p>
-                                        <ul className="text-sm text-gray-700 space-y-1">
-                                            <li><strong>Отправитель:</strong> {getUserName(s.senderId)}</li>
-                                            <li><strong>Водитель:</strong> {getUserName(s.driverId)}</li>
-                                            {s.status === 'completed' && <li><strong>Получатель:</strong> {getUserName(s.receiverId)}</li>}
-                                        </ul>
-                                    </div>
-                                    <div className="pt-2 border-t">
-                                        <p className="font-semibold text-sm mb-1">Позиции:</p>
-                                        <ul className="list-disc list-inside text-sm text-gray-700">
-                                            {Object.entries(s.items).map(([itemId, quantity]) => {
-                                                const item = items.find(i => i.id === itemId);
-                                                return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
-                                            })}
-                                        </ul>
-                                    </div>
-                                </div>
-                                <div className="mt-4 flex gap-4">
-                                    {isDriverForScenario && s.status === 'new' && (
-                                        <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>
-                                    )}
-                                    {isAdminOrWorker && s.status === 'accepted' && (
-                                        <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
-                                    )}
+                                <div className="text-sm font-semibold">
+                                    <StatusIndicator status={s.status} />
                                 </div>
                             </div>
-                        )
-                    }) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
+                            <div className="mt-2 pt-2 border-t">
+                                <p className="font-semibold text-sm mb-1">Позиции:</p>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                    {Object.entries(s.items).map(([itemId, quantity]) => {
+                                        const item = items.find(i => i.id === itemId);
+                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
+                                    })}
+                                </ul>
+                            </div>
+                            {currentUser.id === s.driverId && (
+                                <div className="mt-4 flex gap-4">
+                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
+                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
+                                </div>
+                            )}
+                        </div>
+                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
                 </div>
             </div>
         </div>
@@ -1190,8 +1157,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        const processedValue = (name === 'assignedWarehouseId' && value !== 'office') ? Number(value) : value;
-        setFormData(prev => ({ ...prev, [name]: processedValue }));
+        setFormData(prev => ({ ...prev, [name]: value }));
     };
 
     const handleSubmit = async (e) => {
@@ -1283,7 +1249,7 @@ export default function App() {
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
-  const [itemToAction, setItemToAction] = useState(null); 
+  const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
@@ -1417,7 +1383,7 @@ export default function App() {
 
   // --- Обработчики действий в приложении ---
   const handleSaveWarehouse = (data) => {
-    const savedData = { ...data, id: data.id || Date.now() };
+    const savedData = { ...data, id: data.id || crypto.randomUUID() };
     setWarehouses(prev => {
         const exists = prev.some(w => w.id === savedData.id);
         if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
@@ -1469,38 +1435,40 @@ export default function App() {
       ...scenarioData,
       id: crypto.randomUUID(),
       status: 'new',
-      senderId: currentUser.id, 
-      receiverId: null, 
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
+  // --- ИЗМЕНЕНИЕ: Логика завершения сценария ---
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
     const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
     if (!scenarioToUpdate) return;
 
-    let updatedScenario = { ...scenarioToUpdate, status: newStatus };
-
+    // Если сценарий ЗАВЕРШЕН, перемещаем позиции
     if (newStatus === 'completed') {
-        updatedScenario.receiverId = currentUser.id;
-
         const itemIdsToMove = Object.keys(scenarioToUpdate.items);
         const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
 
         setItems(prevItems =>
             prevItems.map(item => {
                 if (itemIdsToMove.includes(item.id)) {
-                    return { ...item, warehouseId: destinationWarehouseId, placeId: null };
+                    // Перемещаем на новый склад и сбрасываем место
+                    return {
+                        ...item,
+                        warehouseId: destinationWarehouseId,
+                        placeId: null 
+                    };
                 }
                 return item;
             })
         );
     }
 
+    // В любом случае обновляем статус самого сценария
     setScenarios(prevScenarios =>
         prevScenarios.map(s =>
-            s.id === scenarioId ? updatedScenario : s
+            s.id === scenarioId ? { ...s, status: newStatus } : s
         )
     );
   };
@@ -1675,12 +1643,13 @@ export default function App() {
                                 {assignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                    const isUnplaced = item.placeId === null;
+                                    const isUnplaced = item.placeId === null; // --- ИЗМЕНЕНИЕ: Проверка на неразмещенную позицию
                                     
                                     return (
                                         <div 
                                             key={item.id} 
                                             onClick={() => isActionableUser && setItemToAction(item)} 
+                                            // --- ИЗМЕНЕНИЕ: Условный стиль для неразмещенных позиций
                                             className={`${isUnplaced ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'} p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer transition' : ''}`}
                                         >
                                             <div className="flex items-start gap-3">
@@ -1688,6 +1657,7 @@ export default function App() {
                                                 <div>
                                                     <p className="font-bold text-gray-800">{item.name}</p>
                                                     <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                    {/* --- ИЗМЕНЕНИЕ: Условный текст для неразмещенных позиций --- */}
                                                     {isUnplaced ? (
                                                         <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
                                                     ) : (
