@@ -233,10 +233,10 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
                         })}
                     </div>
                 </div>
-                <div className="flex justify-end space-x-4 mt-8">
-                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
-                    <button onClick={onReset} className="px-6 py-2 rounded-lg text-white bg-yellow-500 hover:bg-yellow-600 font-semibold">Сброс</button>
-                    <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить</button>
+                <div className="flex justify-center items-center gap-4 mt-8">
+                    <button onClick={onCancel} className="flex-1 px-6 py-3 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold transition-colors">Отмена</button>
+                    <button onClick={onReset} className="flex-1 px-6 py-3 rounded-lg text-white bg-yellow-500 hover:bg-yellow-600 font-semibold transition-colors">Сброс</button>
+                    <button onClick={handleSave} className="flex-1 px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold transition-colors">Сохранить</button>
                 </div>
             </div>
         </div>
