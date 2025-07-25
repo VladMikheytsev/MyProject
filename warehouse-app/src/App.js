@@ -151,9 +151,8 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
     
     useEffect(() => {
         const generateQr = async () => {
-            const printDate = new Date().toLocaleDateString('ru-RU');
-            const userName = `${user.firstName} ${user.lastName}`;
-            const qrString = `ID: ${item.id}\nНаименование: ${item.name}\nДата печати: ${printDate}\nПользователь: ${userName}`;
+            // Данные для QR-кода состоят только из ID
+            const qrString = item.id;
             try {
                 const url = await QRCode.toDataURL(qrString, {
                     width: 256,
@@ -1308,8 +1307,8 @@ export default function App() {
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
-  const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
-  const [itemToPrint, setItemToPrint] = useState(null); // <-- НОВОЕ СОСТОЯНИЕ ДЛЯ QR-КОДА
+  const [itemToAction, setItemToAction] = useState(null); 
+  const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
