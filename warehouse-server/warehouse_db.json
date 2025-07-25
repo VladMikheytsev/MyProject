@@ -248,8 +248,8 @@
             "password": "Test1",
             "firstName": "Владислав",
             "lastName": "Шкряба",
-            "position": "ЗамЗавСклад",
-            "phone": "+12133341647",
+            "position": "Зам Зав Склад",
+            "phone": "2133341647",
             "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "role": "Администратор"
         },

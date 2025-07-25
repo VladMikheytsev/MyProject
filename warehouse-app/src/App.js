@@ -24,18 +24,6 @@ const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" he
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 const PrintIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 
-// --- [НОВЫЙ КОМПОНЕНТ] Иконка уведомлений ---
-const NotificationIcon = ({ count }) => (
-    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
-        <ScenariosIcon />
-        {count > 0 && (
-            <span className="absolute -top-2 -right-3 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
-                {count}
-            </span>
-        )}
-    </div>
-);
-
 
 // --- API Configuration ---
 // !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
@@ -1060,21 +1048,79 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     );
 };
 
-// --- [НОВЫЕ КОМПОНЕНТЫ] Модальные окна для сценариев ---
-const ScenariosModal = ({ onOpenCreate, onOpenView, onClose, userRole }) => {
+// --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
+const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose }) => {
+    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
+    const getDriverName = (id) => {
+        const driver = users.find(u => u.id === id);
+        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
+    };
+
+    const StatusIndicator = ({ status }) => {
+        if (status === 'accepted') {
+            return <span className="flex items-center gap-1 text-yellow-600"><ClockIcon /> В работе</span>;
+        }
+        if (status === 'completed') {
+            return <span className="flex items-center gap-1 text-green-600"><CheckCircleIcon /> Завершено</span>;
+        }
+        return <span className="text-gray-600">Новый</span>;
+    };
+    
+    let userScenarios = (currentUser.role === 'Водитель')
+        ? scenarios.filter(s => s.driverId === currentUser.id)
+        : scenarios;
+
+    if (currentUser.role !== 'Администратор') {
+        userScenarios = userScenarios.filter(s => s.status !== 'completed');
+    }
+
+    const statusOrder = { 'new': 1, 'accepted': 2, 'completed': 3 };
+    userScenarios.sort((a, b) => statusOrder[a.status] - statusOrder[b.status]);
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Управление сценариями</h2>
-                <div className="space-y-4">
-                    {userRole !== 'Водитель' && (
-                        <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                            <FilePlusIcon /> Создать сценарий
-                        </button>
-                    )}
-                    <button onClick={onOpenView} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-gray-600 text-white font-semibold hover:bg-gray-700 transition shadow-md">
-                        <EyeIcon /> Просмотреть сценарии
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">Управление сценариями</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+
+                {currentUser.role !== 'Водитель' && (
+                    <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md mb-4">
+                        <FilePlusIcon /> Создать сценарий
                     </button>
+                )}
+                
+                <div className="space-y-4 max-h-[60vh] overflow-y-auto border-t pt-4">
+                    {userScenarios.length > 0 ? userScenarios.map(s => (
+                        <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
+                            <div className="flex justify-between items-start">
+                                <div>
+                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
+                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
+                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
+                                </div>
+                                <div className="text-sm font-semibold">
+                                    <StatusIndicator status={s.status} />
+                                </div>
+                            </div>
+                            <div className="mt-2 pt-2 border-t">
+                                <p className="font-semibold text-sm mb-1">Позиции:</p>
+                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                    {Object.entries(s.items).map(([itemId, quantity]) => {
+                                        const item = items.find(i => i.id === itemId);
+                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
+                                    })}
+                                </ul>
+                            </div>
+                            {currentUser.id === s.driverId && (
+                                <div className="mt-4 flex gap-4">
+                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
+                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
+                                </div>
+                            )}
+                        </div>
+                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
                 </div>
             </div>
         </div>
@@ -1178,70 +1224,6 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         </div>
                     </div>
                 )}
-            </div>
-        </div>
-    );
-};
-
-const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onClose }) => {
-    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
-    const getDriverName = (id) => {
-        const driver = users.find(u => u.id === id);
-        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
-    };
-
-    const userScenarios = currentUser.role === 'Водитель'
-        ? scenarios.filter(s => s.driverId === currentUser.id)
-        : scenarios;
-
-    const StatusIndicator = ({ status }) => {
-        if (status === 'accepted') {
-            return <span className="flex items-center gap-1 text-yellow-600"><ClockIcon /> В работе</span>;
-        }
-        if (status === 'completed') {
-            return <span className="flex items-center gap-1 text-green-600"><CheckCircleIcon /> Завершено</span>;
-        }
-        return <span className="text-gray-600">Новый</span>;
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-6">
-                    <h2 className="text-2xl font-bold text-gray-800">Просмотр сценариев</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
-                </div>
-                <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                    {userScenarios.length > 0 ? userScenarios.map(s => (
-                        <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
-                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
-                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
-                                </div>
-                                <div className="text-sm font-semibold">
-                                    <StatusIndicator status={s.status} />
-                                </div>
-                            </div>
-                            <div className="mt-2 pt-2 border-t">
-                                <p className="font-semibold text-sm mb-1">Позиции:</p>
-                                <ul className="list-disc list-inside text-sm text-gray-700">
-                                    {Object.entries(s.items).map(([itemId, quantity]) => {
-                                        const item = items.find(i => i.id === itemId);
-                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
-                                    })}
-                                </ul>
-                            </div>
-                            {currentUser.id === s.driverId && (
-                                <div className="mt-4 flex gap-4">
-                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
-                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
-                                </div>
-                            )}
-                        </div>
-                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
-                </div>
             </div>
         </div>
     );
@@ -1397,7 +1379,6 @@ export default function App() {
   const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
-  const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const hasLoadedData = useRef(false);
@@ -1820,7 +1801,13 @@ export default function App() {
 
                 <div className="space-y-4">
                      <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
-                        <NotificationIcon count={notificationCount} /> Сценарии
+                        <ScenariosIcon />
+                        <span className="flex-1 text-left">Сценарии</span>
+                        {notificationCount > 0 && (
+                            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-red-100 bg-red-600 rounded-full">
+                                {notificationCount}
+                            </span>
+                        )}
                     </button>
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon /> Переместить позицию по QR
@@ -1934,10 +1921,18 @@ export default function App() {
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
 
       {/* Новые модальные окна для сценариев */}
-      {isScenariosModalOpen && <ScenariosModal userRole={userRole} onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onOpenView={() => { setScenariosModalOpen(false); setViewScenariosModalOpen(true); }} onClose={() => setScenariosModalOpen(false)} />}
+      {isScenariosModalOpen && <ScenariosModal 
+            scenarios={scenarios} 
+            warehouses={warehouses} 
+            items={items} 
+            users={users} 
+            currentUser={currentUser} 
+            onUpdateStatus={handleUpdateScenarioStatus}
+            onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} 
+            onClose={() => setScenariosModalOpen(false)} 
+        />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
-      {isViewScenariosModalOpen && <ViewScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={handleUpdateScenarioStatus} onClose={() => setViewScenariosModalOpen(false)} />}
-
+      
     </div>
   );
 }
