@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 
@@ -143,15 +143,16 @@ const PalletStats = ({ places = [], items = [] }) => {
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const printRef = useRef();
+    const titleRef = useRef(null); // Ref для заголовка
 
     const handlePrint = useReactToPrint({
         content: () => printRef.current,
         documentTitle: `QR-Code-${item.name}`,
     });
     
+    // Эффект для генерации QR-кода
     useEffect(() => {
         const generateQr = async () => {
-            // Данные для QR-кода состоят только из ID
             const qrString = item.id;
             try {
                 const url = await QRCode.toDataURL(qrString, {
@@ -164,17 +165,47 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
             }
         };
         generateQr();
-    }, [item, user]);
+    }, [item]);
+
+    // Эффект для динамического изменения размера шрифта
+    useLayoutEffect(() => {
+        const element = titleRef.current;
+        if (!element || !qrCodeUrl) return;
+
+        const MAX_WIDTH = 256; 
+        const MIN_FONT_SIZE = 12;
+        const START_FONT_SIZE = 60;
+
+        let currentFontSize = START_FONT_SIZE;
+        element.style.fontSize = `${currentFontSize}px`;
+        element.style.wordWrap = 'break-word';
+
+        // Эвристика для проверки высоты (не более 2 строк)
+        const isTooTall = () => element.scrollHeight > currentFontSize * 2.4;
+        
+        // Уменьшаем шрифт, пока он не влезет по ширине или высоте
+        while ((element.scrollWidth > MAX_WIDTH || isTooTall()) && currentFontSize > MIN_FONT_SIZE) {
+            currentFontSize--;
+            element.style.fontSize = `${currentFontSize}px`;
+        }
+
+    }, [item.name, qrCodeUrl]);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
-                <div ref={printRef} className="text-center p-4">
-                    <h2 className="text-6xl font-bold mb-4 text-gray-800">{item.name}</h2>
+                <div ref={printRef} className="text-center p-4 flex flex-col items-center">
+                    <h2 
+                        ref={titleRef} 
+                        className="font-bold text-gray-800 mb-4" 
+                        style={{ maxWidth: '256px', lineHeight: 1.2 }}
+                    >
+                        {item.name}
+                    </h2>
                     {qrCodeUrl ? (
                         <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
                     ) : (
-                        <div className="w-64 h-64 bg-gray-200 animate-pulse mx-auto"></div>
+                        <div style={{width: '256px', height: '256px'}} className="bg-gray-200 animate-pulse mx-auto"></div>
                     )}
                     <div className="text-xs text-gray-500 mt-4">
                         <p>Дата печати: {new Date().toLocaleString('ru-RU')}</p>
