@@ -7,7 +7,48 @@
             "gate_code": "1",
             "lock_code": "1",
             "id": 1753407392679,
-            "places": []
+            "places": [
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         },
         {
             "name": "G",
@@ -28,7 +69,17 @@
             "places": []
         }
     ],
-    "items": [],
+    "items": [
+        {
+            "name": "Gdhdhhd",
+            "type": "Коробки",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": 1753407392679,
+            "placeId": 9,
+            "id": "0704635a-52ab-4106-b162-3edf528de0b8"
+        }
+    ],
     "itemTypes": [
         {
             "id": 1,
@@ -49,8 +100,19 @@
     "users": [
         {
             "id": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
-            "username": "Vladislav",
-            "password": "Eh45TbrNMi986V7",
+            "username": "Test1",
+            "password": "Test1",
+            "firstName": "1",
+            "lastName": "1",
+            "position": "1",
+            "phone": "1",
+            "assignedWarehouseId": "office",
+            "role": "Администратор"
+        },
+        {
+            "id": "b369452d-8d4d-4526-9e32-ae721c1711cb",
+            "username": "Test2",
+            "password": "Test2",
             "firstName": "1",
             "lastName": "1",
             "position": "1",
