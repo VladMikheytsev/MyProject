@@ -661,7 +661,6 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     );
 };
 
-// --- ИЗМЕНЕННЫЙ КОМПОНЕНТ: Модальное окно для сканирования QR-кода через Telegram ---
 const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
     const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, error
     const [scanError, setScanError] = useState('');
@@ -916,7 +915,6 @@ export default function App() {
 
   // --- Эффекты ---
   
-  // --- ИЗМЕНЕНИЕ: Добавлен useEffect для загрузки скрипта Telegram ---
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-web-app.js';
@@ -1070,20 +1068,18 @@ export default function App() {
                 <span className="font-semibold">{currentUser.firstName} {currentUser.lastName}</span>
                 <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
             </div>
-            <div className="flex items-center gap-2">
+            {/* --- ИЗМЕНЕНИЕ: Обновленный блок кнопок --- */}
+            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-[160px]">
                 {userRole === 'Администратор' && (
-                    <button onClick={() => setUserModerationModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
+                    <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
                         <UsersIcon />
-                        <span>Модерация</span>
                     </button>
                 )}
-                <button onClick={() => setContactsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
+                <button onClick={() => setContactsModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ContactsIcon />
-                    <span>Контакты</span>
                 </button>
-                <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
+                <button onClick={handleLogout} className="flex flex-1 items-center justify-center p-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
                     <LogOutIcon />
-                    <span>Выйти</span>
                 </button>
             </div>
         </div>
