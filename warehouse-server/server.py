@@ -50,7 +50,6 @@ class AppData(BaseModel):
     items: list
     itemTypes: list
 
-# --- Функции для работы с БД ---
 def load_data():
     global db
     if os.path.exists(DB_FILE):
@@ -58,20 +57,36 @@ def load_data():
             db = json.load(f)
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
-        # Создаем суперпользователя, если база данных пуста
-        db["users"].append({
-            "id": "vladislav-admin",
-            "username": "Vladislav",
-            "password": "Eh45TbrNMi986V7",
-            "role": "Администратор",
-            "firstName": "Владислав",
-            "lastName": "Модератор",
-            "position": "Главный администратор",
-            "phone": "000-000-0000",
-            "assignedWarehouseId": "office"
-        })
+        # Создаем пользователей по умолчанию, если база данных пуста
+        db["users"] = [
+            {
+                "id": "vladislav-admin",
+                "username": "Vladislav",
+                "password": "Eh45TbrNMi986V7",
+                "role": "Администратор",
+                "firstName": "Владислав",
+                "lastName": "Модератор",
+                "position": "Главный администратор",
+                "phone": "000-000-0000",
+                "assignedWarehouseId": "office"
+            },
+            {
+                "id": "moderator-admin",
+                "username": "Moderator",
+                "password": "Eh45TbrNMi986V71!",
+                "role": "Администратор",
+                "firstName": "Старший",
+                "lastName": "Модератор",
+                "position": "Модератор",
+                "phone": "111-111-1111",
+                "assignedWarehouseId": "office"
+            }
+        ]
         save_data()
-        print(f"⚠️ Файл {DB_FILE} не найден. Создан новый с пользователем Vladislav.")
+        print(f"⚠️ Файл {DB_FILE} не найден. Создан новый с пользователями по умолчанию.")
+
+
+
 
 def save_data():
     with open(DB_FILE, 'w', encoding='utf-8') as f:
