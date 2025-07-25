@@ -661,7 +661,7 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     );
 };
 
-const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
+const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, error
     const [scanError, setScanError] = useState('');
 
@@ -671,20 +671,33 @@ const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
 
             const onQrTextReceived = (eventData) => {
                 tg.closeScanQrPopup();
-                if (eventData.data === itemToVerify.id) {
-                    tg.offEvent('qrTextReceived', onQrTextReceived);
-                    onSuccess();
+                const scannedId = eventData.data;
+                tg.offEvent('qrTextReceived', onQrTextReceived);
+
+                if (itemToVerify.id !== 'any') {
+                    if (scannedId === itemToVerify.id) {
+                        onSuccess(itemToVerify);
+                    } else {
+                        setScanStatus('error');
+                        setScanError(`Неверный QR-код. Отсканирован другой товар.`);
+                    }
                 } else {
-                    setScanStatus('error');
-                    setScanError(`Неверный QR-код. Отсканирован другой товар.`);
-                    tg.offEvent('qrTextReceived', onQrTextReceived);
+                    const foundItem = allItems.find(item => item.id === scannedId);
+                    if (foundItem) {
+                        onSuccess(foundItem);
+                    } else {
+                        setScanStatus('error');
+                        setScanError(`Позиция с QR-кодом не найдена в системе.`);
+                    }
                 }
             };
 
             tg.onEvent('qrTextReceived', onQrTextReceived);
             
             tg.showScanQrPopup({
-                text: `Наведите на QR-код товара "${itemToVerify.name}"`
+                text: itemToVerify.id === 'any' 
+                    ? 'Наведите на QR-код любого товара' 
+                    : `Наведите на QR-код товара "${itemToVerify.name}"`
             });
             setScanStatus('scanning');
             setScanError('');
@@ -701,7 +714,13 @@ const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative text-center">
                 <button onClick={onCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><XIcon /></button>
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Проверка позиции</h2>
-                <p className="mb-6 text-gray-600">Нажмите кнопку, чтобы отсканировать QR-код для позиции: <span className="font-bold">"{itemToVerify.name}"</span></p>
+                <p className="mb-6 text-gray-600">
+                    {itemToVerify.id === 'any'
+                        ? 'Нажмите кнопку, чтобы отсканировать QR-код любой позиции для перемещения.'
+                        : `Нажмите кнопку, чтобы отсканировать QR-код для позиции: `
+                    }
+                    {itemToVerify.id !== 'any' && <span className="font-bold">"{itemToVerify.name}"</span>}
+                </p>
                 
                 <button 
                     onClick={startScan} 
@@ -1023,8 +1042,8 @@ export default function App() {
     setMovingItem(null);
   };
 
-  const handleVerificationSuccess = () => {
-    setMovingItem(verifyingItem);
+  const handleVerificationSuccess = (verifiedItem) => {
+    setMovingItem(verifiedItem);
     setVerifyingItem(null);
   };
   
@@ -1068,7 +1087,6 @@ export default function App() {
                 <span className="font-semibold">{currentUser.firstName} {currentUser.lastName}</span>
                 <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
             </div>
-            {/* --- ИЗМЕНЕНИЕ: Обновленный блок кнопок --- */}
             <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-[160px]">
                 {userRole === 'Администратор' && (
                     <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
@@ -1127,7 +1145,17 @@ export default function App() {
                     </div>
                 </div>
 
-                {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (<button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md"><PlusIcon /> Создать позицию</button>)}
+                {/* --- ИЗМЕНЕНИЕ: Добавлена кнопка "Переместить позицию" --- */}
+                <div className="space-y-4">
+                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
+                        <TruckIcon /> Переместить позицию
+                    </button>
+                    {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (
+                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
+                            <PlusIcon /> Создать позицию
+                        </button>
+                    )}
+                </div>
                 
                 {(userRole === 'Администратор' || userRole === 'Сотрудник склада' || userRole === 'Водитель') && (
                     <div className="bg-white rounded-xl shadow-md p-5">
@@ -1181,7 +1209,7 @@ export default function App() {
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
-      {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
+      {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
 
     </div>
   );

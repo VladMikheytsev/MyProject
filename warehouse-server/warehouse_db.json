@@ -91,8 +91,8 @@
             "type": "Коробки",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": 1753408690390,
-            "placeId": 2,
+            "warehouseId": 1753407392679,
+            "placeId": 9,
             "id": "0704635a-52ab-4106-b162-3edf528de0b8"
         }
     ],
@@ -135,6 +135,17 @@
             "phone": "1",
             "assignedWarehouseId": "office",
             "role": "Администратор"
+        },
+        {
+            "id": "86139ebd-ff60-4905-961f-62cebdfdd938",
+            "username": "Test3",
+            "password": "Test3",
+            "firstName": "Name",
+            "lastName": "Surname",
+            "position": "*",
+            "phone": "2133312131",
+            "assignedWarehouseId": "office",
+            "role": "Водитель"
         }
     ]
 }
