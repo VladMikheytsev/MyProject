@@ -1,61 +1,40 @@
 import json
-import logging
 import aiohttp
-from aiogram import Bot, Dispatcher, F
-from aiogram.types import Message, WebAppInfo, InlineKeyboardMarkup, InlineKeyboardButton, Update
+import logging
+import asyncio
+import os
+
+from aiogram import Bot, Dispatcher, F, types
+from aiogram.types import Message, WebAppInfo
 from aiogram.enums import ParseMode
-from aiogram.types.web_app_data import WebAppData
-from aiogram.utils.keyboard import ReplyKeyboardMarkup, KeyboardButton
-from aiogram.utils.token import TokenValidationError
-from aiogram.utils import executor
-from aiogram.types import ReplyKeyboardRemove
+from aiogram.client.default import DefaultBotProperties
+from aiogram.utils.keyboard import ReplyKeyboardBuilder  # ✅ ВОТ ЭТО
 
-from aiogram.client.session.aiohttp import AiohttpSession
-from fastapi import FastAPI
-import uvicorn
 
-BOT_TOKEN = "7863369427:AAE1hC7Xm0Ru9Mjyox7yVZFcuQ48r4eFsBQ"
-API_URL = "https://warehouse-vlad.ngrok.io";
+# ✅ Токен и API адрес
+BOT_TOKEN = os.getenv("BOT_TOKEN", "7863369427:AAE1hC7Xm0Ru9Mjyox7yVZFcuQ48r4eFsBQ")
+API_URL = "https://warehouse-vlad.ngrok.io"
 
-bot = Bot(token=BOT_TOKEN)
+bot = Bot(
+    token=BOT_TOKEN,
+    default=DefaultBotProperties(parse_mode=ParseMode.HTML)
+)
 dp = Dispatcher()
 
 
-# --- Меню клавиатуры ---
-def main_menu():
-    return ReplyKeyboardMarkup(keyboard=[
-        [KeyboardButton(text="Регистрация", web_app=WebAppInfo(url=f"{API_URL}/register"))],
-        [KeyboardButton(text="Все пользователи")]
-    ], resize_keyboard=True)
-
-
-# --- Обработка команды /start ---
+# --- /start ---
 @dp.message(F.text == "/start")
 async def start_handler(message: Message):
-    await message.answer("Добро пожаловать! Выберите действие:", reply_markup=main_menu())
+    kb = ReplyKeyboardBuilder()
+    kb.button(
+        text="Регистрация",
+        web_app=WebAppInfo(url=f"{API_URL}/register")
+    )
+    kb.button(text="Все пользователи")
+    await message.answer("Добро пожаловать! Выберите действие:", reply_markup=kb.as_markup(resize_keyboard=True))
 
 
-# --- Обработка кнопки "Все пользователи" ---
-@dp.message(F.text == "Все пользователи")
-async def show_users(message: Message):
-    try:
-        async with aiohttp.ClientSession() as session:
-            async with session.get(f"{API_URL}/api/users") as resp:
-                if resp.status == 200:
-                    users = await resp.json()
-                    text = ""
-                    for user in users:
-                        text += f"👤 {user['first_name']} {user['last_name']} | {user['phone']} | Роль: {user['role']}\n"
-                    if not text:
-                        text = "Нет зарегистрированных пользователей."
-                    await message.answer(text)
-                else:
-                    await message.answer("Ошибка при получении списка пользователей.")
-    except Exception as e:
-        await message.answer(f"Ошибка: {e}")
-
-
-# --- Обработка WebAppData после регистрации ---
+# --- WebAppData (регистрация) ---
 @dp.message(F.web_app_data)
 async def handle_webapp_data(message: Message):
     try:
@@ -68,32 +47,62 @@ async def handle_webapp_data(message: Message):
             "role": "не подтвержден"
         }
 
-        # --- Отправка на сервер ---
+        # Отправка на сервер
         async with aiohttp.ClientSession() as session:
             async with session.post(f"{API_URL}/api/register_user", json=user_data) as resp:
                 if resp.status == 200:
-                    await message.answer("✅ Регистрация успешно завершена!", reply_markup=ReplyKeyboardRemove())
+                    await message.answer("✅ Вы успешно зарегистрированы.")
                 else:
-                    await message.answer("❌ Ошибка при регистрации. Попробуйте позже.")
-                    return
+                    await message.answer("❌ Ошибка при регистрации.")
 
-        # --- Получение всех администраторов и отправка уведомления ---
-        async with session.get(f"{API_URL}/api/users") as resp:
-            if resp.status == 200:
-                users = await resp.json()
-                for u in users:
-                    if u.get("role") == "Администратор":
-                        try:
-                            await bot.send_message(u["telegram_id"],
-                                f"🔔 Новая регистрация:\n{user_data['first_name']} {user_data['last_name']}\n📞 {user_data['phone']}")
-                        except Exception as e:
-                            print(f"Ошибка отправки админу: {e}")
+            # Уведомление администраторам
+            async with session.get(f"{API_URL}/api/users") as resp:
+                if resp.status == 200:
+                    all_users = await resp.json()
+                    for u in all_users:
+                        if u.get("role") == "Администратор":
+                            try:
+                                await bot.send_message(
+                                    u["telegram_id"],
+                                    f"🔔 Новая регистрация:\n<b>{user_data['first_name']} {user_data['last_name']}</b>\n📞 {user_data['phone']}"
+                                )
+                            except Exception as e:
+                                logging.warning(f"Ошибка уведомления админа {u.get('telegram_id')}: {e}")
 
     except Exception as e:
-        await message.answer(f"Ошибка обработки данных: {e}")
+        await message.answer(f"⚠️ Ошибка обработки данных: {e}")
 
+
+# --- Список пользователей ---
+@dp.message(F.text == "Все пользователи")
+async def all_users_handler(message: Message):
+    try:
+        async with aiohttp.ClientSession() as session:
+            async with session.get(f"{API_URL}/api/users") as resp:
+                if resp.status != 200:
+                    return await message.answer("❌ Не удалось загрузить пользователей.")
+                users = await resp.json()
+
+        if not users:
+            return await message.answer("Список пользователей пуст.")
+
+        response = "📋 <b>Зарегистрированные пользователи:</b>\n\n"
+        for user in users:
+            response += f"👤 <b>{user['first_name']} {user['last_name']}</b>\n"
+            response += f"📞 {user['phone']}\n"
+            response += f"🧩 Роль: <i>{user['role']}</i>\n\n"
+
+        await message.answer(response)
+
+    except Exception as e:
+        await message.answer(f"⚠️ Ошибка получения списка: {e}")
+
+
+# --- Запуск бота ---
+async def main():
+    logging.basicConfig(level=logging.INFO)
+    await bot.delete_webhook(drop_pending_updates=True)
+    await dp.start_polling(bot)
 
 if __name__ == "__main__":
-    logging.basicConfig(level=logging.INFO)
-    from aiogram import executor
-    executor.start_polling(dp, skip_updates=True)
+    asyncio.run(main())

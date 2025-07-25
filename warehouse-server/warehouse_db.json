@@ -1,5 +1,15 @@
 {
-    "warehouses": [],
+    "warehouses": [
+        {
+            "name": "1",
+            "address": "1",
+            "hours": "1",
+            "gate_code": "1",
+            "lock_code": "1",
+            "id": 1753407392679,
+            "places": []
+        }
+    ],
     "items": [],
     "itemTypes": [
         {
@@ -17,5 +27,6 @@
             "name": "Коробки",
             "color": "#f97316"
         }
-    ]
+    ],
+    "users": []
 }

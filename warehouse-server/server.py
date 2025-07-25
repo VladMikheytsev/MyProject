@@ -3,24 +3,8 @@ import os
 from fastapi import FastAPI, Request
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
-from typing import Dict, Any, List
-
-app = FastAPI()
-
-# ✅ Разрешённые источники CORS
-origins = [
-    "http://localhost:3000",
-    "https://my-project-navy-theta.vercel.app",
-    "https://warehouse-vlad.ngrok.io",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
+from typing import Dict, Any
+from contextlib import asynccontextmanager
 
 # 📁 Путь до JSON-файла
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -55,18 +39,36 @@ def save_db(data: Dict[str, Any]):
     print(f"💾 Сохранено: {len(data.get('warehouses', []))} складов, "
           f"{len(data.get('items', []))} товаров, {len(data.get('users', []))} пользователей")
 
-# 🚀 При старте — создать файл, если его нет
-@app.on_event("startup")
-def initialize_db():
+# 🔄 Lifespan-инициализация
+@asynccontextmanager
+async def lifespan(app: FastAPI):
     if not os.path.exists(DB_FILE):
         print("📂 warehouse_db.json не найден. Создаю файл.")
         save_db(DEFAULT_DATA)
     else:
-        # добавим ключ "users" если его нет
         data = load_db()
         if "users" not in data:
             data["users"] = []
             save_db(data)
+    yield
+
+# 🚀 Приложение
+app = FastAPI(lifespan=lifespan)
+
+# ✅ Разрешённые источники CORS
+origins = [
+    "http://localhost:3000",
+    "https://my-project-navy-theta.vercel.app",
+    "https://warehouse-vlad.ngrok.io",
+]
+
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=origins,
+    allow_credentials=True,
+    allow_methods=["*"],
+    allow_headers=["*"],
+)
 
 # 📤 Получение всех данных
 @app.get("/api/data")
