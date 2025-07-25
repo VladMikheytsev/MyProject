@@ -204,6 +204,15 @@
             "warehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "placeId": 10,
             "id": "03e075a6-bbad-49f4-88a5-0070744edabb"
+        },
+        {
+            "name": "Hghhhhhh",
+            "type": "📦",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "placeId": 7,
+            "id": "71da0280-dc31-432c-8e2e-4f9397c1ad2a"
         }
     ],
     "itemTypes": [
