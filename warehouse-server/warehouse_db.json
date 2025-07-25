@@ -7,7 +7,53 @@
             "gate_code": "-",
             "lock_code": "5147#",
             "id": "c8414422-04d9-4490-8296-805b117daae8",
-            "places": []
+            "places": [
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 32,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         },
         {
             "name": "Склад NH",
@@ -67,19 +113,19 @@
     "items": [],
     "itemTypes": [
         {
-            "id": 1,
-            "name": "Гель",
-            "color": "#3b82f6"
+            "name": "📦",
+            "color": "#412c1e",
+            "id": "1b2e922a-cd6a-4996-8041-7f17c5391ed1"
         },
         {
-            "id": 2,
-            "name": "Расходники",
-            "color": "#16a34a"
+            "name": "🫙",
+            "color": "#ffbc0c",
+            "id": "c2a4a9d7-c173-403e-b146-9df5721846c2"
         },
         {
-            "id": 3,
-            "name": "Коробки",
-            "color": "#f97316"
+            "name": "💥",
+            "color": "#8c5be9",
+            "id": "a90c7e42-ba37-42cf-8040-b81579f8ce5c"
         }
     ],
     "users": [
@@ -91,7 +137,7 @@
             "lastName": "1",
             "position": "1",
             "phone": "1",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "role": "Администратор"
         },
         {
@@ -102,7 +148,7 @@
             "lastName": "1",
             "position": "1",
             "phone": "1",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "a4084c27-bbc2-4d46-a89e-7a7bfd51c30d",
             "role": "Администратор"
         },
         {
@@ -113,7 +159,7 @@
             "lastName": "Surname",
             "position": "*",
             "phone": "2133312131",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
             "role": "Водитель"
         },
         {
@@ -124,7 +170,7 @@
             "lastName": "Surname",
             "position": "Driver",
             "phone": "+1(213)334-16-47",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "role": "Администратор"
         },
         {
@@ -135,7 +181,7 @@
             "lastName": "Guys",
             "position": "Driver",
             "phone": "2132133121",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "role": "Сотрудник склада"
         }
     ]

@@ -135,8 +135,8 @@ const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
   const handleSave = () => { if (!formData.name || !formData.address) { alert('Наименование и адрес склада обязательны для заполнения.'); return; } onSave(formData); };
   return (
-    <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up">
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+      <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto">
         <h2 className="text-2xl font-bold mb-6 text-gray-800">Данные о складе</h2>
         <div className="space-y-4">
           <input type="text" name="name" value={formData.name} onChange={handleChange} placeholder="Наименование склада" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
@@ -155,8 +155,8 @@ const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
 };
 const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, onDelete, onClose, userRole }) => {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Выберите склад</h2>
                 <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
                     <div onClick={() => onSelect(null)} className={`p-3 rounded-lg cursor-pointer transition ${selectedId === null ? 'bg-blue-100 border-blue-500 border' : 'bg-gray-50 hover:bg-gray-200'}`}>
@@ -216,8 +216,8 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
         return { className, style };
     };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex flex-col items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Редактирование мест</h2>
                 <div style={{ borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black', padding: '4px', width: 'fit-content', margin: '0 auto' }}>
                     <div className="grid grid-cols-7 gap-1 justify-center">
@@ -356,8 +356,8 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Создать позицию</h2>
                 <div className="space-y-4">
                     <input type="text" name="name" value={newItem.name} onChange={handleChange} placeholder="Наименование" className="w-full p-3 border rounded-lg" />
@@ -408,8 +408,8 @@ const ItemTypesManager = ({ types, onSave, onCancel }) => {
     const handleAdd = () => { if (newType.name && !currentTypes.find(t => t.name === newType.name)) { setCurrentTypes([...currentTypes, { ...newType, id: crypto.randomUUID() }]); setNewType({ name: '', color: '#aabbcc' }); } };
     const handleRemove = (idToRemove) => { setCurrentTypes(currentTypes.filter(t => t.id !== idToRemove)); };
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Типы позиций</h2>
                 <div className="space-y-2 max-h-48 overflow-y-auto mb-4">
                     {currentTypes.map(t => (
@@ -437,8 +437,8 @@ const ItemTypesManager = ({ types, onSave, onCancel }) => {
 };
 const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">Позиции на месте #{place.id + 1}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
@@ -483,8 +483,8 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
     const hasOfficeContacts = officeUsers.length > 0;
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Контакты сотрудников</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
@@ -556,8 +556,8 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-6">
                     <h2 className="text-2xl font-bold text-gray-800">Модерация пользователей</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
@@ -680,8 +680,8 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up">
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение позиции</h2>
                 <p className="mb-6 text-gray-600">"{itemToMove.name}"</p>
 
@@ -771,8 +771,8 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
     const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-2 text-gray-800">Действия с позицией</h2>
                 <p className="mb-6 text-gray-600">"{itemToAction.name}"</p>
 
@@ -883,8 +883,8 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     };
 
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative text-center">
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative text-center my-auto">
                 <button onClick={onCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><XIcon /></button>
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Проверка позиции</h2>
                 <p className="mb-6 text-gray-600">
@@ -934,7 +934,7 @@ const LoginView = ({ onLogin, onSwitchToRegister }) => {
     };
 
     return (
-        <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+        <div className="w-full min-h-screen flex items-center justify-center bg-gray-100 p-4">
             <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
                 <h2 className="text-3xl font-bold text-center text-gray-800">Вход в систему</h2>
                 <form className="space-y-4" onSubmit={handleSubmit}>
@@ -986,7 +986,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
     };
 
     return (
-        <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+        <div className="w-full min-h-screen flex items-center justify-center bg-gray-100 p-4">
             <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
                 <h2 className="text-3xl font-bold text-center text-gray-800">Регистрация</h2>
                 <form className="space-y-4" onSubmit={handleSubmit}>
