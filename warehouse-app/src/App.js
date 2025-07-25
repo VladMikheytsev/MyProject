@@ -948,6 +948,17 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
     const [selectedItems, setSelectedItems] = useState({}); // { itemId: quantity }
     const [driverId, setDriverId] = useState(null);
 
+    // [FIX]: Добавлен useEffect для корректного сброса состояния при смене склада-отправителя
+    useEffect(() => {
+        // При смене склада-отправителя, сбрасываем выбранные позиции и водителя
+        setSelectedItems({});
+        setDriverId(null);
+        // Если новый склад-отправитель совпадает с уже выбранным получателем, сбрасываем получателя
+        if (toWarehouseId !== null && toWarehouseId === fromWarehouseId) {
+            setToWarehouseId(null);
+        }
+    }, [fromWarehouseId]);
+
     const drivers = users.filter(u => u.role === 'Водитель');
 
     const handleItemToggle = (item) => {
@@ -979,7 +990,10 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
         onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId });
     };
     
-    const itemsOnWarehouse = fromWarehouseId ? items.filter(i => i.warehouseId === fromWarehouseId) : [];
+    // [FIX]: Фильтруем только те товары, которые размещены на складе (имеют placeId)
+    const itemsOnWarehouse = fromWarehouseId 
+        ? items.filter(i => i.warehouseId === fromWarehouseId && i.placeId !== null) 
+        : [];
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
@@ -992,12 +1006,12 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                             <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
-                                {itemsOnWarehouse.map(item => (
+                                {itemsOnWarehouse.length > 0 ? itemsOnWarehouse.map(item => (
                                     <div key={item.id} onClick={() => handleItemToggle(item)} className={`p-3 rounded-lg cursor-pointer flex justify-between items-center ${selectedItems[item.id] ? 'bg-blue-100 border-blue-500 border' : 'bg-white hover:bg-gray-100'}`}>
                                         <span>{item.name} (Доступно: {item.quantity})</span>
                                         {selectedItems[item.id] && <span className="font-bold text-blue-700">Выбрано: {selectedItems[item.id]}</span>}
                                     </div>
-                                ))}
+                                )) : <p className="text-center text-gray-500 py-4">На этом складе нет размещенных позиций для перемещения.</p>}
                             </div>
                         </div>
                         <div className="flex justify-between items-center mt-8">
