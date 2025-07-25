@@ -6,7 +6,7 @@ import QRCode from 'qrcode';
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
-const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
+const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
@@ -1049,7 +1049,7 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 };
 
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
-const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose }) => {
+const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete }) => {
     const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
     const getDriverName = (id) => {
         const driver = users.find(u => u.id === id);
@@ -1113,12 +1113,19 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                     })}
                                 </ul>
                             </div>
-                            {currentUser.id === s.driverId && (
-                                <div className="mt-4 flex gap-4">
-                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
-                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
-                                </div>
-                            )}
+                            <div className="mt-4 flex gap-4 items-center">
+                                {currentUser.id === s.driverId && (
+                                    <>
+                                        {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять</button>}
+                                        {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
+                                    </>
+                                )}
+                                {currentUser.role === 'Администратор' && (
+                                    <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full ml-auto">
+                                        <TrashIcon width="20" height="20" />
+                                    </button>
+                                )}
+                            </div>
                         </div>
                     )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
                 </div>
@@ -1640,6 +1647,12 @@ export default function App() {
         )
     );
   };
+  
+  const handleDeleteScenario = (scenarioId) => {
+    if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
+        setScenarios(prevScenarios => prevScenarios.filter(s => s.id !== scenarioId));
+    }
+  };
 
 
   const handleVerificationSuccess = (verifiedItem) => {
@@ -1931,6 +1944,7 @@ export default function App() {
             currentUser={currentUser} 
             onUpdateStatus={handleUpdateScenarioStatus}
             onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} 
+            onDelete={handleDeleteScenario}
             onClose={() => setScenariosModalOpen(false)} 
         />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}

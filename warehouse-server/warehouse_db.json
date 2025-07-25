@@ -268,6 +268,17 @@
     "scenarios": [
         {
             "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "toWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
+            "items": {
+                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1,
+                "03e075a6-bbad-49f4-88a5-0070744edabb": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "5d396723-9dd5-4ec2-8c46-d44d493a5d74",
+            "status": "new"
+        },
+        {
+            "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "toWarehouseId": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
             "items": {
                 "85513774-30f4-4e7d-8c0b-03783a464a9d": 1
