@@ -10,7 +10,8 @@ const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heigh
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
 const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
-const ContactsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/><line x1="8" y1="2" x2="8" y2="4"/><line x1="16" y1="2" x2="16" y2="4"/></svg>;
+const ContactsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/><line x1="8" y1="2" x2="8" y2="4"/><line x1="16" y1="2" x2="16" y2="4"/></svg>;
+const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
 
 
 // --- API Configuration ---
@@ -459,6 +460,102 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
     );
 };
 
+const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) => {
+    const [editingUser, setEditingUser] = useState(null);
+    const [userData, setUserData] = useState(null);
+    const ROLES = ["Администратор", "Сотрудник склада", "Водитель", "На модерации"];
+
+    const handleEdit = (user) => {
+        setEditingUser(user);
+        setUserData({ ...user });
+    };
+
+    const handleCancel = () => {
+        setEditingUser(null);
+        setUserData(null);
+    };
+
+    const handleSave = () => {
+        onSave(userData);
+        handleCancel();
+    };
+    
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setUserData(prev => ({ ...prev, [name]: value }));
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Модерация пользователей</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto">
+                    <table className="w-full text-left">
+                        <thead className="border-b text-sm text-gray-500">
+                            <tr>
+                                <th className="p-2">Пользователь</th>
+                                <th className="p-2">Роль</th>
+                                <th className="p-2">Контакты</th>
+                                <th className="p-2">Действия</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {users.map(user => (
+                                <tr key={user.id} className="border-b">
+                                    {editingUser?.id === user.id ? (
+                                        <td colSpan="4" className="p-2">
+                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-100 p-4 rounded-lg">
+                                                <input type="text" name="firstName" value={userData.firstName} onChange={handleChange} placeholder="Имя" className="p-2 border rounded-lg" />
+                                                <input type="text" name="lastName" value={userData.lastName} onChange={handleChange} placeholder="Фамилия" className="p-2 border rounded-lg" />
+                                                <input type="text" name="position" value={userData.position} onChange={handleChange} placeholder="Должность" className="p-2 border rounded-lg" />
+                                                <input type="tel" name="phone" value={userData.phone} onChange={handleChange} placeholder="Телефон" className="p-2 border rounded-lg" />
+                                                <select name="role" value={userData.role} onChange={handleChange} className="p-2 border rounded-lg bg-white">
+                                                    {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
+                                                </select>
+                                                <div className="flex gap-2 items-center">
+                                                    <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Сохранить</button>
+                                                    <button onClick={handleCancel} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Отмена</button>
+                                                </div>
+                                            </div>
+                                        </td>
+                                    ) : (
+                                        <>
+                                            <td className="p-2">
+                                                <p className="font-semibold">{user.firstName} {user.lastName}</p>
+                                                <p className="text-sm text-gray-500">@{user.username}</p>
+                                            </td>
+                                            <td className="p-2">
+                                                <span className={`px-2 py-1 text-xs font-semibold rounded-full ${user.role === 'На модерации' ? 'bg-yellow-200 text-yellow-800' : 'bg-gray-200 text-gray-700'}`}>
+                                                    {user.role}
+                                                </span>
+                                            </td>
+                                            <td className="p-2 text-sm">
+                                                <p>{user.position}</p>
+                                                <p className="text-gray-500">{user.phone}</p>
+                                            </td>
+                                            <td className="p-2">
+                                                <div className="flex gap-2">
+                                                    <button onClick={() => handleEdit(user)} className="p-2 text-gray-500 hover:text-blue-600"><EditIcon /></button>
+                                                    {currentUser.id !== user.id && (
+                                                        <button onClick={() => onDelete(user.id)} className="p-2 text-gray-500 hover:text-red-600"><TrashIcon /></button>
+                                                    )}
+                                                </div>
+                                            </td>
+                                        </>
+                                    )}
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -502,7 +599,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
         lastName: '',
         position: '',
         phone: '',
-        assignedWarehouseId: 'office' // Default to 'office'
+        assignedWarehouseId: 'office'
     });
     const [error, setError] = useState('');
 
@@ -554,13 +651,28 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
     );
 };
 
+const PendingModerationView = ({ onLogout }) => {
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+            <div className="w-full max-w-md p-8 text-center bg-white rounded-xl shadow-lg">
+                <h2 className="text-2xl font-bold text-gray-800 mb-4">Ожидание подтверждения</h2>
+                <p className="text-gray-600 mb-6">Ваш аккаунт находится на проверке. Вы получите доступ к приложению после одобрения администратором.</p>
+                <button onClick={onLogout} className="flex items-center justify-center w-full gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
+                    <LogOutIcon />
+                    <span>Выйти</span>
+                </button>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
   // --- Состояние аутентификации ---
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
-  const [authView, setAuthView] = useState('login'); // 'login' или 'register'
+  const [authView, setAuthView] = useState('login'); 
 
   // --- Состояние приложения ---
   const [loading, setLoading] = useState(true);
@@ -576,12 +688,13 @@ export default function App() {
   const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
+  const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   
   const hasLoadedData = useRef(false);
   const USERS_STORAGE_KEY = 'warehouseAppUsers';
   const DATA_STORAGE_KEY = 'warehouseAppData';
 
-  // --- Обработчики аутентификации ---
+  // --- Обработчики аутентификации и модерации ---
   const handleLogin = (username, password, setError) => {
       const user = users.find(u => u.username === username && u.password === password);
       if (user) {
@@ -599,13 +712,13 @@ export default function App() {
       const newUser = { 
           ...formData,
           id: crypto.randomUUID(),
-          role: 'Водитель', // Роль по умолчанию
+          role: 'На модерации', // Роль по умолчанию
           assignedWarehouseId: formData.assignedWarehouseId === 'office' ? 'office' : Number(formData.assignedWarehouseId)
       };
       const updatedUsers = [...users, newUser];
       setUsers(updatedUsers);
       api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
-      setCurrentUser(newUser);
+      setCurrentUser(newUser); // Сразу логиним, но он увидит экран модерации
   };
   
   const handleLogout = () => {
@@ -616,34 +729,56 @@ export default function App() {
       setSelectedWarehouseId(null);
   };
 
+  const handleUpdateUser = (updatedUser) => {
+    const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
+    setUsers(updatedUsers);
+    api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
+  };
+
+  const handleDeleteUser = (userId) => {
+    const updatedUsers = users.filter(u => u.id !== userId);
+    setUsers(updatedUsers);
+    api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
+  };
+
+
   // --- Эффекты ---
   
-  // Первичная загрузка пользователей
+  // Первичная загрузка и проверка пользователей
   useEffect(() => {
     const loadUsers = async () => {
         let loadedUsers = await api.fetchAllData(USERS_STORAGE_KEY);
+        
+        const superUser = { 
+            id: 'vladislav-admin', 
+            username: 'Vladislav', 
+            password: 'Eh45TbrNMi986V7', 
+            role: 'Администратор',
+            firstName: 'Владислав',
+            lastName: 'Модератор',
+            position: 'Главный администратор',
+            phone: '000-000-0000',
+            assignedWarehouseId: 'office'
+        };
+
         if (!loadedUsers || loadedUsers.length === 0) {
-            loadedUsers = [{ 
-                id: 1, 
-                username: 'admin', 
-                password: 'password', 
-                role: 'Администратор',
-                firstName: 'Главный',
-                lastName: 'Администратор',
-                position: 'CEO',
-                phone: '123-456-7890',
-                assignedWarehouseId: 'office'
-            }];
-            await api.saveAllData(USERS_STORAGE_KEY, loadedUsers);
+            loadedUsers = [superUser];
+        } else {
+            const superUserExists = loadedUsers.some(u => u.username === 'Vladislav');
+            if (!superUserExists) {
+                loadedUsers.push(superUser);
+            }
         }
+        
         setUsers(loadedUsers);
+        await api.saveAllData(USERS_STORAGE_KEY, loadedUsers);
     };
     loadUsers();
   }, []);
 
   // Загрузка данных приложения после входа
   useEffect(() => {
-    if (!currentUser) {
+    if (!currentUser || currentUser.role === 'На модерации') {
         setLoading(false);
         return;
     };
@@ -714,6 +849,10 @@ export default function App() {
       }
       return <RegisterView onRegister={handleRegister} onSwitchToLogin={() => setAuthView('login')} warehouses={warehouses} />;
   }
+  
+  if (currentUser.role === 'На модерации') {
+      return <PendingModerationView onLogout={handleLogout} />
+  }
 
   const userRole = currentUser.role;
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
@@ -736,6 +875,12 @@ export default function App() {
                 <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
             </div>
             <div className="flex items-center gap-2">
+                {userRole === 'Администратор' && (
+                    <button onClick={() => setUserModerationModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
+                        <UsersIcon />
+                        <span>Модерация</span>
+                    </button>
+                )}
                 <button onClick={() => setContactsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ContactsIcon />
                     <span>Контакты</span>
@@ -841,6 +986,7 @@ export default function App() {
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
+      {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
     </div>
   );
 }
