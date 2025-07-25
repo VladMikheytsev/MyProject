@@ -7,7 +7,13 @@
             "gate_code": "-",
             "lock_code": "5147#",
             "id": "c8414422-04d9-4490-8296-805b117daae8",
-            "places": []
+            "places": [
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         }
     ],
     "items": [
@@ -19,6 +25,15 @@
             "warehouseId": "unassigned",
             "placeId": null,
             "id": "ae80e6bc-ca79-42d6-bb13-9646027f1cfa"
+        },
+        {
+            "name": "Gggg",
+            "type": "Гель",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "placeId": 31,
+            "id": "5f3a9b4e-3071-486e-be1e-d071ad4789e2"
         }
     ],
     "itemTypes": [
