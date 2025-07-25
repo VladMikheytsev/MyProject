@@ -1,10 +1,13 @@
 import json
 import os
-from fastapi import FastAPI, Request
+from fastapi import FastAPI, Request, HTTPException
 from fastapi.middleware.cors import CORSMiddleware
 from fastapi.responses import JSONResponse
 from typing import Dict, Any
 from contextlib import asynccontextmanager
+from pydantic import BaseModel
+import uuid # Для генерации уникальных ID
+
 
 # 📁 Путь до JSON-файла
 BASE_DIR = os.path.dirname(os.path.abspath(__file__))
@@ -113,3 +116,42 @@ async def register_user(request: Request):
 async def get_users():
     db = load_db()
     return db.get("users", [])
+
+
+# Модель для данных, приходящих от клиента при регистрации
+class UserRegistration(BaseModel):
+    username: str
+    password: str
+    firstName: str
+    lastName: str
+    position: str
+    phone: str
+    assignedWarehouseId: str | int
+
+# Эндпоинт для регистрации
+@app.post("/register")
+async def register_user(user_data: UserRegistration):
+    global db
+    
+    # Проверяем, не занят ли username
+    for user in db["users"]:
+        if user["username"] == user_data.username:
+            raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
+
+    # Создаем нового пользователя
+    new_user = {
+        "id": str(uuid.uuid4()), # Генерируем уникальный ID
+        "username": user_data.username,
+        "password": user_data.password, # В реальном приложении пароль нужно хешировать!
+        "firstName": user_data.firstName,
+        "lastName": user_data.lastName,
+        "position": user_data.position,
+        "phone": user_data.phone,
+        "assignedWarehouseId": user_data.assignedWarehouseId,
+        "role": "На модерации" # Роль по умолчанию
+    }
+    
+    db["users"].append(new_user)
+    save_data() # Сохраняем обновленные данные в JSON
+    
+    return new_user # Возвращаем созданного пользователя клиенту
