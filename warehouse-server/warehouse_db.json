@@ -136,6 +136,17 @@
             "phone": "2133312131",
             "assignedWarehouseId": "office",
             "role": "Водитель"
+        },
+        {
+            "id": "b1c97bd6-7921-4fd8-88b7-543ab00aa53d",
+            "username": "Test9",
+            "password": "Test9",
+            "firstName": "Name",
+            "lastName": "Surname",
+            "position": "Driver",
+            "phone": "+1(213)334-16-47",
+            "assignedWarehouseId": "office",
+            "role": "Администратор"
         }
     ]
 }
