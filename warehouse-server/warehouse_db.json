@@ -7,27 +7,83 @@
             "gate_code": "-",
             "lock_code": "5147#",
             "id": "c8414422-04d9-4490-8296-805b117daae8",
+            "places": [
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
+        },
+        {
+            "name": "Склад NH",
+            "address": "8134 Lankershim Blvd, North Hollywood",
+            "hours": "7AM - 9PM",
+            "gate_code": "-",
+            "lock_code": "-",
+            "id": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "places": []
+        },
+        {
+            "name": "Storage 134",
+            "address": "195 E Arrow Hwy, San Dimas",
+            "hours": "7AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "11f15699-726c-4b4f-b04d-f4b7aadad645",
+            "places": []
+        },
+        {
+            "name": "Storage 25",
+            "address": "195 E Arrow Hwy, San Dimas",
+            "hours": "7AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
+            "places": []
+        },
+        {
+            "name": "Storage 291",
+            "address": "195 E Arrow Hwy, San Dimas",
+            "hours": "7AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
+            "places": []
+        },
+        {
+            "name": "Storage 19",
+            "address": "195 E Arrow Hwy, San Dimas",
+            "hours": "7AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "a4084c27-bbc2-4d46-a89e-7a7bfd51c30d",
+            "places": []
+        },
+        {
+            "name": "Storage K013",
+            "address": " 919 W Gladstone St, San Dimas",
+            "hours": "6AM - 10PM",
+            "gate_code": "*00134702#",
+            "lock_code": "5147",
+            "id": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
             "places": []
         }
     ],
     "items": [
         {
-            "name": "Ghhvh",
+            "name": "Ghffgh",
             "type": "Гель",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "unassigned",
-            "placeId": null,
-            "id": "ae80e6bc-ca79-42d6-bb13-9646027f1cfa"
-        },
-        {
-            "name": "Gggg",
-            "type": "Гель",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "unassigned",
-            "placeId": null,
-            "id": "5f3a9b4e-3071-486e-be1e-d071ad4789e2"
+            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "placeId": 31,
+            "id": "d9dda2be-c846-4509-9269-9284dbe35664"
         }
     ],
     "itemTypes": [
