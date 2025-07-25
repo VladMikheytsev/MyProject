@@ -1,6 +1,6 @@
 import React, { useState, useEffect, useRef } from 'react';
 
-// --- Иконки (SVG11111111) ---
+// --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
@@ -8,40 +8,40 @@ const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" heigh
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
+const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
+const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
 
 
-// --- API Configuration 111---
-const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
-// const API_BASE_URL = "https://<your-ngrok-address>.ngrok-free.app";
+// --- API Configuration ---
+// В реальном приложении URL будет в переменных окружения
+// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
+const API_BASE_URL = "https://<your-ngrok-address>.ngrok-free.app";
 
 const api = {
   fetchAllData: async () => {
     try {
-      const response = await fetch(`${API_BASE_URL}/api/data`);
-      if (!response.ok) throw new Error("Network response was not ok");
-      return await response.json();
+      // Имитируем задержку сети
+      await new Promise(res => setTimeout(res, 500));
+      const data = localStorage.getItem('warehouseAppData');
+      return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("Ошибка при загрузке данных:", error);
+      console.error("Ошибка при загрузке данных из localStorage:", error);
       return null;
     }
   },
-    saveAllData: async (fullState) => {
-        try {
-            const response = await fetch(`${API_BASE_URL}/api/data`, {
-                method: 'POST',
-                headers: { 'Content-Type': 'application/json' },
-                body: JSON.stringify(fullState),
-            });
-            console.log("Ответ от сервера:", await response.json());
-        } catch (error) {
-            console.error("Ошибка при сохранении данных:", error);
-        }
-    },
-
+  saveAllData: async (fullState) => {
+    try {
+        // Имитируем задержку сети
+        await new Promise(res => setTimeout(res, 500));
+        localStorage.setItem('warehouseAppData', JSON.stringify(fullState));
+        console.log("Данные успешно сохранены в localStorage");
+    } catch (error) {
+        console.error("Ошибка при сохранении данных в localStorage:", error);
+    }
+  },
 };
 
-
-// --- Компоненты дизайна паллет и стеллажей ---
+// --- Компоненты дизайна паллет и стеллажей (без изменений) ---
 const PalletLines = ({ orientation = 'vertical' }) => {
     const longLineStyle = { position: 'absolute', backgroundColor: 'rgb(255, 249, 230)' };
     const transLineStyle = { position: 'absolute', backgroundColor: 'rgb(245, 191, 93)' };
@@ -78,7 +78,7 @@ const ShelvingLines = ({ orientation = 'vertical' }) => {
     }
 };
 
-// --- Компонент статистики паллет ---
+// --- Компонент статистики паллет (без изменений) ---
 const PalletStats = ({ places = [], items = [] }) => {
     const palletPlaces = places.filter(p => p.type === 'pallet');
     const totalPalletPlaces = palletPlaces.length;
@@ -113,8 +113,7 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
-
-// --- Модальные окна (выбор склада, редактор склада, редактор мест) ---
+// --- Модальные окна (без изменений, но теперь используют userRole от currentUser) ---
 const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({ name: '', address: '', hours: '', gate_code: '', lock_code: '', ...initialData });
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
@@ -218,8 +217,6 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel }) => {
         </div>
     );
 };
-
-// --- Компонент для отображения сетки мест ---
 const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInfo, disabledPlaces = [], itemTypes, warehouseId }) => {
     const activeRows = new Set();
     const activeCols = new Set();
@@ -280,8 +277,6 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
         </div>
     );
 };
-
-// --- Модальное окно создания/редактирования позиции ---
 const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, items, userRole }) => {
     const [newItem, setNewItem] = useState({ name: '', type: itemTypes[0]?.name || '', size: 'Паллета', quantity: 1, warehouseId: warehouses[0]?.id || null, placeId: null });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
@@ -313,7 +308,7 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         const processedValue = name === 'warehouseId' ? Number(value) : value;
         setNewItem(prev => ({ ...prev, [name]: processedValue, placeId: name === 'warehouseId' ? null : prev.placeId })); 
     };
-    const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: Date.now() }); };
+    const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID() }); };
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
 
     return (
@@ -363,12 +358,10 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         </div>
     );
 };
-
-// --- Модальное окно управления типами позиций ---
 const ItemTypesManager = ({ types, onSave, onCancel }) => {
     const [currentTypes, setCurrentTypes] = useState([...types]);
     const [newType, setNewType] = useState({ name: '', color: '#aabbcc' });
-    const handleAdd = () => { if (newType.name && !currentTypes.find(t => t.name === newType.name)) { setCurrentTypes([...currentTypes, { ...newType, id: Date.now() }]); setNewType({ name: '', color: '#aabbcc' }); } };
+    const handleAdd = () => { if (newType.name && !currentTypes.find(t => t.name === newType.name)) { setCurrentTypes([...currentTypes, { ...newType, id: crypto.randomUUID() }]); setNewType({ name: '', color: '#aabbcc' }); } };
     const handleRemove = (idToRemove) => { setCurrentTypes(currentTypes.filter(t => t.id !== idToRemove)); };
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
@@ -398,8 +391,6 @@ const ItemTypesManager = ({ types, onSave, onCancel }) => {
         </div>
     );
 };
-
-// --- Модальное окно для просмотра позиций на месте ---
 const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
@@ -427,10 +418,97 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     )
 }
 
+// --- НОВЫЕ Компоненты для входа и регистрации ---
+const LoginView = ({ onLogin, onSwitchToRegister }) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        if (!username || !password) {
+            setError('Имя пользователя и пароль обязательны.');
+            return;
+        }
+        onLogin(username, password, setError);
+    };
+
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+            <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <h2 className="text-3xl font-bold text-center text-gray-800">Вход в систему</h2>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Имя пользователя" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                    <button type="submit" className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Войти</button>
+                </form>
+                <div className="text-center">
+                    <button onClick={onSwitchToRegister} className="text-sm font-medium text-blue-600 hover:underline">
+                        Нет аккаунта? Зарегистрироваться
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const RegisterView = ({ onRegister, onSwitchToLogin }) => {
+    const [username, setUsername] = useState('');
+    const [password, setPassword] = useState('');
+    const [role, setRole] = useState('Сотрудник склада');
+    const [error, setError] = useState('');
+
+    const handleSubmit = (e) => {
+        e.preventDefault();
+        setError('');
+        if (!username || !password) {
+            setError('Имя пользователя и пароль обязательны.');
+            return;
+        }
+        onRegister(username, password, role, setError);
+    };
+
+    return (
+        <div className="w-full h-screen flex items-center justify-center bg-gray-100">
+            <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
+                <h2 className="text-3xl font-bold text-center text-gray-800">Регистрация</h2>
+                <form className="space-y-4" onSubmit={handleSubmit}>
+                    <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Имя пользователя" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
+                    <select value={role} onChange={e => setRole(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg">
+                        <option>Сотрудник склада</option>
+                        <option>Водитель</option>
+                        <option>Администратор</option>
+                    </select>
+                    {error && <p className="text-sm text-red-600">{error}</p>}
+                    <button type="submit" className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Зарегистрироваться</button>
+                </form>
+                <div className="text-center">
+                    <button onClick={onSwitchToLogin} className="text-sm font-medium text-blue-600 hover:underline">
+                        Уже есть аккаунт? Войти
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
-  const [userRole, setUserRole] = useState('Администратор');
+  // --- Состояние аутентификации ---
+  const [users, setUsers] = useState(() => {
+      // Загружаем пользователей из localStorage или создаем админа по умолчанию
+      const savedUsers = localStorage.getItem('warehouseAppUsers');
+      if (savedUsers) return JSON.parse(savedUsers);
+      return [{ id: 1, username: 'admin', password: 'password', role: 'Администратор' }];
+  });
+  const [currentUser, setCurrentUser] = useState(null);
+  const [authView, setAuthView] = useState('login'); // 'login' или 'register'
+
+  // --- Состояние приложения ---
   const [loading, setLoading] = useState(true);
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
@@ -439,52 +517,96 @@ export default function App() {
       {id: 2, name: 'Расходники', color: '#16a34a'},
       {id: 3, name: 'Коробки', color: '#f97316'}
   ]);
-  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null); // null means "all warehouses"
+  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
   const [isWarehouseListOpen, setWarehouseListOpen] = useState(false);
   const [isItemEditorOpen, setItemEditorOpen] = useState(false);
   const [isItemTypesManagerOpen, setItemTypesManagerOpen] = useState(false);
-  const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null); // { warehouseId, placeId }
+  const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   
   const hasLoadedData = useRef(false);
 
-    useEffect(() => {
+  // --- Обработчики аутентификации ---
+  const handleLogin = (username, password, setError) => {
+      const user = users.find(u => u.username === username && u.password === password);
+      if (user) {
+          setCurrentUser(user);
+      } else {
+          setError('Неверное имя пользователя или пароль.');
+      }
+  };
+
+  const handleRegister = (username, password, role, setError) => {
+      if (users.some(u => u.username === username)) {
+          setError('Пользователь с таким именем уже существует.');
+          return;
+      }
+      const newUser = { id: Date.now(), username, password, role };
+      const updatedUsers = [...users, newUser];
+      setUsers(updatedUsers);
+      localStorage.setItem('warehouseAppUsers', JSON.stringify(updatedUsers));
+      setCurrentUser(newUser);
+  };
+  
+  const handleLogout = () => {
+      setCurrentUser(null);
+      hasLoadedData.current = false; // Сбрасываем флаг загрузки
+      // Очищаем данные приложения при выходе
+      setWarehouses([]);
+      setItems([]);
+      setSelectedWarehouseId(null);
+  };
+
+  // --- Эффекты ---
+  useEffect(() => {
+    // Загружаем данные только если пользователь вошел в систему
+    if (!currentUser) {
+        setLoading(false);
+        return;
+    };
+
     const loadInitialData = async () => {
         setLoading(true);
         const data = await api.fetchAllData();
         if (data) {
-        hasLoadedData.current = true; // ✅ Ставим флаг ПЕРЕД setState
-        setWarehouses(data.warehouses || []);
-        setItems(data.items || []);
-        setItemTypes(data.itemTypes || []);
-        
-        if ((data.warehouses || []).length > 0) {
-            setSelectedWarehouseId(data.warehouses[0].id);
-        } else {
-            setSelectedWarehouseId(null);
-        }
+            setWarehouses(data.warehouses || []);
+            setItems(data.items || []);
+            setItemTypes(data.itemTypes || [
+                {id: 1, name: 'Гель', color: '#3b82f6'},
+                {id: 2, name: 'Расходники', color: '#16a34a'},
+                {id: 3, name: 'Коробки', color: '#f97316'}
+            ]);
+            
+            if ((data.warehouses || []).length > 0 && selectedWarehouseId === null) {
+                setSelectedWarehouseId(data.warehouses[0].id);
+            }
         }
         setLoading(false);
+        // Устанавливаем флаг после первой загрузки данных для текущего пользователя
+        setTimeout(() => { hasLoadedData.current = true; }, 100);
     };
     loadInitialData();
-    }, []);
+  }, [currentUser]); // Перезагружаем данные при смене пользователя
 
-    // ✅ Автоматическое сохранение при изменении данных
-    useEffect(() => {
-    if (!hasLoadedData.current) return;
+  // Автоматическое сохранение при изменении данных
+  useEffect(() => {
+    // Сохраняем, только если данные были загружены и есть пользователь
+    if (!hasLoadedData.current || !currentUser) return;
+    
     const fullState = {
         warehouses,
         items,
         itemTypes
     };
     api.saveAllData(fullState);
-    }, [warehouses, items, itemTypes]);
+  }, [warehouses, items, itemTypes, currentUser]); // Добавляем currentUser в зависимости
 
 
-  const handleSaveWarehouse = async (data) => {
-    const savedData = { ...data, id: data.id || Date.now() };
+  // --- Обработчики действий в приложении ---
+  const handleSaveWarehouse = (data) => {
+    const savedData = { ...data, id: data.id || crypto.randomUUID() };
     setWarehouses(prev => {
         const exists = prev.some(w => w.id === savedData.id);
         if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
@@ -493,15 +615,15 @@ export default function App() {
     setSelectedWarehouseId(savedData.id);
     setEditingWarehouse(null);
   };
-  const handleSavePlaces = async (placesData) => {
+  const handleSavePlaces = (placesData) => {
     setWarehouses(prev => prev.map(w => w.id === selectedWarehouseId ? { ...w, places: placesData } : w));
     setPlacesEditorOpen(false);
   };
-  const handleSaveItem = async (itemData) => {
+  const handleSaveItem = (itemData) => {
     setItems(prev => [...prev, itemData]);
     setItemEditorOpen(false);
   };
-  const handleSaveItemTypes = async (types) => {
+  const handleSaveItemTypes = (types) => {
     setItemTypes(types);
     setItemTypesManagerOpen(false);
   };
@@ -510,26 +632,39 @@ export default function App() {
   const handleStartEditWarehouse = (warehouse) => { setWarehouseListOpen(false); setEditingWarehouse(warehouse); };
   const handleSelectWarehouse = (id) => { setSelectedWarehouseId(id); setWarehouseListOpen(false); };
 
+  // --- Рендеринг ---
+  if (!currentUser) {
+      if (authView === 'login') {
+          return <LoginView onLogin={handleLogin} onSwitchToRegister={() => setAuthView('register')} />;
+      }
+      return <RegisterView onRegister={handleRegister} onSwitchToLogin={() => setAuthView('login')} />;
+  }
+
+  // --- Переменные для отображения ---
+  const userRole = currentUser.role;
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId);
-  
   const filteredItems = activeItemTypeFilter === 'all'
     ? itemsToDisplay
     : itemsToDisplay.filter(item => item.type === activeItemTypeFilter);
-
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
 
-  if (loading) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка...</div></div>;
+  if (loading) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных пользователя...</div></div>;
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto mb-4">
-        <div className="bg-yellow-200 p-3 rounded-lg flex items-center gap-4">
-            <span className="font-bold text-yellow-800">Симулятор роли:</span>
-            <select value={userRole} onChange={(e) => setUserRole(e.target.value)} className="p-2 rounded-md border-gray-300">
-                <option>Администратор</option><option>Сотрудник склада</option><option>Водитель</option>
-            </select>
+        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4">
+            <div className="flex items-center gap-3 text-gray-700">
+                <UserIcon />
+                <span className="font-semibold">{currentUser.username}</span>
+                <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
+            </div>
+            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
+                <LogOutIcon />
+                <span>Выйти</span>
+            </button>
         </div>
       </div>
       <div className="max-w-7xl mx-auto">
@@ -624,7 +759,7 @@ export default function App() {
       {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
-      {viewingPlaceInfo && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
+      {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
     </div>
   );
 }
