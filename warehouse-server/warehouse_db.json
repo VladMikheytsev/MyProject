@@ -217,61 +217,8 @@
             "places": []
         }
     ],
-    "items": [
-        {
-            "name": "Овоа",
-            "type": "📦",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "placeId": 1,
-            "id": "85513774-30f4-4e7d-8c0b-03783a464a9d"
-        },
-        {
-            "name": "ыфЫФыфЫ",
-            "type": "📦",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "placeId": 2,
-            "id": "03e075a6-bbad-49f4-88a5-0070744edabb"
-        },
-        {
-            "name": "Hghhhhhh",
-            "type": "📦",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
-            "placeId": null,
-            "id": "71da0280-dc31-432c-8e2e-4f9397c1ad2a"
-        },
-        {
-            "name": "ыфвфыв выфвфывыф  вфывфывфы вфывыфв",
-            "type": "📦",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
-            "placeId": null,
-            "id": "b21c3cdb-b402-4e67-ae62-316d47ab0d70"
-        }
-    ],
-    "itemTypes": [
-        {
-            "name": "📦",
-            "color": "#412c1e",
-            "id": "1b2e922a-cd6a-4996-8041-7f17c5391ed1"
-        },
-        {
-            "name": "🫙",
-            "color": "#ffbc0c",
-            "id": "c2a4a9d7-c173-403e-b146-9df5721846c2"
-        },
-        {
-            "name": "💥",
-            "color": "#8c5be9",
-            "id": "a90c7e42-ba37-42cf-8040-b81579f8ce5c"
-        }
-    ],
+    "items": [],
+    "itemTypes": [],
     "users": [
         {
             "id": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
@@ -296,20 +243,5 @@
             "role": "Водитель"
         }
     ],
-    "scenarios": [
-        {
-            "fromWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "toWarehouseId": "11f15699-726c-4b4f-b04d-f4b7aadad645",
-            "items": {
-                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1,
-                "03e075a6-bbad-49f4-88a5-0070744edabb": 1
-            },
-            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
-            "id": "f932f72b-61d4-4934-8948-2f3533b3c67e",
-            "number": 1,
-            "status": "new",
-            "creatorId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
-            "createdAt": "2025-07-25T21:23:52.650Z"
-        }
-    ]
+    "scenarios": []
 }

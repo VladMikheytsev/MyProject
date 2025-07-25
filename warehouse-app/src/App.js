@@ -1724,6 +1724,21 @@ export default function App() {
             : [...prev, warehouseId]
     );
   };
+  
+  const calculateFreePalletSpaces = (warehouse, allItems) => {
+    const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
+    const totalPalletPlaces = palletPlaces.length;
+    if (totalPalletPlaces === 0) return 0;
+
+    const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
+    const occupiedPalletPlaceIds = new Set();
+    allItems.filter(item => item.warehouseId === warehouse.id).forEach(item => {
+        if (palletPlaceIds.has(item.placeId)) {
+            occupiedPalletPlaceIds.add(item.placeId);
+        }
+    });
+    return totalPalletPlaces - occupiedPalletPlaceIds.size;
+  };
 
   // --- Рендеринг ---
   if (!authChecked) {
@@ -1744,7 +1759,16 @@ export default function App() {
   if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
   const userRole = currentUser.role;
-  const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
+  let warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
+
+    if (selectedWarehouseId === null) {
+        warehousesToDisplay.sort((a, b) => {
+            const freeA = calculateFreePalletSpaces(a, items);
+            const freeB = calculateFreePalletSpaces(b, items);
+            return freeB - freeA;
+        });
+    }
+
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
