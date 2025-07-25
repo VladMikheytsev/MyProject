@@ -985,7 +985,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
                         <div className="space-y-4">
-                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
+                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                             <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
@@ -1009,7 +1009,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
-                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
+                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
@@ -1042,14 +1042,15 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
 
 const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onClose }) => {
     const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
-    const getDriverName = (id) => {
-        const driver = users.find(u => u.id === id);
-        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
+    const getUserName = (userId) => {
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : 'Не назначен';
     };
 
-    const userScenarios = currentUser.role === 'Водитель'
-        ? scenarios.filter(s => s.driverId === currentUser.id)
-        : scenarios;
+    // Отображаем все сценарии для админов/сотрудников, и только назначенные для водителей
+    const userScenarios = (currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада')
+        ? scenarios
+        : scenarios.filter(s => s.driverId === currentUser.id);
 
     const StatusIndicator = ({ status }) => {
         if (status === 'accepted') {
@@ -1069,35 +1070,47 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto">
-                    {userScenarios.length > 0 ? userScenarios.map(s => (
-                        <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
-                            <div className="flex justify-between items-start">
-                                <div>
-                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
-                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
-                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
+                    {userScenarios.length > 0 ? userScenarios.map(s => {
+                        const canAccept = currentUser.role === 'Водитель' && currentUser.id === s.driverId;
+                        const canComplete = currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада';
+
+                        return (
+                            <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
+                                <div className="flex justify-between items-start mb-3">
+                                    <div>
+                                        <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
+                                        <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
+                                    </div>
+                                    <div className="text-sm font-semibold">
+                                        <StatusIndicator status={s.status} />
+                                    </div>
                                 </div>
-                                <div className="text-sm font-semibold">
-                                    <StatusIndicator status={s.status} />
+                                <div className="space-y-3">
+                                    <div className="pt-2 border-t">
+                                        <p className="font-semibold text-sm mb-1">Участники:</p>
+                                        <ul className="text-sm text-gray-700 space-y-1">
+                                            <li><strong>Отправитель:</strong> {getUserName(s.senderId)}</li>
+                                            <li><strong>Водитель:</strong> {getUserName(s.driverId)}</li>
+                                            {s.status === 'completed' && <li><strong>Получатель:</strong> {getUserName(s.receiverId)}</li>}
+                                        </ul>
+                                    </div>
+                                    <div className="pt-2 border-t">
+                                        <p className="font-semibold text-sm mb-1">Позиции:</p>
+                                        <ul className="list-disc list-inside text-sm text-gray-700">
+                                            {Object.entries(s.items).map(([itemId, quantity]) => {
+                                                const item = items.find(i => i.id === itemId);
+                                                return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
+                                            })}
+                                        </ul>
+                                    </div>
                                 </div>
-                            </div>
-                            <div className="mt-2 pt-2 border-t">
-                                <p className="font-semibold text-sm mb-1">Позиции:</p>
-                                <ul className="list-disc list-inside text-sm text-gray-700">
-                                    {Object.entries(s.items).map(([itemId, quantity]) => {
-                                        const item = items.find(i => i.id === itemId);
-                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
-                                    })}
-                                </ul>
-                            </div>
-                            {currentUser.id === s.driverId && (
                                 <div className="mt-4 flex gap-4">
-                                    {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
-                                    {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
+                                    {canAccept && s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
+                                    {canComplete && s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
                                 </div>
-                            )}
-                        </div>
-                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
+                            </div>
+                        )
+                    }) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
                 </div>
             </div>
         </div>
@@ -1383,7 +1396,7 @@ export default function App() {
 
   // --- Обработчики действий в приложении ---
   const handleSaveWarehouse = (data) => {
-    const savedData = { ...data, id: data.id || crypto.randomUUID() };
+    const savedData = { ...data, id: data.id || Date.now() };
     setWarehouses(prev => {
         const exists = prev.some(w => w.id === savedData.id);
         if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
@@ -1430,45 +1443,48 @@ export default function App() {
     }
   };
   
+  // --- ИЗМЕНЕНИЕ: Добавляем ID отправителя при создании ---
   const handleCreateScenario = (scenarioData) => {
     const newScenario = {
       ...scenarioData,
       id: crypto.randomUUID(),
       status: 'new',
+      senderId: currentUser.id, // ID текущего пользователя-создателя
+      receiverId: null, // Получатель пока не назначен
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
-  // --- ИЗМЕНЕНИЕ: Логика завершения сценария ---
+  // --- ИЗМЕНЕНИЕ: Обновленная логика смены статуса сценария ---
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
     const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
     if (!scenarioToUpdate) return;
 
-    // Если сценарий ЗАВЕРШЕН, перемещаем позиции
+    let updatedScenario = { ...scenarioToUpdate, status: newStatus };
+
     if (newStatus === 'completed') {
+        // Добавляем ID того, кто завершил сценарий
+        updatedScenario.receiverId = currentUser.id;
+
         const itemIdsToMove = Object.keys(scenarioToUpdate.items);
         const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
 
+        // Обновляем состояние позиций
         setItems(prevItems =>
             prevItems.map(item => {
                 if (itemIdsToMove.includes(item.id)) {
-                    // Перемещаем на новый склад и сбрасываем место
-                    return {
-                        ...item,
-                        warehouseId: destinationWarehouseId,
-                        placeId: null 
-                    };
+                    return { ...item, warehouseId: destinationWarehouseId, placeId: null };
                 }
                 return item;
             })
         );
     }
 
-    // В любом случае обновляем статус самого сценария
+    // Обновляем состояние сценариев
     setScenarios(prevScenarios =>
         prevScenarios.map(s =>
-            s.id === scenarioId ? { ...s, status: newStatus } : s
+            s.id === scenarioId ? updatedScenario : s
         )
     );
   };
@@ -1643,13 +1659,12 @@ export default function App() {
                                 {assignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                    const isUnplaced = item.placeId === null; // --- ИЗМЕНЕНИЕ: Проверка на неразмещенную позицию
+                                    const isUnplaced = item.placeId === null;
                                     
                                     return (
                                         <div 
                                             key={item.id} 
                                             onClick={() => isActionableUser && setItemToAction(item)} 
-                                            // --- ИЗМЕНЕНИЕ: Условный стиль для неразмещенных позиций
                                             className={`${isUnplaced ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'} p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer transition' : ''}`}
                                         >
                                             <div className="flex items-start gap-3">
@@ -1657,7 +1672,6 @@ export default function App() {
                                                 <div>
                                                     <p className="font-bold text-gray-800">{item.name}</p>
                                                     <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                    {/* --- ИЗМЕНЕНИЕ: Условный текст для неразмещенных позиций --- */}
                                                     {isUnplaced ? (
                                                         <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
                                                     ) : (
