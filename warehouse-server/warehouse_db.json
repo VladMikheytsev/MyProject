@@ -9,6 +9,46 @@
             "id": "c8414422-04d9-4490-8296-805b117daae8",
             "places": [
                 {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 11,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 12,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
                     "id": 16,
                     "type": "pallet",
                     "orientation": "30*36"
@@ -20,6 +60,21 @@
                 },
                 {
                     "id": 18,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 19,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
                     "type": "pallet",
                     "orientation": "30*36"
                 },
@@ -39,17 +94,7 @@
                     "orientation": "30*36"
                 },
                 {
-                    "id": 30,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 31,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 32,
+                    "id": 26,
                     "type": "pallet",
                     "orientation": "30*36"
                 }
@@ -156,8 +201,8 @@
             "type": "📦",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "placeId": 16,
+            "warehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "placeId": 10,
             "id": "03e075a6-bbad-49f4-88a5-0070744edabb"
         }
     ],
@@ -222,6 +267,26 @@
             "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
             "id": "eb507833-0fb7-48a3-adda-8fbf218c156a",
             "status": "completed"
+        },
+        {
+            "fromWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "toWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "items": {
+                "03e075a6-bbad-49f4-88a5-0070744edabb": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "12012ec0-8d61-408e-bf8d-05b1af5a3d42",
+            "status": "completed"
+        },
+        {
+            "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "toWarehouseId": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
+            "items": {
+                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "c156ba4e-303f-4843-b290-92c23ad8fc05",
+            "status": "new"
         }
     ]
 }
