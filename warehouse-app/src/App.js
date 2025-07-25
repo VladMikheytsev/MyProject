@@ -1,6 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import { BrowserRouter as Router, Routes, Route } from "react-router-dom";
-import RegisterForm from "./pages/RegisterForm"; // Импорт формы
 
 // --- Иконки (SVG11111111) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -431,7 +429,7 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
 
 
 // --- Основной компонент приложения ---
-function MainAppContent() {
+export default function App() {
   const [userRole, setUserRole] = useState('Администратор');
   const [loading, setLoading] = useState(true);
   const [warehouses, setWarehouses] = useState([]);
@@ -628,17 +626,5 @@ function MainAppContent() {
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
     </div>
-  );
-}
-
-export default function App() {
-  return (
-    <Router>
-      <Routes>
-        <Route path="/register" element={<RegisterForm />} />
-        {/* Основное содержимое приложения будет на корневом маршруте */}
-        <Route path="/" element={<MainAppContent />} /> 
-      </Routes>
-    </Router>
   );
 }
