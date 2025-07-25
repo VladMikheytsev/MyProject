@@ -1437,6 +1437,19 @@ export default function App() {
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
+
+    // Function to download the scenario as a JSON file
+    const downloadScenario = (scenario) => {
+      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
+        JSON.stringify(scenario, null, 2)
+      )}`;
+      const link = document.createElement("a");
+      link.href = jsonString;
+      link.download = `scenario_${scenario.id}.json`;
+      link.click();
+    };
+
+    downloadScenario(newScenario);
   };
 
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
