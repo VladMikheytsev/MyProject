@@ -575,6 +575,102 @@ const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) 
     );
 };
 
+// --- НОВЫЙ КОМПОНЕНТ: Модальное окно для перемещения позиции ---
+const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCancel }) => {
+    const [destination, setDestination] = useState({
+        warehouseId: itemToMove.warehouseId,
+        placeId: null
+    });
+    const [disabledPlaces, setDisabledPlaces] = useState([]);
+
+    // Этот эффект пересчитывает, какие места должны быть отключены на складе назначения.
+    useEffect(() => {
+        const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
+        if (!selectedWarehouse) return;
+
+        // Нам нужно рассмотреть товары в пункте назначения, ИСКЛЮЧАЯ товар, который мы перемещаем
+        const otherItems = items.filter(i => i.id !== itemToMove.id);
+
+        const newDisabledPlaces = [];
+        (selectedWarehouse.places || []).forEach(place => {
+            const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
+            if (itemToMove.size === 'Паллета') {
+                // Отключить полки
+                if (place.type === 'shelving') {
+                    newDisabledPlaces.push(place.id);
+                }
+                // Отключить паллетные места, которые уже заполнены (2 паллетами)
+                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) {
+                    newDisabledPlaces.push(place.id);
+                }
+            }
+            // Добавьте другие правила для 'Коробка' или 'Шт', если это необходимо
+        });
+        setDisabledPlaces(newDisabledPlaces);
+        // Сброс выбора места при смене склада
+        setDestination(prev => ({...prev, placeId: null}));
+
+    }, [destination.warehouseId, itemToMove, warehouses, items]);
+
+    const handleSave = () => {
+        if (destination.placeId === null) {
+            alert('Пожалуйста, выберите новое место.');
+            return;
+        }
+        onSave(destination);
+    };
+
+    const handleWarehouseChange = (e) => {
+        const newWarehouseId = Number(e.target.value);
+        setDestination({ warehouseId: newWarehouseId, placeId: null });
+    };
+
+    const handlePlaceSelect = (placeInfo) => {
+        setDestination(prev => ({ ...prev, placeId: placeInfo.placeId }));
+    };
+
+    const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up">
+                <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение позиции</h2>
+                <p className="mb-6 text-gray-600">"{itemToMove.name}"</p>
+
+                <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700">Целевой склад:</label>
+                    <select name="warehouseId" value={destination.warehouseId} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
+                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+
+                    {selectedWarehouse && (
+                        <div>
+                            <h3 className="font-semibold mb-2">Выберите новое место на складе "{selectedWarehouse.name}"</h3>
+                            <div className="max-h-64 overflow-auto p-2 bg-gray-100 rounded-lg">
+                                <CompactPlacesGrid
+                                    places={selectedWarehouse.places || []}
+                                    items={items.filter(i => i.warehouseId === selectedWarehouse.id && i.id !== itemToMove.id)}
+                                    itemTypes={itemTypes}
+                                    onPlaceSelect={handlePlaceSelect}
+                                    selectedPlaceInfo={destination}
+                                    disabledPlaces={disabledPlaces}
+                                    warehouseId={selectedWarehouse.id}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex justify-end space-x-4 mt-8">
+                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                    <button onClick={handleSave} disabled={destination.placeId === null} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
+
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -717,6 +813,7 @@ export default function App() {
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
+  const [movingItem, setMovingItem] = useState(null); // <-- НОВОЕ СОСТОЯНИЕ для перемещения
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -858,6 +955,16 @@ export default function App() {
     setItemTypes(types);
     setItemTypesManagerOpen(false);
   };
+
+  // --- НОВЫЙ ОБРАБОТЧИК: Сохранение перемещения позиции ---
+  const handleSaveItemMove = (destination) => {
+    setItems(prevItems => prevItems.map(item =>
+        item.id === movingItem.id
+            ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
+            : item
+    ));
+    setMovingItem(null); // Закрыть модальное окно
+  };
   
   const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
   const handleStartEditWarehouse = (warehouse) => { setWarehouseListOpen(false); setEditingWarehouse(warehouse); };
@@ -989,7 +1096,8 @@ export default function App() {
                                                 <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
                                             </div>
                                         </div>
-                                        <button className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                        {/* --- ИЗМЕНЕНИЕ: Кнопка для запуска перемещения --- */}
+                                        <button onClick={() => setMovingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                     </div>
                                 )})}
                             </div>
@@ -1004,6 +1112,7 @@ export default function App() {
             </div>
         )}
       </div>
+      {/* --- ИЗМЕНЕНИЕ: Рендеринг всех модальных окон --- */}
       {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} />}
@@ -1012,6 +1121,8 @@ export default function App() {
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
+      {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
+
     </div>
   );
 }
