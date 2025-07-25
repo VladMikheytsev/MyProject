@@ -182,7 +182,7 @@ const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, o
         </div>
     );
 };
-const PlacesEditor = ({ initialPlaces, onSave, onCancel }) => {
+const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
     const [placeStates, setPlaceStates] = useState(() => {
         const states = Array(49).fill(0);
         initialPlaces.forEach(p => {
@@ -235,6 +235,7 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel }) => {
                 </div>
                 <div className="flex justify-end space-x-4 mt-8">
                     <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                    <button onClick={onReset} className="px-6 py-2 rounded-lg text-white bg-yellow-500 hover:bg-yellow-600 font-semibold">Сброс</button>
                     <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить</button>
                 </div>
             </div>
@@ -1062,11 +1063,25 @@ export default function App() {
   
   const handleDeleteWarehouse = (warehouseIdToDelete) => {
     setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
-    setItems(prev => prev.filter(i => i.warehouseId !== warehouseIdToDelete));
+    setItems(prev => prev.map(i => i.warehouseId === warehouseIdToDelete ? { ...i, warehouseId: 'unassigned', placeId: null } : i));
     if (selectedWarehouseId === warehouseIdToDelete) {
         setSelectedWarehouseId(null);
     }
     setWarehouseListOpen(false);
+  };
+  
+  const handleResetPlaces = (warehouseId) => {
+    setItems(prevItems =>
+        prevItems.map(item =>
+            item.warehouseId === warehouseId ? { ...item, warehouseId: 'unassigned', placeId: null } : item
+        )
+    );
+    setWarehouses(prevWarehouses =>
+        prevWarehouses.map(w =>
+            w.id === warehouseId ? { ...w, places: [] } : w
+        )
+    );
+    setPlacesEditorOpen(false);
   };
 
   // --- Рендеринг ---
@@ -1087,10 +1102,19 @@ export default function App() {
 
   const userRole = currentUser.role;
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
-  const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId);
-  const filteredItems = activeItemTypeFilter === 'all'
+  const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
+  
+  const assignedFilteredItems = (activeItemTypeFilter === 'all'
     ? itemsToDisplay
-    : itemsToDisplay.filter(item => item.type === activeItemTypeFilter);
+    : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
+  ).filter(item => item.warehouseId !== 'unassigned');
+
+  const unassignedFilteredItems = (activeItemTypeFilter === 'all'
+    ? itemsToDisplay
+    : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
+  ).filter(item => item.warehouseId === 'unassigned');
+
+
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
 
@@ -1186,9 +1210,9 @@ export default function App() {
                                 </button>
                             ))}
                         </div>
-                        {filteredItems.length > 0 ? (
+                        {assignedFilteredItems.length > 0 ? (
                             <div className="space-y-3">
-                                {filteredItems.map(item => {
+                                {assignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
                                     return (
@@ -1206,6 +1230,29 @@ export default function App() {
                                 )})}
                             </div>
                         ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
+                        
+                        {unassignedFilteredItems.length > 0 && selectedWarehouseId === null && (
+                            <div className="mt-6 pt-4 border-t">
+                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ОТСУТСТВУЮТ НА СКЛАДАХ</h3>
+                                <div className="space-y-3">
+                                    {unassignedFilteredItems.map(item => {
+                                        const itemType = itemTypes.find(it => it.name === item.type);
+                                        return (
+                                        <div key={item.id} className="bg-red-50 p-3 rounded-lg flex items-start justify-between">
+                                            <div className="flex items-start gap-3">
+                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                <div>
+                                                    <p className="font-bold text-gray-800">{item.name}</p>
+                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                    <p className="text-sm text-red-600 mt-1">Местоположение не задано</p>
+                                                </div>
+                                            </div>
+                                            <button onClick={() => setVerifyingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                        </div>
+                                    )})}
+                                </div>
+                            </div>
+                        )}
                     </div>
                 )}
             </div>
@@ -1219,7 +1266,7 @@ export default function App() {
       
       {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onDelete={handleDeleteWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
-      {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} />}
+      {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(selectedWarehouseId)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}

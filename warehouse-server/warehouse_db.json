@@ -1,63 +1,18 @@
 {
     "warehouses": [
         {
-            "name": "1",
-            "address": "1",
-            "hours": "1",
-            "gate_code": "1",
-            "lock_code": "1",
-            "id": 1753407392679,
+            "name": "Склад SD",
+            "address": "325 E Arrow st, San Dimas",
+            "hours": "6AM - 9PM",
+            "gate_code": "-",
+            "lock_code": "5147#",
+            "id": "c8414422-04d9-4490-8296-805b117daae8",
             "places": [
                 {
-                    "id": 9,
+                    "id": 0,
                     "type": "pallet",
                     "orientation": "30*36"
                 },
-                {
-                    "id": 10,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 15,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 16,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 17,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 22,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 23,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 24,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                }
-            ]
-        },
-        {
-            "name": "G",
-            "address": "B",
-            "hours": "B",
-            "gate_code": "B",
-            "lock_code": "B",
-            "id": 1753408690390,
-            "places": [
                 {
                     "id": 1,
                     "type": "pallet",
@@ -72,30 +27,131 @@
                     "id": 3,
                     "type": "pallet",
                     "orientation": "30*36"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 28,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 35,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 36,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 37,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 38,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 42,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 43,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 44,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 45,
+                    "type": "pallet",
+                    "orientation": "30*36"
                 }
             ]
-        },
-        {
-            "name": "2",
-            "address": "2",
-            "hours": "2",
-            "gate_code": "2",
-            "lock_code": "2",
-            "id": "c5e6e4be-8cff-4bcf-b335-3696dddfa024",
-            "places": []
         }
     ],
-    "items": [
-        {
-            "name": "Gdhdhhd",
-            "type": "Коробки",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": 1753407392679,
-            "placeId": 24,
-            "id": "0704635a-52ab-4106-b162-3edf528de0b8"
-        }
-    ],
+    "items": [],
     "itemTypes": [
         {
             "id": 1,
