@@ -1118,7 +1118,12 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 <ul className="text-sm text-gray-700 space-y-2">
                                     {Object.entries(s.items).map(([itemId, quantity]) => {
                                         const item = items.find(i => i.id === itemId);
-                                        return <li key={itemId} className="border-b border-dashed border-gray-300 last:border-b-0 pb-2">{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
+                                        return (
+                                            <li key={itemId} className="flex justify-between items-center border-b border-dashed border-gray-300 last:border-b-0 pb-2">
+                                                <span>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</span>
+                                                <span className="text-gray-500">{item?.type || ''}</span>
+                                            </li>
+                                        );
                                     })}
                                 </ul>
                             </div>
@@ -1153,10 +1158,10 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
     const drivers = users.filter(u => u.role === 'Водитель');
 
     const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
-    const lockedItemIds = activeScenarios.flatMap(s => Object.keys(s.items));
+    const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
 
     const itemsOnWarehouse = fromWarehouseId
-        ? items.filter(i => i.warehouseId === fromWarehouseId && !lockedItemIds.includes(i.id))
+        ? items.filter(i => i.warehouseId === fromWarehouseId && !lockedItemIds.has(i.id))
         : [];
 
     const handleItemToggle = (item) => {
