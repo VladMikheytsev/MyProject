@@ -6,6 +6,7 @@ import QRCode from 'qrcode';
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
+const ChevronUpIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
 const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
@@ -1802,25 +1803,27 @@ export default function App() {
                             const isExpanded = expandedWarehouses.includes(warehouse.id);
                             return (
                                 <div key={warehouse.id}>
-                                    <div className="flex justify-between items-center mb-2">
-                                        <h3 className="text-sm font-semibold text-gray-500">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
+                                    <div onClick={() => toggleWarehouseExpansion(warehouse.id)} className="flex justify-between items-center mb-2 cursor-pointer group">
+                                        <h3 className="text-sm font-semibold text-gray-500 group-hover:text-blue-600">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
                                         <div className="flex items-center gap-2">
                                             {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (
-                                                <button onClick={() => setPlacesEditorOpen(true)} className="text-gray-400 hover:text-blue-600 transition p-1"><EditIcon /></button>
+                                                <button onClick={(e) => { e.stopPropagation(); setPlacesEditorOpen(true); }} className="text-gray-400 hover:text-blue-600 transition p-1 z-10">
+                                                    <EditIcon />
+                                                </button>
                                             )}
-                                            <button onClick={() => toggleWarehouseExpansion(warehouse.id)} className="text-gray-500 hover:text-blue-600 p-1">
-                                                <ChevronDownIcon className="transition-transform duration-300" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }} />
-                                            </button>
+                                            {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                                         </div>
                                     </div>
+                                    
                                     {isExpanded && (
-                                        (warehouse.places && warehouse.places.length > 0) ? (
-                                        <>
-                                            <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
-                                            <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                                        </>
-                                        ) : (<div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>)
+                                        (warehouse.places && warehouse.places.length > 0) 
+                                        ? <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
+                                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>
                                     )}
+                                    
+                                    {(warehouse.places && warehouse.places.length > 0) &&
+                                        <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
+                                    }
                                 </div>
                             );
                         })}
