@@ -354,9 +354,12 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         }
     }, [newItem.warehouseId, newItem.size, warehouses, items]);
 
+    // --- ИСПРАВЛЕНИЕ: Преобразование warehouseId в число ---
     const handleChange = (e) => { 
         const { name, value } = e.target;
-        setNewItem(prev => ({ ...prev, [name]: value, placeId: name === 'warehouseId' ? null : prev.placeId })); 
+        const isWarehouseSelect = name === 'warehouseId';
+        const processedValue = isWarehouseSelect ? Number(value) : value;
+        setNewItem(prev => ({ ...prev, [name]: processedValue, placeId: isWarehouseSelect ? null : prev.placeId })); 
     };
     const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID() }); };
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
@@ -556,9 +559,11 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
         handleCancel();
     };
     
+    // --- ИСПРАВЛЕНИЕ: Преобразование assignedWarehouseId в число ---
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setUserData(prev => ({ ...prev, [name]: value }));
+        const processedValue = (name === 'assignedWarehouseId' && value !== 'office') ? Number(value) : value;
+        setUserData(prev => ({ ...prev, [name]: processedValue }));
     };
 
     return (
@@ -985,6 +990,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
                         <div className="space-y-4">
+                            {/* --- ИСПРАВЛЕНИЕ: Преобразование в число --- */}
                             <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
@@ -1009,6 +1015,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
+                                {/* --- ИСПРАВЛЕНИЕ: Преобразование в число --- */}
                                 <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -1047,7 +1054,6 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
         return user ? `${user.firstName} ${user.lastName}` : 'Не назначен';
     };
 
-    // Отображаем все сценарии для админов/сотрудников, и только назначенные для водителей
     const userScenarios = (currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада')
         ? scenarios
         : scenarios.filter(s => s.driverId === currentUser.id);
@@ -1071,8 +1077,8 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
                 </div>
                 <div className="space-y-4 max-h-[70vh] overflow-y-auto">
                     {userScenarios.length > 0 ? userScenarios.map(s => {
-                        const canAccept = currentUser.role === 'Водитель' && currentUser.id === s.driverId;
-                        const canComplete = currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада';
+                        const isDriverForScenario = currentUser.role === 'Водитель' && currentUser.id === s.driverId;
+                        const isAdminOrWorker = currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада';
 
                         return (
                             <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
@@ -1105,8 +1111,12 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
                                     </div>
                                 </div>
                                 <div className="mt-4 flex gap-4">
-                                    {canAccept && s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>}
-                                    {canComplete && s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
+                                    {isDriverForScenario && s.status === 'new' && (
+                                        <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять сценарий</button>
+                                    )}
+                                    {isAdminOrWorker && s.status === 'accepted' && (
+                                        <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
+                                    )}
                                 </div>
                             </div>
                         )
@@ -1116,7 +1126,6 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
         </div>
     );
 };
-
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -1262,7 +1271,7 @@ export default function App() {
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
-  const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
+  const [itemToAction, setItemToAction] = useState(null); 
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
@@ -1443,20 +1452,18 @@ export default function App() {
     }
   };
   
-  // --- ИЗМЕНЕНИЕ: Добавляем ID отправителя при создании ---
   const handleCreateScenario = (scenarioData) => {
     const newScenario = {
       ...scenarioData,
       id: crypto.randomUUID(),
       status: 'new',
-      senderId: currentUser.id, // ID текущего пользователя-создателя
-      receiverId: null, // Получатель пока не назначен
+      senderId: currentUser.id, 
+      receiverId: null, 
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
-  // --- ИЗМЕНЕНИЕ: Обновленная логика смены статуса сценария ---
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
     const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
     if (!scenarioToUpdate) return;
@@ -1464,13 +1471,11 @@ export default function App() {
     let updatedScenario = { ...scenarioToUpdate, status: newStatus };
 
     if (newStatus === 'completed') {
-        // Добавляем ID того, кто завершил сценарий
         updatedScenario.receiverId = currentUser.id;
 
         const itemIdsToMove = Object.keys(scenarioToUpdate.items);
         const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
 
-        // Обновляем состояние позиций
         setItems(prevItems =>
             prevItems.map(item => {
                 if (itemIdsToMove.includes(item.id)) {
@@ -1481,7 +1486,6 @@ export default function App() {
         );
     }
 
-    // Обновляем состояние сценариев
     setScenarios(prevScenarios =>
         prevScenarios.map(s =>
             s.id === scenarioId ? updatedScenario : s

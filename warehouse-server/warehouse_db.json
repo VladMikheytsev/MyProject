@@ -150,6 +150,15 @@
             "warehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "placeId": 9,
             "id": "85513774-30f4-4e7d-8c0b-03783a464a9d"
+        },
+        {
+            "name": "Оаоао",
+            "type": "📦",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "placeId": 16,
+            "id": "69389ef7-90cf-491a-9d6e-80ea0cd125b2"
         }
     ],
     "itemTypes": [
