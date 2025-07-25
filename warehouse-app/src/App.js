@@ -1800,7 +1800,7 @@ export default function App() {
                 </div>
 
                 <div className="space-y-4">
-                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
+                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
                         <ScenariosIcon />
                         <span className="flex-1 text-left">Сценарии</span>
                         {notificationCount > 0 && (
@@ -1809,12 +1809,14 @@ export default function App() {
                             </span>
                         )}
                     </button>
-                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
-                        <TruckIcon /> Переместить позицию по QR
+                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
+                        <TruckIcon />
+                        <span className="flex-1 text-left">Переместить позицию по QR</span>
                     </button>
                     {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (
-                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                            <PlusIcon /> Создать позицию
+                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
+                            <PlusIcon />
+                            <span className="flex-1 text-left">Создать позицию</span>
                         </button>
                     )}
                 </div>

@@ -267,6 +267,16 @@
     ],
     "scenarios": [
         {
+            "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "toWarehouseId": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
+            "items": {
+                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "c156ba4e-303f-4843-b290-92c23ad8fc05",
+            "status": "accepted"
+        },
+        {
             "fromWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "toWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "items": {
@@ -295,16 +305,6 @@
             "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
             "id": "12012ec0-8d61-408e-bf8d-05b1af5a3d42",
             "status": "completed"
-        },
-        {
-            "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "toWarehouseId": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
-            "items": {
-                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1
-            },
-            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
-            "id": "c156ba4e-303f-4843-b290-92c23ad8fc05",
-            "status": "accepted"
         }
     ]
 }
