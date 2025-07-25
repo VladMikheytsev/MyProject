@@ -673,6 +673,7 @@ export default function App() {
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('login'); 
+  const [authChecked, setAuthChecked] = useState(false);
 
   // --- Состояние приложения ---
   const [loading, setLoading] = useState(true);
@@ -693,12 +694,15 @@ export default function App() {
   const hasLoadedData = useRef(false);
   const USERS_STORAGE_KEY = 'warehouseAppUsers';
   const DATA_STORAGE_KEY = 'warehouseAppData';
+  const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
   // --- Обработчики аутентификации и модерации ---
   const handleLogin = (username, password, setError) => {
       const user = users.find(u => u.username === username && u.password === password);
       if (user) {
+          const now = new Date().getTime();
           setCurrentUser(user);
+          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
       } else {
           setError('Неверное имя пользователя или пароль.');
       }
@@ -718,11 +722,15 @@ export default function App() {
       const updatedUsers = [...users, newUser];
       setUsers(updatedUsers);
       api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
-      setCurrentUser(newUser); // Сразу логиним, но он увидит экран модерации
+      
+      const now = new Date().getTime();
+      setCurrentUser(newUser);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: newUser, loginTime: now }));
   };
   
   const handleLogout = () => {
       setCurrentUser(null);
+      localStorage.removeItem(SESSION_STORAGE_KEY);
       hasLoadedData.current = false;
       setWarehouses([]);
       setItems([]);
@@ -775,6 +783,36 @@ export default function App() {
     };
     loadUsers();
   }, []);
+
+  // Проверка сессии при начальной загрузке
+  useEffect(() => {
+    const checkSession = () => {
+      try {
+        const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (savedSession) {
+          const { user, loginTime } = JSON.parse(savedSession);
+          const now = new Date().getTime();
+          const ONE_HOUR = 3600 * 1000;
+
+          if (now - loginTime < ONE_HOUR) {
+            // Сессия действительна, логиним пользователя
+            setCurrentUser(user);
+            // Обновляем временную метку, чтобы продлить сессию
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
+          } else {
+            // Сессия истекла
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+          }
+        }
+      } catch (error) {
+        console.error("Не удалось проанализировать данные сеанса:", error);
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      }
+      setAuthChecked(true);
+    };
+
+    checkSession();
+  }, []); // Запускается только один раз при монтировании компонента
 
   // Загрузка данных приложения после входа
   useEffect(() => {
@@ -843,6 +881,10 @@ export default function App() {
   const handleSelectWarehouse = (id) => { setSelectedWarehouseId(id); setWarehouseListOpen(false); };
 
   // --- Рендеринг ---
+  if (!authChecked) {
+    return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
+  }
+
   if (!currentUser) {
       if (authView === 'login') {
           return <LoginView onLogin={handleLogin} onSwitchToRegister={() => setAuthView('register')} />;
