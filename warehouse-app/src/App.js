@@ -1017,10 +1017,17 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                             </div>
                              <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Водитель:</label>
-                                <select value={driverId || ''} onChange={e => setDriverId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
-                                    <option value="" disabled>Выберите водителя</option>
-                                    {drivers.map(d => <option key={d.id} value={d.id}>{d.firstName} {d.lastName}</option>)}
-                                </select>
+                                <div className="max-h-40 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
+                                    {drivers.map(d => (
+                                        <button 
+                                            key={d.id} 
+                                            onClick={() => setDriverId(d.id)}
+                                            className={`w-full text-left p-3 rounded-lg ${driverId === d.id ? 'bg-blue-600 text-white' : 'bg-white hover:bg-gray-100'}`}
+                                        >
+                                            {d.firstName} {d.lastName}
+                                        </button>
+                                    ))}
+                                </div>
                             </div>
                         </div>
                         <div className="flex justify-between items-center mt-8">
