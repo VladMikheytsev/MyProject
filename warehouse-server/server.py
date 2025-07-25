@@ -28,8 +28,7 @@ db = {
     "warehouses": [],
     "items": [],
     "itemTypes": [],
-    "users": [],
-    "scenarios": [] # Добавлено поле для сценариев
+    "users": []
 }
 
 # --- Модели данных (Pydantic) ---
@@ -50,16 +49,12 @@ class AppData(BaseModel):
     warehouses: list
     items: list
     itemTypes: list
-    scenarios: list # Добавлено поле для сценариев
 
 def load_data():
     global db
     if os.path.exists(DB_FILE):
         with open(DB_FILE, 'r', encoding='utf-8') as f:
-            # Убедимся, что все ключи существуют
-            loaded_db = json.load(f)
-            for key in db.keys():
-                db[key] = loaded_db.get(key, [])
+            db = json.load(f)
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         # Создаем пользователей по умолчанию, если база данных пуста
@@ -105,14 +100,13 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-# Получение всех данных приложения (склады, товары, сценарии)
+# Получение всех данных приложения (склады, товары)
 @app.get("/data")
 async def get_app_data():
     return {
         "warehouses": db.get("warehouses", []),
         "items": db.get("items", []),
-        "itemTypes": db.get("itemTypes", []),
-        "scenarios": db.get("scenarios", []) # Возвращаем сценарии
+        "itemTypes": db.get("itemTypes", [])
     }
 
 # Сохранение всех данных приложения
@@ -122,7 +116,6 @@ async def save_app_data(data: AppData):
     db["warehouses"] = data.warehouses
     db["items"] = data.items
     db["itemTypes"] = data.itemTypes
-    db["scenarios"] = data.scenarios # Сохраняем сценарии
     save_data()
     return {"message": "Данные успешно сохранены"}
 
