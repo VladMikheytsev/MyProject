@@ -1050,12 +1050,14 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
 const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete }) => {
-    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
-    const getDriverName = (id) => {
-        const driver = users.find(u => u.id === id);
-        return driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
+    const getUserNameById = (userId) => {
+        if (!userId) return 'Неизвестно';
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : 'Неизвестно';
     };
-
+    
+    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
+    
     const StatusIndicator = ({ status }) => {
         if (status === 'accepted') {
             return <span className="flex items-center gap-1 text-yellow-600"><ClockIcon /> В работе</span>;
@@ -1098,7 +1100,11 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 <div>
                                     <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
                                     <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
-                                    <p className="text-sm text-gray-600">Водитель: {getDriverName(s.driverId)}</p>
+                                    <div className="text-sm text-gray-600 mt-2 border-t pt-2 space-y-1">
+                                         <p>Отправитель: {getUserNameById(s.creatorId)}</p>
+                                         {(s.status === 'accepted' || s.status === 'completed') && <p>Водитель: {getUserNameById(s.driverId)}</p>}
+                                         {s.status === 'completed' && <p>Получатель: {getUserNameById(s.completerId)}</p>}
+                                    </div>
                                 </div>
                                 <div className="text-sm font-semibold">
                                     <StatusIndicator status={s.status} />
@@ -1114,11 +1120,11 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 </ul>
                             </div>
                             <div className="mt-4 flex gap-4 items-center">
-                                {currentUser.id === s.driverId && (
-                                    <>
-                                        {s.status === 'new' && <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять</button>}
-                                        {s.status === 'accepted' && <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>}
-                                    </>
+                                {currentUser.id === s.driverId && s.status === 'new' && (
+                                    <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять</button>
+                                )}
+                                {(currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада') && s.status === 'accepted' && (
+                                     <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
                                 )}
                                 {currentUser.role === 'Администратор' && (
                                     <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full ml-auto">
@@ -1614,37 +1620,38 @@ export default function App() {
       ...scenarioData,
       id: crypto.randomUUID(),
       status: 'new',
+      creatorId: currentUser.id,
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
-    const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
-    if (!scenarioToUpdate) return;
-
-    if (newStatus === 'completed') {
-        const itemIdsToMove = Object.keys(scenarioToUpdate.items);
-        const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
-
-        setItems(prevItems =>
-            prevItems.map(item => {
-                if (itemIdsToMove.includes(item.id)) {
-                    return {
-                        ...item,
-                        warehouseId: destinationWarehouseId,
-                        placeId: null 
-                    };
-                }
-                return item;
-            })
-        );
-    }
-
     setScenarios(prevScenarios =>
-        prevScenarios.map(s =>
-            s.id === scenarioId ? { ...s, status: newStatus } : s
-        )
+        prevScenarios.map(s => {
+            if (s.id === scenarioId) {
+                const updatedScenario = { ...s, status: newStatus };
+                if (newStatus === 'completed') {
+                    updatedScenario.completerId = currentUser.id;
+                    const itemIdsToMove = Object.keys(updatedScenario.items);
+                    const destinationWarehouseId = updatedScenario.toWarehouseId;
+                    setItems(prevItems =>
+                        prevItems.map(item => {
+                            if (itemIdsToMove.includes(item.id)) {
+                                return {
+                                    ...item,
+                                    warehouseId: destinationWarehouseId,
+                                    placeId: null 
+                                };
+                            }
+                            return item;
+                        })
+                    );
+                }
+                return updatedScenario;
+            }
+            return s;
+        })
     );
   };
   
