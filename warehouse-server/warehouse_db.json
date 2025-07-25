@@ -110,7 +110,17 @@
             "places": []
         }
     ],
-    "items": [],
+    "items": [
+        {
+            "name": "Овоа",
+            "type": "📦",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "placeId": 17,
+            "id": "85513774-30f4-4e7d-8c0b-03783a464a9d"
+        }
+    ],
     "itemTypes": [
         {
             "name": "📦",
@@ -139,50 +149,6 @@
             "phone": "1",
             "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "role": "Администратор"
-        },
-        {
-            "id": "b369452d-8d4d-4526-9e32-ae721c1711cb",
-            "username": "Test2",
-            "password": "Test2",
-            "firstName": "1",
-            "lastName": "1",
-            "position": "1",
-            "phone": "1",
-            "assignedWarehouseId": "a4084c27-bbc2-4d46-a89e-7a7bfd51c30d",
-            "role": "Администратор"
-        },
-        {
-            "id": "86139ebd-ff60-4905-961f-62cebdfdd938",
-            "username": "Test3",
-            "password": "Test3",
-            "firstName": "Name",
-            "lastName": "Surname",
-            "position": "*",
-            "phone": "2133312131",
-            "assignedWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "role": "Водитель"
-        },
-        {
-            "id": "b1c97bd6-7921-4fd8-88b7-543ab00aa53d",
-            "username": "Test9",
-            "password": "Test9",
-            "firstName": "Name",
-            "lastName": "Surname",
-            "position": "Driver",
-            "phone": "+1(213)334-16-47",
-            "assignedWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "role": "Администратор"
-        },
-        {
-            "id": "19e556b7-ad72-4375-af41-c7041f88e601",
-            "username": "Test5",
-            "password": "Test5",
-            "firstName": "Alex",
-            "lastName": "Guys",
-            "position": "Driver",
-            "phone": "2132133121",
-            "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "role": "Сотрудник склада"
         }
     ]
 }
