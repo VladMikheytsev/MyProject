@@ -1349,7 +1349,6 @@ export default function App() {
                 setWarehouses(appData.warehouses || []);
                 setItems(appData.items || []);
                 setItemTypes(appData.itemTypes || []);
-                // --- ИЗМЕНЕНИЕ: Загрузка сценариев с сервера ---
                 setScenarios(appData.scenarios || []);
                 setUsers(usersData || []);
                 hasLoadedData.current = true;
@@ -1372,9 +1371,7 @@ export default function App() {
     initializeApp();
   }, []);
 
-  // --- ИЗМЕНЕНИЕ: Этот эффект теперь отправляет ВСЕ данные, включая сценарии, на сервер при любом изменении ---
   useEffect(() => {
-    // Не сохранять данные, пока они не загружены с сервера или нет пользователя
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
     const fullState = { warehouses, items, itemTypes, scenarios };
@@ -1417,20 +1414,19 @@ export default function App() {
     setMovingItem(null);
   };
 
-  // --- Обработчики для модального окна ItemActionModal ---
   const handleMoveItem = (destination) => {
     setItems(prevItems => prevItems.map(item =>
         item.id === itemToAction.id
             ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
             : item
     ));
-    setItemToAction(null); // Закрываем модальное окно
+    setItemToAction(null);
   };
 
   const handleWriteOffItem = (itemId) => {
     if (window.confirm('Вы уверены, что хотите списать эту позицию? Это действие необратимо.')) {
         setItems(prevItems => prevItems.filter(item => item.id !== itemId));
-        setItemToAction(null); // Закрываем модальное окно
+        setItemToAction(null);
     }
   };
   
@@ -1438,16 +1434,43 @@ export default function App() {
     const newScenario = {
       ...scenarioData,
       id: crypto.randomUUID(),
-      status: 'new', // 'new', 'accepted', 'completed'
+      status: 'new',
     };
-    // Обновление состояния вызовет эффект сохранения данных
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
 
+  // --- ИЗМЕНЕНИЕ: Логика завершения сценария ---
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
-    // Обновление состояния вызовет эффект сохранения данных
-    setScenarios(prev => prev.map(s => s.id === scenarioId ? { ...s, status: newStatus } : s));
+    const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
+    if (!scenarioToUpdate) return;
+
+    // Если сценарий ЗАВЕРШЕН, перемещаем позиции
+    if (newStatus === 'completed') {
+        const itemIdsToMove = Object.keys(scenarioToUpdate.items);
+        const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
+
+        setItems(prevItems =>
+            prevItems.map(item => {
+                if (itemIdsToMove.includes(item.id)) {
+                    // Перемещаем на новый склад и сбрасываем место
+                    return {
+                        ...item,
+                        warehouseId: destinationWarehouseId,
+                        placeId: null 
+                    };
+                }
+                return item;
+            })
+        );
+    }
+
+    // В любом случае обновляем статус самого сценария
+    setScenarios(prevScenarios =>
+        prevScenarios.map(s =>
+            s.id === scenarioId ? { ...s, status: newStatus } : s
+        )
+    );
   };
 
 
@@ -1508,10 +1531,11 @@ export default function App() {
     : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
   ).filter(item => item.warehouseId !== 'unassigned');
 
+  const unassignedItems = items.filter(item => item.warehouseId === 'unassigned');
   const unassignedFilteredItems = (activeItemTypeFilter === 'all'
-    ? itemsToDisplay
-    : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
-  ).filter(item => item.warehouseId === 'unassigned');
+    ? unassignedItems
+    : unassignedItems.filter(item => item.type === activeItemTypeFilter)
+  );
 
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
@@ -1619,25 +1643,37 @@ export default function App() {
                                 {assignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
+                                    const isUnplaced = item.placeId === null; // --- ИЗМЕНЕНИЕ: Проверка на неразмещенную позицию
+                                    
                                     return (
-                                    <div key={item.id} onClick={() => isActionableUser && setItemToAction(item)} className={`bg-gray-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer hover:bg-gray-100 transition' : ''}`}>
-                                        <div className="flex items-start gap-3">
-                                            <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                            <div>
-                                                <p className="font-bold text-gray-800">{item.name}</p>
-                                                <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                        <div 
+                                            key={item.id} 
+                                            onClick={() => isActionableUser && setItemToAction(item)} 
+                                            // --- ИЗМЕНЕНИЕ: Условный стиль для неразмещенных позиций
+                                            className={`${isUnplaced ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'} p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer transition' : ''}`}
+                                        >
+                                            <div className="flex items-start gap-3">
+                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                <div>
+                                                    <p className="font-bold text-gray-800">{item.name}</p>
+                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                    {/* --- ИЗМЕНЕНИЕ: Условный текст для неразмещенных позиций --- */}
+                                                    {isUnplaced ? (
+                                                        <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
+                                                    ) : (
+                                                        <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                                    )}
+                                                </div>
                                             </div>
+                                            <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                         </div>
-                                        <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
-                                    </div>
                                 )})}
                             </div>
                         ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
                         
                         {unassignedFilteredItems.length > 0 && selectedWarehouseId === null && (
                             <div className="mt-6 pt-4 border-t">
-                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ОТСУТСТВУЮТ НА СКЛАДАХ</h3>
+                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
                                 <div className="space-y-3">
                                     {unassignedFilteredItems.map(item => {
                                         const itemType = itemTypes.find(it => it.name === item.type);
@@ -1648,7 +1684,7 @@ export default function App() {
                                                 <div>
                                                     <p className="font-bold text-gray-800">{item.name}</p>
                                                     <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                    <p className="text-sm text-red-600 mt-1">Местоположение не задано</p>
+                                                    <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
                                                 </div>
                                             </div>
                                             <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
