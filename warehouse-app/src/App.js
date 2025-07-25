@@ -6,8 +6,7 @@ import QRCode from 'qrcode';
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
 const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
-const ChevronUpIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
-const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
+const TrashIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
 const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
@@ -105,13 +104,13 @@ const ShelvingLines = ({ orientation = 'vertical' }) => {
     }
 };
 
-// --- [ОБНОВЛЕННЫЙ] Компонент статистики паллет ---
+// --- Компонент статистики паллет (без изменений) ---
 const PalletStats = ({ places = [], items = [] }) => {
     const palletPlaces = places.filter(p => p.type === 'pallet');
     const totalPalletPlaces = palletPlaces.length;
 
     if (totalPalletPlaces === 0) {
-        return <p className="mt-2 text-sm text-center text-gray-500">Паллетные места не сконфигурированы</p>;
+        return <p className="mt-4 pt-4 border-t text-sm text-center text-gray-500">Паллетные места не сконфигурированы</p>;
     }
     
     const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
@@ -127,7 +126,7 @@ const PalletStats = ({ places = [], items = [] }) => {
     const freePalletPlacesCount = totalPalletPlaces - occupiedPalletPlacesCount;
 
     return (
-        <div className="mt-2 text-sm text-gray-600 space-y-1">
+        <div className="mt-4 pt-4 border-t text-sm text-gray-600 space-y-1">
             <div className="flex justify-between">
                 <span>Всего паллетных мест:</span>
                 <span className="font-semibold text-gray-800">{totalPalletPlaces}</span>
@@ -140,20 +139,19 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
-// --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
+// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const printRef = useRef();
-    const titleRef = useRef(null); // Ref для заголовка
 
     const handlePrint = useReactToPrint({
         content: () => printRef.current,
         documentTitle: `QR-Code-${item.name}`,
     });
     
-    // Эффект для генерации QR-кода
     useEffect(() => {
         const generateQr = async () => {
+            // Данные для QR-кода состоят только из ID
             const qrString = item.id;
             try {
                 const url = await QRCode.toDataURL(qrString, {
@@ -166,48 +164,18 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
             }
         };
         generateQr();
-    }, [item]);
-
-    // Эффект для динамического изменения размера шрифта
-    useLayoutEffect(() => {
-        const element = titleRef.current;
-        if (!element || !qrCodeUrl) return;
-
-        const MAX_WIDTH = 256; 
-        const MIN_FONT_SIZE = 12;
-        const START_FONT_SIZE = 60;
-
-        let currentFontSize = START_FONT_SIZE;
-        element.style.fontSize = `${currentFontSize}px`;
-        element.style.wordWrap = 'break-word';
-
-        // Эвристика для проверки высоты (не более 2 строк)
-        const isTooTall = () => element.scrollHeight > currentFontSize * 2.4;
-        
-        // Уменьшаем шрифт, пока он не влезет по ширине или высоте
-        while ((element.scrollWidth > MAX_WIDTH || isTooTall()) && currentFontSize > MIN_FONT_SIZE) {
-            currentFontSize--;
-            element.style.fontSize = `${currentFontSize}px`;
-        }
-
-    }, [item.name, qrCodeUrl]);
+    }, [item, user]);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
-                <div ref={printRef} className="text-center p-4 flex flex-col items-center">
-                    <h2 
-                        ref={titleRef} 
-                        className="font-bold text-gray-800" 
-                        style={{ maxWidth: '256px', lineHeight: 1.2 }}
-                    >
-                        {item.name}
-                    </h2>
-                    <p className="text-xl text-gray-500 mb-4">Тип: {item.type}</p>
+                <div ref={printRef} className="text-center p-4">
+                    <h2 className="text-xl font-bold mb-1 text-gray-800">{item.name}</h2>
+                    <p className="text-sm text-gray-500 mb-4">ID: {item.id}</p>
                     {qrCodeUrl ? (
                         <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
                     ) : (
-                        <div style={{width: '256px', height: '256px'}} className="bg-gray-200 animate-pulse mx-auto"></div>
+                        <div className="w-64 h-64 bg-gray-200 animate-pulse mx-auto"></div>
                     )}
                     <div className="text-xs text-gray-500 mt-4">
                         <p>Дата печати: {new Date().toLocaleString('ru-RU')}</p>
@@ -227,46 +195,6 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
 
 
 // --- Модальные окна ---
-
-// --- [НОВОЕ МОДАЛЬНОЕ ОКНО] Редактор профиля пользователя ---
-const ProfileEditorModal = ({ user, warehouses, onSave, onClose }) => {
-    const [userData, setUserData] = useState({ ...user });
-
-    const handleChange = (e) => {
-        const { name, value } = e.target;
-        setUserData(prev => ({ ...prev, [name]: value }));
-    };
-
-    const handleSave = () => {
-        onSave(userData);
-        onClose();
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto">
-                <h2 className="text-2xl font-bold mb-6 text-gray-800">Редактировать профиль</h2>
-                <div className="space-y-4">
-                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
-                        <input type="text" name="firstName" value={userData.firstName} onChange={handleChange} placeholder="Имя" className="w-full p-3 border rounded-lg" />
-                        <input type="text" name="lastName" value={userData.lastName} onChange={handleChange} placeholder="Фамилия" className="w-full p-3 border rounded-lg" />
-                    </div>
-                    <input type="text" name="position" value={userData.position} onChange={handleChange} placeholder="Должность" className="w-full p-3 border rounded-lg" />
-                    <input type="tel" name="phone" value={userData.phone} onChange={handleChange} placeholder="Телефон" className="w-full p-3 border rounded-lg" />
-                    <select name="assignedWarehouseId" value={userData.assignedWarehouseId} onChange={handleChange} className="w-full p-3 border rounded-lg bg-white">
-                        <option value="office">Офис (не привязан к складу)</option>
-                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                    </select>
-                </div>
-                <div className="flex justify-end space-x-4 mt-8">
-                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
-                    <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить</button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({ name: '', address: '', hours: '', gate_code: '', lock_code: '', ...initialData });
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
@@ -1406,6 +1334,7 @@ export default function App() {
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const hasLoadedData = useRef(false);
   const printComponentRef = useRef();
@@ -1655,11 +1584,8 @@ export default function App() {
         prevScenarios.map(s => {
             if (s.id === scenarioId) {
                 const updatedScenario = { ...s, status: newStatus };
-                if (newStatus === 'accepted') {
-                    updatedScenario.acceptedAt = new Date().toISOString();
-                } else if (newStatus === 'completed') {
-                    updatedScenario.completedAt = new Date().toISOString();
-                    updatedScenario.completerId = currentUser.id;
+                if (newStatus === 'completed') {
+                    updatedScenario.completerId = currentUser.id; 
                     const itemIdsToMove = Object.keys(updatedScenario.items);
                     const destinationWarehouseId = updatedScenario.toWarehouseId;
                     setItems(prevItems =>
@@ -1721,18 +1647,6 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  const toggleWarehouseExpansion = (warehouseId) => {
-    setExpandedWarehouses(prev =>
-        prev.includes(warehouseId)
-            ? prev.filter(id => id !== warehouseId)
-            : [...prev, warehouseId]
-    );
-  };
-  
-  const handlePrintScenario = useReactToPrint({
-    content: () => printComponentRef.current,
-  });
-
   // --- Рендеринг ---
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
@@ -1785,9 +1699,11 @@ export default function App() {
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto mb-4">
         <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
-            <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
+            <div className="flex items-center gap-3 text-gray-700">
                 <UserIcon />
-            </button>
+                <span className="font-semibold">{currentUser.firstName} {currentUser.lastName}</span>
+                <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
+            </div>
             <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-[160px]">
                 {userRole === 'Администратор' && (
                     <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
@@ -1828,56 +1744,34 @@ export default function App() {
                            </div>
                         )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-md p-5 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                        {warehousesToDisplay.map((warehouse, index) => {
-                            const isExpanded = expandedWarehouses.includes(warehouse.id);
-                            return (
-                                <div key={warehouse.id} className={index < warehousesToDisplay.length -1 ? "border-b-2 border-dashed border-gray-200 pb-4 mb-4" : ""}>
-                                    <div onClick={() => toggleWarehouseExpansion(warehouse.id)} className="flex justify-between items-center mb-2 cursor-pointer group">
-                                        <h3 className="text-sm font-semibold text-gray-500 group-hover:text-blue-600">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
-                                        <div className="flex items-center gap-2">
-                                            {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (
-                                                <button onClick={(e) => { e.stopPropagation(); setPlacesEditorOpen(true); }} className="text-gray-400 hover:text-blue-600 transition p-1 z-10">
-                                                    <EditIcon />
-                                                </button>
-                                            )}
-                                            {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                                        </div>
-                                    </div>
-                                    
-                                    {(warehouse.places && warehouse.places.length > 0) &&
-                                        <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                                    }
-
-                                    {isExpanded && (
-                                        (warehouse.places && warehouse.places.length > 0) 
-                                        ? <div className="mt-2"><CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} /></div>
-                                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>
-                                    )}
+                    <div className="bg-white rounded-xl shadow-md p-5 space-y-4 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+                        {warehousesToDisplay.map(warehouse => (
+                            <div key={warehouse.id}>
+                                <div className="flex justify-between items-center mb-3">
+                                    <h3 className="text-sm font-semibold text-gray-500">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
+                                    {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (<button onClick={() => setPlacesEditorOpen(true)} className="text-gray-400 hover:text-blue-600 transition p-1"><EditIcon /></button>)}
                                 </div>
-                            );
-                        })}
+                                {(warehouse.places && warehouse.places.length > 0) ? (
+                                <>
+                                    <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
+                                    <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
+                                </>
+                                ) : (<div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>)}
+                            </div>
+                        ))}
                     </div>
                 </div>
 
                 <div className="space-y-4">
-                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
-                        <ScenariosIcon />
-                        <span className="flex-1 text-left">Задачи</span>
-                        {notificationCount > 0 && (
-                            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-red-100 bg-red-600 rounded-full">
-                                {notificationCount}
-                            </span>
-                        )}
+                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
+                        <ScenariosIcon /> Задачи
                     </button>
-                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
-                        <TruckIcon />
-                        <span className="flex-1 text-left">Переместить позицию по QR</span>
+                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
+                        <TruckIcon /> Переместить позицию по QR
                     </button>
                     {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (
-                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                            <PlusIcon />
-                            <span className="flex-1 text-left">Создать позицию</span>
+                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
+                            <PlusIcon /> Создать позицию
                         </button>
                     )}
                 </div>
