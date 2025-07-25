@@ -152,7 +152,7 @@ const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
     </div>
   );
 };
-const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, onClose, userRole }) => {
+const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, onDelete, onClose, userRole }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
@@ -168,7 +168,16 @@ const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, o
                         </div>
                     ))}
                 </div>
-                {userRole === 'Администратор' && (<button onClick={onAdd} className="w-full flex items-center justify-center text-blue-600 hover:text-blue-800 transition py-3 border-t border-gray-200 mt-2"><PlusIcon /><span className="ml-2 font-semibold">Добавить новый склад</span></button>)}
+                <div className="border-t border-gray-200 pt-2 space-y-2">
+                    {userRole === 'Администратор' && (<button onClick={onAdd} className="w-full flex items-center justify-center text-blue-600 hover:text-blue-800 transition py-3"><PlusIcon /><span className="ml-2 font-semibold">Добавить новый склад</span></button>)}
+                    
+                    {userRole === 'Администратор' && selectedId !== null && (
+                        <button onClick={() => onDelete(selectedId)} className="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition py-3">
+                            <TrashIcon />
+                            <span className="ml-2 font-semibold">Удалить выбранный склад</span>
+                        </button>
+                    )}
+                </div>
             </div>
         </div>
     );
@@ -1050,6 +1059,15 @@ export default function App() {
   const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
   const handleStartEditWarehouse = (warehouse) => { setWarehouseListOpen(false); setEditingWarehouse(warehouse); };
   const handleSelectWarehouse = (id) => { setSelectedWarehouseId(id); setWarehouseListOpen(false); };
+  
+  const handleDeleteWarehouse = (warehouseIdToDelete) => {
+    setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
+    setItems(prev => prev.filter(i => i.warehouseId !== warehouseIdToDelete));
+    if (selectedWarehouseId === warehouseIdToDelete) {
+        setSelectedWarehouseId(null);
+    }
+    setWarehouseListOpen(false);
+  };
 
   // --- Рендеринг ---
   if (!authChecked) {
@@ -1145,7 +1163,6 @@ export default function App() {
                     </div>
                 </div>
 
-                {/* --- ИЗМЕНЕНИЕ: Добавлена кнопка "Переместить позицию" --- */}
                 <div className="space-y-4">
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon /> Переместить позицию
@@ -1200,7 +1217,7 @@ export default function App() {
         )}
       </div>
       
-      {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onClose={() => setWarehouseListOpen(false)} />}
+      {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onDelete={handleDeleteWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
