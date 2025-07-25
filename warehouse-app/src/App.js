@@ -22,7 +22,7 @@ const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" he
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 
 
-// --- API Configuration --
+// --- API Configuration ---
 // !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
 
@@ -1437,19 +1437,6 @@ export default function App() {
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
-
-    // Function to download the scenario as a JSON file
-    const downloadScenario = (scenario) => {
-      const jsonString = `data:text/json;charset=utf-8,${encodeURIComponent(
-        JSON.stringify(scenario, null, 2)
-      )}`;
-      const link = document.createElement("a");
-      link.href = jsonString;
-      link.download = `scenario_${scenario.id}.json`;
-      link.click();
-    };
-
-    downloadScenario(newScenario);
   };
 
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
