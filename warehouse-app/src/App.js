@@ -105,13 +105,13 @@ const ShelvingLines = ({ orientation = 'vertical' }) => {
     }
 };
 
-// --- Компонент статистики паллет (без изменений) ---
+// --- [ОБНОВЛЕННЫЙ] Компонент статистики паллет ---
 const PalletStats = ({ places = [], items = [] }) => {
     const palletPlaces = places.filter(p => p.type === 'pallet');
     const totalPalletPlaces = palletPlaces.length;
 
     if (totalPalletPlaces === 0) {
-        return <p className="mt-4 pt-4 border-t text-sm text-center text-gray-500">Паллетные места не сконфигурированы</p>;
+        return <p className="mt-2 text-sm text-center text-gray-500">Паллетные места не сконфигурированы</p>;
     }
     
     const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
@@ -127,7 +127,7 @@ const PalletStats = ({ places = [], items = [] }) => {
     const freePalletPlacesCount = totalPalletPlaces - occupiedPalletPlacesCount;
 
     return (
-        <div className="mt-4 pt-4 border-t text-sm text-gray-600 space-y-1">
+        <div className="mt-2 text-sm text-gray-600 space-y-1">
             <div className="flex justify-between">
                 <span>Всего паллетных мест:</span>
                 <span className="font-semibold text-gray-800">{totalPalletPlaces}</span>
@@ -1798,11 +1798,11 @@ export default function App() {
                            </div>
                         )}
                     </div>
-                    <div className="bg-white rounded-xl shadow-md p-5 space-y-4 lg:col-start-2 lg:row-start-1 lg:row-span-2">
+                    <div className="bg-white rounded-xl shadow-md p-5 lg:col-start-2 lg:row-start-1 lg:row-span-2">
                         {warehousesToDisplay.map(warehouse => {
                             const isExpanded = expandedWarehouses.includes(warehouse.id);
                             return (
-                                <div key={warehouse.id}>
+                                <div key={warehouse.id} className="border-b-2 border-dashed border-gray-200 last:border-b-0 pb-4 mb-4">
                                     <div onClick={() => toggleWarehouseExpansion(warehouse.id)} className="flex justify-between items-center mb-2 cursor-pointer group">
                                         <h3 className="text-sm font-semibold text-gray-500 group-hover:text-blue-600">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
                                         <div className="flex items-center gap-2">
@@ -1815,15 +1815,15 @@ export default function App() {
                                         </div>
                                     </div>
                                     
-                                    {isExpanded && (
-                                        (warehouse.places && warehouse.places.length > 0) 
-                                        ? <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
-                                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>
-                                    )}
-                                    
                                     {(warehouse.places && warehouse.places.length > 0) &&
                                         <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
                                     }
+
+                                    {isExpanded && (
+                                        (warehouse.places && warehouse.places.length > 0) 
+                                        ? <div className="mt-2"><CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} /></div>
+                                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>
+                                    )}
                                 </div>
                             );
                         })}
