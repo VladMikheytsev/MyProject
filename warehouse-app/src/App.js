@@ -24,6 +24,18 @@ const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" he
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 const PrintIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 
+// --- [НОВЫЙ КОМПОНЕНТ] Иконка уведомлений ---
+const NotificationIcon = ({ count }) => (
+    <div style={{ position: 'relative', display: 'inline-flex', alignItems: 'center' }}>
+        <ScenariosIcon />
+        {count > 0 && (
+            <span className="absolute -top-2 -right-3 inline-flex items-center justify-center px-2 py-1 text-xs font-bold leading-none text-red-100 transform translate-x-1/2 -translate-y-1/2 bg-red-600 rounded-full">
+                {count}
+            </span>
+        )}
+    </div>
+);
+
 
 // --- API Configuration ---
 // !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
@@ -1009,15 +1021,17 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 };
 
 // --- [НОВЫЕ КОМПОНЕНТЫ] Модальные окна для сценариев ---
-const ScenariosModal = ({ onOpenCreate, onOpenView, onClose }) => {
+const ScenariosModal = ({ onOpenCreate, onOpenView, onClose, userRole }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Управление сценариями</h2>
                 <div className="space-y-4">
-                    <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                        <FilePlusIcon /> Создать сценарий
-                    </button>
+                    {userRole !== 'Водитель' && (
+                        <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
+                            <FilePlusIcon /> Создать сценарий
+                        </button>
+                    )}
                     <button onClick={onOpenView} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-gray-600 text-white font-semibold hover:bg-gray-700 transition shadow-md">
                         <EyeIcon /> Просмотреть сценарии
                     </button>
@@ -1471,7 +1485,7 @@ export default function App() {
     });
   }, [warehouses, items, itemTypes, scenarios, currentUser, loading]);
 
-  // --- Новый эффект для автоматического обновления данных (Polling) ---
+  // --- Эффект для автоматического обновления данных (Polling) ---
     const stateRef = useRef();
     stateRef.current = { warehouses, items, itemTypes, scenarios, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
 
@@ -1485,7 +1499,6 @@ export default function App() {
             const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem;
 
             if (isEditing) {
-                console.log("Polling paused: user is editing.");
                 return;
             }
 
@@ -1494,7 +1507,6 @@ export default function App() {
 
                 const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
-                    console.log("App data has changed, updating state.");
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
                     setItemTypes(newData.itemTypes || []);
@@ -1502,7 +1514,6 @@ export default function App() {
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
-                    console.log("Users data has changed, updating state.");
                     setUsers(newUsers || []);
                 }
             } catch (error) {
@@ -1573,12 +1584,10 @@ export default function App() {
     setCreateScenarioModalOpen(false);
   };
 
-  // --- ИЗМЕНЕНИЕ: Логика завершения сценария ---
   const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
     const scenarioToUpdate = scenarios.find(s => s.id === scenarioId);
     if (!scenarioToUpdate) return;
 
-    // Если сценарий ЗАВЕРШЕН, перемещаем позиции
     if (newStatus === 'completed') {
         const itemIdsToMove = Object.keys(scenarioToUpdate.items);
         const destinationWarehouseId = scenarioToUpdate.toWarehouseId;
@@ -1586,7 +1595,6 @@ export default function App() {
         setItems(prevItems =>
             prevItems.map(item => {
                 if (itemIdsToMove.includes(item.id)) {
-                    // Перемещаем на новый склад и сбрасываем место
                     return {
                         ...item,
                         warehouseId: destinationWarehouseId,
@@ -1598,7 +1606,6 @@ export default function App() {
         );
     }
 
-    // В любом случае обновляем статус самого сценария
     setScenarios(prevScenarios =>
         prevScenarios.map(s =>
             s.id === scenarioId ? { ...s, status: newStatus } : s
@@ -1681,6 +1688,7 @@ export default function App() {
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
+  const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
 
   if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
@@ -1767,7 +1775,7 @@ export default function App() {
 
                 <div className="space-y-4">
                      <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
-                        <ScenariosIcon /> Сценарии
+                        <NotificationIcon count={notificationCount} /> Сценарии
                     </button>
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon /> Переместить позицию по QR
@@ -1880,7 +1888,7 @@ export default function App() {
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
 
       {/* Новые модальные окна для сценариев */}
-      {isScenariosModalOpen && <ScenariosModal onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onOpenView={() => { setScenariosModalOpen(false); setViewScenariosModalOpen(true); }} onClose={() => setScenariosModalOpen(false)} />}
+      {isScenariosModalOpen && <ScenariosModal userRole={userRole} onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onOpenView={() => { setScenariosModalOpen(false); setViewScenariosModalOpen(true); }} onClose={() => setScenariosModalOpen(false)} />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       {isViewScenariosModalOpen && <ViewScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={handleUpdateScenarioStatus} onClose={() => setViewScenariosModalOpen(false)} />}
 
