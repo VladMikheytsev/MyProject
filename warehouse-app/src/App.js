@@ -197,11 +197,12 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
                 <div ref={printRef} className="text-center p-4 flex flex-col items-center">
                     <h2 
                         ref={titleRef} 
-                        className="font-bold text-gray-800 mb-4" 
+                        className="font-bold text-gray-800" 
                         style={{ maxWidth: '256px', lineHeight: 1.2 }}
                     >
                         {item.name}
                     </h2>
+                    <p className="text-xl text-gray-500 mb-4">Тип: {item.type}</p>
                     {qrCodeUrl ? (
                         <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
                     ) : (
