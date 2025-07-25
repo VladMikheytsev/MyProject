@@ -10,33 +10,28 @@ const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heigh
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
 const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
+const ContactsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/><line x1="8" y1="2" x2="8" y2="4"/><line x1="16" y1="2" x2="16" y2="4"/></svg>;
 
 
 // --- API Configuration ---
-// В реальном приложении URL будет в переменных окружения
-// const API_BASE_URL = process.env.REACT_APP_API_BASE_URL; 
-const API_BASE_URL = "https://<your-ngrok-address>.ngrok-free.app";
-
 const api = {
-  fetchAllData: async () => {
+  fetchAllData: async (key) => {
     try {
-      // Имитируем задержку сети
       await new Promise(res => setTimeout(res, 500));
-      const data = localStorage.getItem('warehouseAppData');
+      const data = localStorage.getItem(key);
       return data ? JSON.parse(data) : null;
     } catch (error) {
-      console.error("Ошибка при загрузке данных из localStorage:", error);
+      console.error(`Ошибка при загрузке данных из localStorage по ключу ${key}:`, error);
       return null;
     }
   },
-  saveAllData: async (fullState) => {
+  saveAllData: async (key, fullState) => {
     try {
-        // Имитируем задержку сети
         await new Promise(res => setTimeout(res, 500));
-        localStorage.setItem('warehouseAppData', JSON.stringify(fullState));
-        console.log("Данные успешно сохранены в localStorage");
+        localStorage.setItem(key, JSON.stringify(fullState));
+        console.log(`Данные успешно сохранены в localStorage по ключу ${key}`);
     } catch (error) {
-        console.error("Ошибка при сохранении данных в localStorage:", error);
+        console.error(`Ошибка при сохранении данных в localStorage по ключу ${key}:`, error);
     }
   },
 };
@@ -418,7 +413,52 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     )
 }
 
-// --- НОВЫЕ Компоненты для входа и регистрации ---
+// --- НОВЫЕ и измененные компоненты ---
+
+const ContactsModal = ({ users, warehouses, onClose }) => {
+    const contactsByWarehouse = warehouses.reduce((acc, warehouse) => {
+        const warehouseUsers = users.filter(user => user.assignedWarehouseId === warehouse.id);
+        if (warehouseUsers.length > 0) {
+            acc[warehouse.id] = {
+                name: warehouse.name,
+                users: warehouseUsers
+            };
+        }
+        return acc;
+    }, {});
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-6">
+                    <h2 className="text-2xl font-bold text-gray-800">Контакты сотрудников</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+                    {Object.keys(contactsByWarehouse).length > 0 ? (
+                        Object.values(contactsByWarehouse).map(warehouseData => (
+                            <div key={warehouseData.name}>
+                                <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">{warehouseData.name}</h3>
+                                <div className="space-y-3">
+                                    {warehouseData.users.map(user => (
+                                        <div key={user.id} className="bg-gray-50 p-3 rounded-lg">
+                                            <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
+                                            <p className="text-sm text-gray-600">{user.position}</p>
+                                            <p className="text-sm text-gray-500 mt-1">Тел: {user.phone}</p>
+                                        </div>
+                                    ))}
+                                </div>
+                            </div>
+                        ))
+                    ) : (
+                        <p className="text-gray-500 text-center py-8">Нет сотрудников, привязанных к складам.</p>
+                    )}
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -454,34 +494,53 @@ const LoginView = ({ onLogin, onSwitchToRegister }) => {
     );
 };
 
-const RegisterView = ({ onRegister, onSwitchToLogin }) => {
-    const [username, setUsername] = useState('');
-    const [password, setPassword] = useState('');
-    const [role, setRole] = useState('Сотрудник склада');
+const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
+    const [formData, setFormData] = useState({
+        username: '',
+        password: '',
+        firstName: '',
+        lastName: '',
+        position: '',
+        phone: '',
+        assignedWarehouseId: 'office' // Default to 'office'
+    });
     const [error, setError] = useState('');
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        setFormData(prev => ({ ...prev, [name]: value }));
+    };
 
     const handleSubmit = (e) => {
         e.preventDefault();
         setError('');
-        if (!username || !password) {
-            setError('Имя пользователя и пароль обязательны.');
+        const { username, password, firstName, lastName, position, phone } = formData;
+        if (!username || !password || !firstName || !lastName || !position || !phone) {
+            setError('Все поля обязательны для заполнения.');
             return;
         }
-        onRegister(username, password, role, setError);
+        onRegister(formData, setError);
     };
 
     return (
         <div className="w-full h-screen flex items-center justify-center bg-gray-100">
-            <div className="w-full max-w-sm p-8 space-y-6 bg-white rounded-xl shadow-lg">
+            <div className="w-full max-w-md p-8 space-y-6 bg-white rounded-xl shadow-lg">
                 <h2 className="text-3xl font-bold text-center text-gray-800">Регистрация</h2>
                 <form className="space-y-4" onSubmit={handleSubmit}>
-                    <input type="text" value={username} onChange={e => setUsername(e.target.value)} placeholder="Имя пользователя" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
-                    <input type="password" value={password} onChange={e => setPassword(e.target.value)} placeholder="Пароль" className="w-full p-3 border border-gray-300 rounded-lg focus:ring-2 focus:ring-blue-500" />
-                    <select value={role} onChange={e => setRole(e.target.value)} className="w-full p-3 border border-gray-300 rounded-lg">
-                        <option>Сотрудник склада</option>
-                        <option>Водитель</option>
-                        <option>Администратор</option>
+                    <input type="text" name="username" value={formData.username} onChange={handleChange} placeholder="Имя пользователя (логин)" className="w-full p-3 border rounded-lg" />
+                    <input type="password" name="password" value={formData.password} onChange={handleChange} placeholder="Пароль" className="w-full p-3 border rounded-lg" />
+                    <hr/>
+                    <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                        <input type="text" name="firstName" value={formData.firstName} onChange={handleChange} placeholder="Имя" className="w-full p-3 border rounded-lg" />
+                        <input type="text" name="lastName" value={formData.lastName} onChange={handleChange} placeholder="Фамилия" className="w-full p-3 border rounded-lg" />
+                    </div>
+                    <input type="text" name="position" value={formData.position} onChange={handleChange} placeholder="Должность" className="w-full p-3 border rounded-lg" />
+                    <input type="tel" name="phone" value={formData.phone} onChange={handleChange} placeholder="Телефон" className="w-full p-3 border rounded-lg" />
+                    <select name="assignedWarehouseId" value={formData.assignedWarehouseId} onChange={handleChange} className="w-full p-3 border rounded-lg bg-white">
+                        <option value="office">Офис (не привязан к складу)</option>
+                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                     </select>
+
                     {error && <p className="text-sm text-red-600">{error}</p>}
                     <button type="submit" className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Зарегистрироваться</button>
                 </form>
@@ -499,12 +558,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin }) => {
 // --- Основной компонент приложения ---
 export default function App() {
   // --- Состояние аутентификации ---
-  const [users, setUsers] = useState(() => {
-      // Загружаем пользователей из localStorage или создаем админа по умолчанию
-      const savedUsers = localStorage.getItem('warehouseAppUsers');
-      if (savedUsers) return JSON.parse(savedUsers);
-      return [{ id: 1, username: 'admin', password: 'password', role: 'Администратор' }];
-  });
+  const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('login'); // 'login' или 'register'
 
@@ -512,11 +566,7 @@ export default function App() {
   const [loading, setLoading] = useState(true);
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
-  const [itemTypes, setItemTypes] = useState([
-      {id: 1, name: 'Гель', color: '#3b82f6'},
-      {id: 2, name: 'Расходники', color: '#16a34a'},
-      {id: 3, name: 'Коробки', color: '#f97316'}
-  ]);
+  const [itemTypes, setItemTypes] = useState([]);
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
@@ -525,8 +575,11 @@ export default function App() {
   const [isItemTypesManagerOpen, setItemTypesManagerOpen] = useState(false);
   const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
+  const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   
   const hasLoadedData = useRef(false);
+  const USERS_STORAGE_KEY = 'warehouseAppUsers';
+  const DATA_STORAGE_KEY = 'warehouseAppData';
 
   // --- Обработчики аутентификации ---
   const handleLogin = (username, password, setError) => {
@@ -538,30 +591,58 @@ export default function App() {
       }
   };
 
-  const handleRegister = (username, password, role, setError) => {
-      if (users.some(u => u.username === username)) {
+  const handleRegister = (formData, setError) => {
+      if (users.some(u => u.username === formData.username)) {
           setError('Пользователь с таким именем уже существует.');
           return;
       }
-      const newUser = { id: Date.now(), username, password, role };
+      const newUser = { 
+          ...formData,
+          id: crypto.randomUUID(),
+          role: 'Водитель', // Роль по умолчанию
+          assignedWarehouseId: formData.assignedWarehouseId === 'office' ? 'office' : Number(formData.assignedWarehouseId)
+      };
       const updatedUsers = [...users, newUser];
       setUsers(updatedUsers);
-      localStorage.setItem('warehouseAppUsers', JSON.stringify(updatedUsers));
+      api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
       setCurrentUser(newUser);
   };
   
   const handleLogout = () => {
       setCurrentUser(null);
-      hasLoadedData.current = false; // Сбрасываем флаг загрузки
-      // Очищаем данные приложения при выходе
+      hasLoadedData.current = false;
       setWarehouses([]);
       setItems([]);
       setSelectedWarehouseId(null);
   };
 
   // --- Эффекты ---
+  
+  // Первичная загрузка пользователей
   useEffect(() => {
-    // Загружаем данные только если пользователь вошел в систему
+    const loadUsers = async () => {
+        let loadedUsers = await api.fetchAllData(USERS_STORAGE_KEY);
+        if (!loadedUsers || loadedUsers.length === 0) {
+            loadedUsers = [{ 
+                id: 1, 
+                username: 'admin', 
+                password: 'password', 
+                role: 'Администратор',
+                firstName: 'Главный',
+                lastName: 'Администратор',
+                position: 'CEO',
+                phone: '123-456-7890',
+                assignedWarehouseId: 'office'
+            }];
+            await api.saveAllData(USERS_STORAGE_KEY, loadedUsers);
+        }
+        setUsers(loadedUsers);
+    };
+    loadUsers();
+  }, []);
+
+  // Загрузка данных приложения после входа
+  useEffect(() => {
     if (!currentUser) {
         setLoading(false);
         return;
@@ -569,7 +650,7 @@ export default function App() {
 
     const loadInitialData = async () => {
         setLoading(true);
-        const data = await api.fetchAllData();
+        const data = await api.fetchAllData(DATA_STORAGE_KEY);
         if (data) {
             setWarehouses(data.warehouses || []);
             setItems(data.items || []);
@@ -584,24 +665,18 @@ export default function App() {
             }
         }
         setLoading(false);
-        // Устанавливаем флаг после первой загрузки данных для текущего пользователя
         setTimeout(() => { hasLoadedData.current = true; }, 100);
     };
     loadInitialData();
-  }, [currentUser]); // Перезагружаем данные при смене пользователя
+  }, [currentUser]);
 
-  // Автоматическое сохранение при изменении данных
+  // Автоматическое сохранение данных приложения
   useEffect(() => {
-    // Сохраняем, только если данные были загружены и есть пользователь
     if (!hasLoadedData.current || !currentUser) return;
     
-    const fullState = {
-        warehouses,
-        items,
-        itemTypes
-    };
-    api.saveAllData(fullState);
-  }, [warehouses, items, itemTypes, currentUser]); // Добавляем currentUser в зависимости
+    const fullState = { warehouses, items, itemTypes };
+    api.saveAllData(DATA_STORAGE_KEY, fullState);
+  }, [warehouses, items, itemTypes, currentUser]);
 
 
   // --- Обработчики действий в приложении ---
@@ -637,10 +712,9 @@ export default function App() {
       if (authView === 'login') {
           return <LoginView onLogin={handleLogin} onSwitchToRegister={() => setAuthView('register')} />;
       }
-      return <RegisterView onRegister={handleRegister} onSwitchToLogin={() => setAuthView('login')} />;
+      return <RegisterView onRegister={handleRegister} onSwitchToLogin={() => setAuthView('login')} warehouses={warehouses} />;
   }
 
-  // --- Переменные для отображения ---
   const userRole = currentUser.role;
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId);
@@ -650,21 +724,27 @@ export default function App() {
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
 
-  if (loading) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных пользователя...</div></div>;
+  if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка...</div></div>;
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto mb-4">
-        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4">
+        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-3 text-gray-700">
                 <UserIcon />
-                <span className="font-semibold">{currentUser.username}</span>
+                <span className="font-semibold">{currentUser.firstName} {currentUser.lastName}</span>
                 <span className="text-sm bg-gray-200 text-gray-600 px-2 py-0.5 rounded-full">{currentUser.role}</span>
             </div>
-            <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
-                <LogOutIcon />
-                <span>Выйти</span>
-            </button>
+            <div className="flex items-center gap-2">
+                <button onClick={() => setContactsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
+                    <ContactsIcon />
+                    <span>Контакты</span>
+                </button>
+                <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
+                    <LogOutIcon />
+                    <span>Выйти</span>
+                </button>
+            </div>
         </div>
       </div>
       <div className="max-w-7xl mx-auto">
@@ -760,6 +840,7 @@ export default function App() {
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
+      {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
     </div>
   );
 }
