@@ -192,8 +192,8 @@
             "type": "📦",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "placeId": 23,
+            "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
+            "placeId": null,
             "id": "85513774-30f4-4e7d-8c0b-03783a464a9d"
         },
         {
@@ -201,8 +201,8 @@
             "type": "📦",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "placeId": 10,
+            "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
+            "placeId": null,
             "id": "03e075a6-bbad-49f4-88a5-0070744edabb"
         },
         {
@@ -210,8 +210,8 @@
             "type": "📦",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "placeId": 7,
+            "warehouseId": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
+            "placeId": null,
             "id": "71da0280-dc31-432c-8e2e-4f9397c1ad2a"
         },
         {
@@ -219,8 +219,8 @@
             "type": "📦",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "placeId": 8,
+            "warehouseId": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
+            "placeId": null,
             "id": "b21c3cdb-b402-4e67-ae62-316d47ab0d70"
         }
     ],
@@ -268,17 +268,6 @@
     "scenarios": [
         {
             "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "toWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "items": {
-                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1,
-                "03e075a6-bbad-49f4-88a5-0070744edabb": 1
-            },
-            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
-            "id": "5d396723-9dd5-4ec2-8c46-d44d493a5d74",
-            "status": "new"
-        },
-        {
-            "fromWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
             "toWarehouseId": "50ed84b5-0cb7-4469-9975-ddf7b8ef7389",
             "items": {
                 "85513774-30f4-4e7d-8c0b-03783a464a9d": 1
@@ -286,6 +275,19 @@
             "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
             "id": "c156ba4e-303f-4843-b290-92c23ad8fc05",
             "status": "accepted"
+        },
+        {
+            "fromWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
+            "toWarehouseId": "0c309334-cd89-4e39-8fa8-e5f24b638a9a",
+            "items": {
+                "71da0280-dc31-432c-8e2e-4f9397c1ad2a": 1,
+                "b21c3cdb-b402-4e67-ae62-316d47ab0d70": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "57c51216-fbd9-4950-a966-69b66cca8787",
+            "status": "completed",
+            "creatorId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
+            "completerId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602"
         }
     ]
 }

@@ -1485,27 +1485,9 @@ export default function App() {
       
       if (sessionUser) {
         setCurrentUser(sessionUser);
-        if (sessionUser.role !== 'На модерации') {
-            setLoading(true);
-            try {
-                const [appData, usersData] = await Promise.all([
-                    api.fetchAppData(),
-                    api.fetchUsers()
-                ]);
-                setWarehouses(appData.warehouses || []);
-                setItems(appData.items || []);
-                setItemTypes(appData.itemTypes || []);
-                setScenarios(appData.scenarios || []);
-                setUsers(usersData || []);
-                hasLoadedData.current = true;
-            } catch (error) {
-                console.error("Не удалось загрузить начальные данные приложения:", error);
-            } finally {
-                setLoading(false);
-            }
-        }
       } else {
         try {
+            // Загружаем только склады для экрана регистрации
             const appData = await api.fetchAppData();
             setWarehouses(appData.warehouses || []);
         } catch(error) {
@@ -1516,6 +1498,32 @@ export default function App() {
 
     initializeApp();
   }, []);
+  
+  // Эффект для загрузки данных после входа или восстановления сессии
+  useEffect(() => {
+      const loadDataForUser = async () => {
+          if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
+              setLoading(true);
+              try {
+                  const [appData, usersData] = await Promise.all([
+                      api.fetchAppData(),
+                      api.fetchUsers()
+                  ]);
+                  setWarehouses(appData.warehouses || []);
+                  setItems(appData.items || []);
+                  setItemTypes(appData.itemTypes || []);
+                  setScenarios(appData.scenarios || []);
+                  setUsers(usersData || []);
+                  hasLoadedData.current = true;
+              } catch (error) {
+                  console.error("Не удалось загрузить данные пользователя:", error);
+              } finally {
+                  setLoading(false);
+              }
+          }
+      };
+      loadDataForUser();
+  }, [currentUser]);
 
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
@@ -1632,7 +1640,7 @@ export default function App() {
             if (s.id === scenarioId) {
                 const updatedScenario = { ...s, status: newStatus };
                 if (newStatus === 'completed') {
-                    updatedScenario.completerId = currentUser.id;
+                    updatedScenario.completerId = currentUser.id; 
                     const itemIdsToMove = Object.keys(updatedScenario.items);
                     const destinationWarehouseId = updatedScenario.toWarehouseId;
                     setItems(prevItems =>
@@ -1718,6 +1726,8 @@ export default function App() {
       return <PendingModerationView onLogout={handleLogout} />
   }
 
+  if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
+
   const userRole = currentUser.role;
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
@@ -1737,8 +1747,6 @@ export default function App() {
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
-
-  if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
 
