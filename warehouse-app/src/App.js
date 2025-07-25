@@ -356,8 +356,7 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
 
     const handleChange = (e) => { 
         const { name, value } = e.target;
-        const processedValue = name === 'warehouseId' ? Number(value) : value;
-        setNewItem(prev => ({ ...prev, [name]: processedValue, placeId: name === 'warehouseId' ? null : prev.placeId })); 
+        setNewItem(prev => ({ ...prev, [name]: value, placeId: name === 'warehouseId' ? null : prev.placeId })); 
     };
     const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID() }); };
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
@@ -986,7 +985,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
                         <div className="space-y-4">
-                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
+                            <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
                             <div className="max-h-64 overflow-y-auto space-y-2 p-2 bg-gray-50 rounded-lg">
@@ -1010,7 +1009,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
-                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
+                                <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                                 </select>
