@@ -1051,10 +1051,10 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
 const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete }) => {
-    const getUserNameById = (userId) => {
+    const formatUserName = (userId) => {
         if (!userId) return 'Неизвестно';
         const user = users.find(u => u.id === userId);
-        return user ? `${user.firstName} ${user.lastName}` : 'Неизвестно';
+        return user ? `${user.firstName} ${user.lastName.charAt(0)}.` : 'Неизвестно';
     };
     
     const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
@@ -1099,12 +1099,14 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                         <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="font-bold">Из: {getWarehouseName(s.fromWarehouseId)}</p>
-                                    <p className="font-bold">В: {getWarehouseName(s.toWarehouseId)}</p>
+                                    <p className="font-bold text-gray-800 text-lg">Сценарий #{s.number}</p>
+                                    <p className="text-xs text-gray-400 mb-2">Создан: {new Date(s.createdAt).toLocaleString('ru-RU')}</p>
+                                    <p><span className="font-semibold">Из:</span> {getWarehouseName(s.fromWarehouseId)}</p>
+                                    <p><span className="font-semibold">В:</span> {getWarehouseName(s.toWarehouseId)}</p>
                                     <div className="text-sm text-gray-600 mt-2 border-t pt-2 space-y-1">
-                                         <p>Отправитель: {getUserNameById(s.creatorId)}</p>
-                                         {(s.status === 'accepted' || s.status === 'completed') && <p>Водитель: {getUserNameById(s.driverId)}</p>}
-                                         {s.status === 'completed' && <p>Получатель: {getUserNameById(s.completerId)}</p>}
+                                         <p>Отправитель: {formatUserName(s.creatorId)}</p>
+                                         {(s.status === 'accepted' || s.status === 'completed') && <p>Водитель: {formatUserName(s.driverId)}</p>}
+                                         {s.status === 'completed' && <p>Получатель: {formatUserName(s.completerId)}</p>}
                                     </div>
                                 </div>
                                 <div className="text-sm font-semibold">
@@ -1113,10 +1115,10 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                             </div>
                             <div className="mt-2 pt-2 border-t">
                                 <p className="font-semibold text-sm mb-1">Позиции:</p>
-                                <ul className="list-disc list-inside text-sm text-gray-700">
+                                <ul className="text-sm text-gray-700 space-y-2">
                                     {Object.entries(s.items).map(([itemId, quantity]) => {
                                         const item = items.find(i => i.id === itemId);
-                                        return <li key={itemId}>{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
+                                        return <li key={itemId} className="border-b border-dashed border-gray-300 last:border-b-0 pb-2">{item?.name || 'Неизвестная позиция'} - {quantity} шт.</li>
                                     })}
                                 </ul>
                             </div>
@@ -1628,8 +1630,10 @@ export default function App() {
     const newScenario = {
       ...scenarioData,
       id: crypto.randomUUID(),
+      number: Math.max(0, ...scenarios.map(s => s.number || 0)) + 1,
       status: 'new',
       creatorId: currentUser.id,
+      createdAt: new Date().toISOString(),
     };
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
@@ -1799,10 +1803,10 @@ export default function App() {
                         )}
                     </div>
                     <div className="bg-white rounded-xl shadow-md p-5 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                        {warehousesToDisplay.map(warehouse => {
+                        {warehousesToDisplay.map((warehouse, index) => {
                             const isExpanded = expandedWarehouses.includes(warehouse.id);
                             return (
-                                <div key={warehouse.id} className="border-b-2 border-dashed border-gray-200 last:border-b-0 pb-4 mb-4">
+                                <div key={warehouse.id} className={index < warehousesToDisplay.length -1 ? "border-b-2 border-dashed border-gray-200 pb-4 mb-4" : ""}>
                                     <div onClick={() => toggleWarehouseExpansion(warehouse.id)} className="flex justify-between items-center mb-2 cursor-pointer group">
                                         <h3 className="text-sm font-semibold text-gray-500 group-hover:text-blue-600">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
                                         <div className="flex items-center gap-2">
