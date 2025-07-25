@@ -62,7 +62,38 @@
             "gate_code": "-",
             "lock_code": "-",
             "id": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "places": []
+            "places": [
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         },
         {
             "name": "Storage 134",
@@ -149,6 +180,17 @@
             "phone": "1",
             "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
             "role": "Администратор"
+        },
+        {
+            "id": "92836587-ace8-4ae7-95a0-355060789b72",
+            "username": "Test2",
+            "password": "test2",
+            "firstName": "A",
+            "lastName": "A",
+            "position": "A",
+            "phone": "4",
+            "assignedWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
+            "role": "Водитель"
         }
     ]
 }
