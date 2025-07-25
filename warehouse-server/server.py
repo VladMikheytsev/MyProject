@@ -1,124 +1,37 @@
-import json
-import os
-from fastapi import FastAPI, Request, HTTPException
+# server.py
+
+from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.responses import JSONResponse
-from typing import Dict, Any
-from contextlib import asynccontextmanager
 from pydantic import BaseModel
-import uuid # Для генерации уникальных ID
+import json
+import uuid
+import os
 
+# --- Конфигурация ---
+DB_FILE = "warehouse_db.json"
 
-# 📁 Путь до JSON-файла
-BASE_DIR = os.path.dirname(os.path.abspath(__file__))
-DB_FILE = os.path.join(BASE_DIR, "warehouse_db.json")
+# --- Инициализация FastAPI ---
+app = FastAPI()
 
-# 📦 Дефолтные данные
-DEFAULT_DATA = {
+# --- Настройка CORS ---
+# Это позволяет вашему React-приложению (с другого адреса) делать запросы к серверу
+app.add_middleware(
+    CORSMiddleware,
+    allow_origins=["*"],  # Разрешить все источники (для разработки)
+    allow_credentials=True,
+    allow_methods=["*"],  # Разрешить все методы (GET, POST, etc.)
+    allow_headers=["*"],  # Разрешить все заголовки
+)
+
+# --- Глобальная переменная для хранения данных ---
+db = {
     "warehouses": [],
     "items": [],
-    "itemTypes": [
-        {"id": 1, "name": "Гель", "color": "#3b82f6"},
-        {"id": 2, "name": "Расходники", "color": "#16a34a"},
-        {"id": 3, "name": "Коробки", "color": "#f97316"}
-    ],
+    "itemTypes": [],
     "users": []
 }
 
-# 📥 Загрузка из файла
-def load_db() -> Dict[str, Any]:
-    try:
-        with open(DB_FILE, "r", encoding="utf-8") as f:
-            print("✅ Загрузка данных из warehouse_db.json")
-            return json.load(f)
-    except (FileNotFoundError, json.JSONDecodeError):
-        print("⚠️ Файл не найден или повреждён, возвращаю дефолтные данные")
-        return DEFAULT_DATA.copy()
-
-# 💾 Сохранение в файл
-def save_db(data: Dict[str, Any]):
-    with open(DB_FILE, "w", encoding="utf-8") as f:
-        json.dump(data, f, ensure_ascii=False, indent=4)
-    print(f"💾 Сохранено: {len(data.get('warehouses', []))} складов, "
-          f"{len(data.get('items', []))} товаров, {len(data.get('users', []))} пользователей")
-
-# 🔄 Lifespan-инициализация
-@asynccontextmanager
-async def lifespan(app: FastAPI):
-    if not os.path.exists(DB_FILE):
-        print("📂 warehouse_db.json не найден. Создаю файл.")
-        save_db(DEFAULT_DATA)
-    else:
-        data = load_db()
-        if "users" not in data:
-            data["users"] = []
-            save_db(data)
-    yield
-
-# 🚀 Приложение
-app = FastAPI(lifespan=lifespan)
-
-# ✅ Разрешённые источники CORS
-origins = [
-    "http://localhost:3000",
-    "https://my-project-navy-theta.vercel.app",
-    "https://warehouse-vlad.ngrok.io",
-]
-
-app.add_middleware(
-    CORSMiddleware,
-    allow_origins=origins,
-    allow_credentials=True,
-    allow_methods=["*"],
-    allow_headers=["*"],
-)
-
-# 📤 Получение всех данных
-@app.get("/api/data")
-async def get_all_data():
-    return load_db()
-
-# 📥 Сохранение всех данных
-@app.post("/api/data")
-async def update_all_data(data: Dict[str, Any], request: Request):
-    print("📥 POST /api/data — данные получены:")
-    print(json.dumps(data, indent=2, ensure_ascii=False))
-
-    if data == DEFAULT_DATA:
-        print("⛔️ Получены дефолтные данные — не сохраняю.")
-        return {"status": "skipped"}
-    save_db(data)
-    return {"status": "success"}
-
-# 🔧 Preflight-запрос
-@app.options("/api/data")
-async def options_handler():
-    return JSONResponse(status_code=200, content={"ok": True})
-
-# 🆕 Регистрация пользователя
-@app.post("/api/register_user")
-async def register_user(request: Request):
-    new_user = await request.json()
-    db = load_db()
-
-    # Проверка на дубликат по telegram_id
-    if any(user.get("telegram_id") == new_user.get("telegram_id") for user in db.get("users", [])):
-        return {"status": "exists"}
-
-    new_user["role"] = "не подтвержден"
-    db.setdefault("users", []).append(new_user)
-    save_db(db)
-    print(f"🆕 Зарегистрирован новый пользователь: {new_user['first_name']} {new_user['last_name']}")
-    return {"status": "ok"}
-
-# 📋 Получение всех пользователей
-@app.get("/api/users")
-async def get_users():
-    db = load_db()
-    return db.get("users", [])
-
-
-# Модель для данных, приходящих от клиента при регистрации
+# --- Модели данных (Pydantic) ---
 class UserRegistration(BaseModel):
     username: str
     password: str
@@ -128,30 +41,131 @@ class UserRegistration(BaseModel):
     phone: str
     assignedWarehouseId: str | int
 
-# Эндпоинт для регистрации
+class UserLogin(BaseModel):
+    username: str
+    password: str
+
+class AppData(BaseModel):
+    warehouses: list
+    items: list
+    itemTypes: list
+
+# --- Функции для работы с БД ---
+def load_data():
+    global db
+    if os.path.exists(DB_FILE):
+        with open(DB_FILE, 'r', encoding='utf-8') as f:
+            db = json.load(f)
+        print(f"✅ Данные загружены из {DB_FILE}")
+    else:
+        # Создаем суперпользователя, если база данных пуста
+        db["users"].append({
+            "id": "vladislav-admin",
+            "username": "Vladislav",
+            "password": "Eh45TbrNMi986V7",
+            "role": "Администратор",
+            "firstName": "Владислав",
+            "lastName": "Модератор",
+            "position": "Главный администратор",
+            "phone": "000-000-0000",
+            "assignedWarehouseId": "office"
+        })
+        save_data()
+        print(f"⚠️ Файл {DB_FILE} не найден. Создан новый с пользователем Vladislav.")
+
+def save_data():
+    with open(DB_FILE, 'w', encoding='utf-8') as f:
+        json.dump(db, f, ensure_ascii=False, indent=4)
+    print(f"💾 Данные сохранены в {DB_FILE}")
+
+# --- События запуска и остановки приложения ---
+@app.on_event("startup")
+async def startup_event():
+    load_data()
+
+# --- Эндпоинты (маршруты) API ---
+
+# Получение всех данных приложения (склады, товары)
+@app.get("/data")
+async def get_app_data():
+    return {
+        "warehouses": db.get("warehouses", []),
+        "items": db.get("items", []),
+        "itemTypes": db.get("itemTypes", [])
+    }
+
+# Сохранение всех данных приложения
+@app.post("/data")
+async def save_app_data(data: AppData):
+    global db
+    db["warehouses"] = data.warehouses
+    db["items"] = data.items
+    db["itemTypes"] = data.itemTypes
+    save_data()
+    return {"message": "Данные успешно сохранены"}
+
+# Получение всех пользователей
+@app.get("/users")
+async def get_users():
+    return db.get("users", [])
+
+# Вход пользователя
+@app.post("/login")
+async def login_user(credentials: UserLogin):
+    for user in db["users"]:
+        if user["username"] == credentials.username and user["password"] == credentials.password:
+            return user
+    raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
+
+# Регистрация нового пользователя
 @app.post("/register")
 async def register_user(user_data: UserRegistration):
     global db
-    
-    # Проверяем, не занят ли username
-    for user in db["users"]:
-        if user["username"] == user_data.username:
-            raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
+    if any(user["username"] == user_data.username for user in db["users"]):
+        raise HTTPException(status_code=400, detail="Пользователь с таким именем уже существует")
 
-    # Создаем нового пользователя
     new_user = {
-        "id": str(uuid.uuid4()), # Генерируем уникальный ID
+        "id": str(uuid.uuid4()),
         "username": user_data.username,
-        "password": user_data.password, # В реальном приложении пароль нужно хешировать!
+        "password": user_data.password,
         "firstName": user_data.firstName,
         "lastName": user_data.lastName,
         "position": user_data.position,
         "phone": user_data.phone,
         "assignedWarehouseId": user_data.assignedWarehouseId,
-        "role": "На модерации" # Роль по умолчанию
+        "role": "На модерации"
     }
-    
     db["users"].append(new_user)
-    save_data() # Сохраняем обновленные данные в JSON
+    save_data()
+    return new_user
+
+# Обновление пользователя (для модерации)
+@app.put("/users/{user_id}")
+async def update_user(user_id: str, updated_data: Request):
+    global db
+    user_index = -1
+    for i, u in enumerate(db["users"]):
+        if u["id"] == user_id:
+            user_index = i
+            break
     
-    return new_user # Возвращаем созданного пользователя клиенту
+    if user_index == -1:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+
+    data = await updated_data.json()
+    db["users"][user_index].update(data)
+    save_data()
+    return db["users"][user_index]
+
+# Удаление пользователя
+@app.delete("/users/{user_id}")
+async def delete_user(user_id: str):
+    global db
+    original_len = len(db["users"])
+    db["users"] = [u for u in db["users"] if u["id"] != user_id]
+    
+    if len(db["users"]) == original_len:
+        raise HTTPException(status_code=404, detail="Пользователь не найден")
+        
+    save_data()
+    return {"message": "Пользователь успешно удален"}
