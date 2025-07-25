@@ -1136,7 +1136,7 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 )}
                             </div>
                         </div>
-                    )) : <p className="text-center text-gray-500 py-8">Нет доступных сценариев.</p>}
+                    )) : <p className="text-center text-gray-500 py-8">Нет доступных задач.</p>}
                 </div>
             </div>
         </div>
@@ -1743,18 +1743,23 @@ export default function App() {
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
-  const lockedItemIds = activeScenarios.flatMap(s => Object.keys(s.items));
+  const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
-  const assignedFilteredItems = (activeItemTypeFilter === 'all'
-    ? itemsToDisplay
-    : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
-  ).filter(item => item.warehouseId !== 'unassigned');
+  const filteredAndSortedItems = (list) => {
+      const filtered = (activeItemTypeFilter === 'all'
+          ? list
+          : list.filter(item => item.type === activeItemTypeFilter)
+      );
+      return filtered.sort((a, b) => {
+          const aIsLocked = lockedItemIds.has(a.id);
+          const bIsLocked = lockedItemIds.has(b.id);
+          if (aIsLocked === bIsLocked) return 0;
+          return aIsLocked ? 1 : -1;
+      });
+  };
 
-  const unassignedItems = items.filter(item => item.warehouseId === 'unassigned');
-  const unassignedFilteredItems = (activeItemTypeFilter === 'all'
-    ? unassignedItems
-    : unassignedItems.filter(item => item.type === activeItemTypeFilter)
-  );
+  const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned'));
 
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
@@ -1876,13 +1881,13 @@ export default function App() {
                                 </button>
                             ))}
                         </div>
-                        {assignedFilteredItems.length > 0 ? (
+                        {sortedAssignedFilteredItems.length > 0 ? (
                             <div className="space-y-3">
-                                {assignedFilteredItems.map(item => {
+                                {sortedAssignedFilteredItems.map(item => {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
                                     const isUnplaced = item.placeId === null;
-                                    const isLocked = lockedItemIds.includes(item.id);
+                                    const isLocked = lockedItemIds.has(item.id);
 
                                     return (
                                         <div 
@@ -1911,13 +1916,13 @@ export default function App() {
                             </div>
                         ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
                         
-                        {unassignedFilteredItems.length > 0 && selectedWarehouseId === null && (
+                        {sortedUnassignedFilteredItems.length > 0 && selectedWarehouseId === null && (
                             <div className="mt-6 pt-4 border-t">
                                 <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
                                 <div className="space-y-3">
-                                    {unassignedFilteredItems.map(item => {
+                                    {sortedUnassignedFilteredItems.map(item => {
                                         const itemType = itemTypes.find(it => it.name === item.type);
-                                        const isLocked = lockedItemIds.includes(item.id);
+                                        const isLocked = lockedItemIds.has(item.id);
                                         return (
                                         <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
                                             <div className="flex items-start gap-3">
