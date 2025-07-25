@@ -530,7 +530,7 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
     );
 };
 
-const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) => {
+const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, currentUser }) => {
     const [editingUser, setEditingUser] = useState(null);
     const [userData, setUserData] = useState(null);
     const ROLES = ["Администратор", "Сотрудник склада", "Водитель", "На модерации"];
@@ -577,7 +577,7 @@ const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) 
                                 <tr key={user.id} className="border-b">
                                     {editingUser?.id === user.id ? (
                                         <td colSpan="4" className="p-2">
-                                            <div className="grid grid-cols-1 md:grid-cols-3 gap-4 bg-gray-100 p-4 rounded-lg">
+                                            <div className="grid grid-cols-1 sm:grid-cols-2 gap-4 bg-gray-100 p-4 rounded-lg">
                                                 <input type="text" name="firstName" value={userData.firstName} onChange={handleChange} placeholder="Имя" className="p-2 border rounded-lg" />
                                                 <input type="text" name="lastName" value={userData.lastName} onChange={handleChange} placeholder="Фамилия" className="p-2 border rounded-lg" />
                                                 <input type="text" name="position" value={userData.position} onChange={handleChange} placeholder="Должность" className="p-2 border rounded-lg" />
@@ -585,7 +585,11 @@ const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) 
                                                 <select name="role" value={userData.role} onChange={handleChange} className="p-2 border rounded-lg bg-white">
                                                     {ROLES.map(r => <option key={r} value={r}>{r}</option>)}
                                                 </select>
-                                                <div className="flex gap-2 items-center">
+                                                <select name="assignedWarehouseId" value={userData.assignedWarehouseId} onChange={handleChange} className="p-2 border rounded-lg bg-white">
+                                                  <option value="office">Офис (не привязан к складу)</option>
+                                                  {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                                                </select>
+                                                <div className="sm:col-span-2 flex gap-2 items-center">
                                                     <button onClick={handleSave} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Сохранить</button>
                                                     <button onClick={handleCancel} className="px-4 py-2 bg-gray-200 rounded-lg hover:bg-gray-300">Отмена</button>
                                                 </div>
@@ -1451,7 +1455,7 @@ export default function App() {
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
-      {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
+      {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       
