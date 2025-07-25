@@ -128,7 +128,7 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
-// --- Модальные окна (без изменений, но теперь используют userRole от currentUser) ---
+// --- Модальные окна ---
 const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
   const [formData, setFormData] = useState({ name: '', address: '', hours: '', gate_code: '', lock_code: '', ...initialData });
   const handleChange = (e) => { const { name, value } = e.target; setFormData(prev => ({ ...prev, [name]: value })); };
@@ -431,9 +431,7 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
             </div>
         </div>
     )
-}
-
-// --- НОВЫЕ и измененные компоненты ---
+};
 
 const ContactsModal = ({ users, warehouses, onClose }) => {
     const contactsByWarehouse = warehouses.reduce((acc, warehouse) => {
@@ -575,7 +573,6 @@ const UserModerationModal = ({ users, onSave, onDelete, onClose, currentUser }) 
     );
 };
 
-// --- НОВЫЙ КОМПОНЕНТ: Модальное окно для перемещения позиции ---
 const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCancel }) => {
     const [destination, setDestination] = useState({
         warehouseId: itemToMove.warehouseId,
@@ -583,31 +580,25 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
 
-    // Этот эффект пересчитывает, какие места должны быть отключены на складе назначения.
     useEffect(() => {
         const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
         if (!selectedWarehouse) return;
 
-        // Нам нужно рассмотреть товары в пункте назначения, ИСКЛЮЧАЯ товар, который мы перемещаем
         const otherItems = items.filter(i => i.id !== itemToMove.id);
 
         const newDisabledPlaces = [];
         (selectedWarehouse.places || []).forEach(place => {
             const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
             if (itemToMove.size === 'Паллета') {
-                // Отключить полки
                 if (place.type === 'shelving') {
                     newDisabledPlaces.push(place.id);
                 }
-                // Отключить паллетные места, которые уже заполнены (2 паллетами)
                 if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) {
                     newDisabledPlaces.push(place.id);
                 }
             }
-            // Добавьте другие правила для 'Коробка' или 'Шт', если это необходимо
         });
         setDisabledPlaces(newDisabledPlaces);
-        // Сброс выбора места при смене склада
         setDestination(prev => ({...prev, placeId: null}));
 
     }, [destination.warehouseId, itemToMove, warehouses, items]);
@@ -665,6 +656,84 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                     <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
                     <button onClick={handleSave} disabled={destination.placeId === null} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
                 </div>
+            </div>
+        </div>
+    );
+};
+
+// --- НОВЫЙ КОМПОНЕНТ: Модальное окно для сканирования QR-кода ---
+const QRScannerModal = ({ itemToVerify, onSuccess, onCancel }) => {
+    const scannerRef = useRef(null);
+    const [scanError, setScanError] = useState('');
+
+    useEffect(() => {
+        const scriptId = 'html5-qrcode-script';
+        
+        const initializeScanner = () => {
+            if (!window.Html5QrcodeScanner) {
+                console.error("Html5QrcodeScanner is not loaded.");
+                setScanError("Не удалось загрузить библиотеку сканера.");
+                return;
+            }
+            
+            if (scannerRef.current) {
+                return;
+            }
+
+            const qrCodeScanner = new window.Html5QrcodeScanner(
+                "qr-reader",
+                { fps: 10, qrbox: { width: 250, height: 250 } },
+                false
+            );
+
+            scannerRef.current = qrCodeScanner;
+
+            const onScanSuccess = (decodedText, decodedResult) => {
+                setScanError('');
+                if (decodedText === itemToVerify.id) {
+                    qrCodeScanner.clear().then(onSuccess).catch(error => console.error("Failed to clear scanner.", error));
+                } else {
+                    setScanError(`Неверный QR-код. Отсканирован другой товар.`);
+                }
+            };
+
+            const onScanFailure = (error) => {
+                if (!error.includes("QR code not found")) {
+                     setScanError('Ошибка сканирования. Попробуйте еще раз.');
+                }
+            };
+            
+            qrCodeScanner.render(onScanSuccess, onScanFailure);
+        };
+
+        if (!document.getElementById(scriptId)) {
+            const script = document.createElement('script');
+            script.id = scriptId;
+            script.src = "https://unpkg.com/html5-qrcode";
+            script.onload = () => initializeScanner();
+            script.onerror = () => setScanError("Не удалось загрузить скрипт сканера.");
+            document.body.appendChild(script);
+        } else {
+            initializeScanner();
+        }
+
+        return () => {
+            if (scannerRef.current && typeof scannerRef.current.clear === 'function') {
+                scannerRef.current.clear().catch(error => {
+                    console.error("Failed to clear scanner on unmount.", error);
+                });
+            }
+        };
+    }, [itemToVerify, onSuccess]);
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-70 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up relative">
+                <button onClick={onCancel} className="absolute top-4 right-4 text-gray-400 hover:text-gray-700"><XIcon /></button>
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">Проверка позиции</h2>
+                <p className="mb-4 text-gray-600">Отсканируйте QR-код для позиции: <span className="font-bold">"{itemToVerify.name}"</span></p>
+                <div id="qr-reader" className="w-full border rounded-lg overflow-hidden"></div>
+                {scanError && <p className="mt-4 text-center text-red-600 font-semibold bg-red-100 p-2 rounded-lg">{scanError}</p>}
             </div>
         </div>
     );
@@ -813,7 +882,8 @@ export default function App() {
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
-  const [movingItem, setMovingItem] = useState(null); // <-- НОВОЕ СОСТОЯНИЕ для перемещения
+  const [movingItem, setMovingItem] = useState(null); 
+  const [verifyingItem, setVerifyingItem] = useState(null); // <-- НОВОЕ: Для проверки QR
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -863,10 +933,8 @@ export default function App() {
 
   // --- Эффекты ---
   
-  // Проверка сессии и загрузка начальных данных
   useEffect(() => {
     const initializeApp = async () => {
-      // 1. Проверить сессию
       let sessionUser = null;
       try {
         const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
@@ -890,7 +958,6 @@ export default function App() {
       
       if (sessionUser) {
         setCurrentUser(sessionUser);
-        // 2. Если пользователь вошел в систему, загрузить все данные
         if (sessionUser.role !== 'На модерации') {
             setLoading(true);
             try {
@@ -910,7 +977,6 @@ export default function App() {
             }
         }
       } else {
-        // Если пользователь не вошел в систему, нам все еще нужны склады для регистрации
         try {
             const appData = await api.fetchAppData();
             setWarehouses(appData.warehouses || []);
@@ -923,7 +989,6 @@ export default function App() {
     initializeApp();
   }, []);
 
-  // Автоматическое сохранение данных приложения
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
@@ -956,14 +1021,19 @@ export default function App() {
     setItemTypesManagerOpen(false);
   };
 
-  // --- НОВЫЙ ОБРАБОТЧИК: Сохранение перемещения позиции ---
   const handleSaveItemMove = (destination) => {
     setItems(prevItems => prevItems.map(item =>
         item.id === movingItem.id
             ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
             : item
     ));
-    setMovingItem(null); // Закрыть модальное окно
+    setMovingItem(null);
+  };
+
+  // --- НОВЫЙ ОБРАБОТЧИК: Успешная проверка QR-кода ---
+  const handleVerificationSuccess = () => {
+    setMovingItem(verifyingItem); // Теперь этот товар готов к перемещению
+    setVerifyingItem(null);      // Закрываем сканер
   };
   
   const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
@@ -1096,8 +1166,7 @@ export default function App() {
                                                 <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
                                             </div>
                                         </div>
-                                        {/* --- ИЗМЕНЕНИЕ: Кнопка для запуска перемещения --- */}
-                                        <button onClick={() => setMovingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                        <button onClick={() => setVerifyingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                     </div>
                                 )})}
                             </div>
@@ -1112,7 +1181,7 @@ export default function App() {
             </div>
         )}
       </div>
-      {/* --- ИЗМЕНЕНИЕ: Рендеринг всех модальных окон --- */}
+      
       {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} />}
@@ -1122,6 +1191,7 @@ export default function App() {
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
+      {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
 
     </div>
   );

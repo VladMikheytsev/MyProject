@@ -57,7 +57,23 @@
             "gate_code": "B",
             "lock_code": "B",
             "id": 1753408690390,
-            "places": []
+            "places": [
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 3,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         },
         {
             "name": "2",
@@ -75,8 +91,8 @@
             "type": "Коробки",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": 1753407392679,
-            "placeId": 9,
+            "warehouseId": 1753408690390,
+            "placeId": 1,
             "id": "0704635a-52ab-4106-b162-3edf528de0b8"
         }
     ],
