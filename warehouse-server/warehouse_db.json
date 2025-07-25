@@ -17,6 +17,15 @@
             "lock_code": "B",
             "id": 1753408690390,
             "places": []
+        },
+        {
+            "name": "2",
+            "address": "2",
+            "hours": "2",
+            "gate_code": "2",
+            "lock_code": "2",
+            "id": "c5e6e4be-8cff-4bcf-b335-3696dddfa024",
+            "places": []
         }
     ],
     "items": [],
@@ -40,8 +49,8 @@
     "users": [
         {
             "id": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
-            "username": "Test1",
-            "password": "Test1",
+            "username": "Vladislav",
+            "password": "Eh45TbrNMi986V7",
             "firstName": "1",
             "lastName": "1",
             "position": "1",
