@@ -7,13 +7,7 @@
             "gate_code": "-",
             "lock_code": "5147#",
             "id": "c8414422-04d9-4490-8296-805b117daae8",
-            "places": [
-                {
-                    "id": 31,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                }
-            ]
+            "places": []
         }
     ],
     "items": [
@@ -31,8 +25,8 @@
             "type": "Гель",
             "size": "Паллета",
             "quantity": 1,
-            "warehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "placeId": 31,
+            "warehouseId": "unassigned",
+            "placeId": null,
             "id": "5f3a9b4e-3071-486e-be1e-d071ad4789e2"
         }
     ],

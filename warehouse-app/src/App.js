@@ -671,6 +671,104 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     );
 };
 
+// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для действий с позицией ---
+const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, onWriteOff, onCancel }) => {
+    // Состояние для выбора нового места
+    const [destination, setDestination] = useState({
+        warehouseId: itemToAction.warehouseId !== 'unassigned' ? itemToAction.warehouseId : warehouses[0]?.id,
+        placeId: null
+    });
+    const [disabledPlaces, setDisabledPlaces] = useState([]);
+
+    // Эффект для определения доступных/недоступных мест
+    useEffect(() => {
+        const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
+        if (!selectedWarehouse) return;
+
+        // Все товары, кроме текущего
+        const otherItems = items.filter(i => i.id !== itemToAction.id);
+        const newDisabledPlaces = [];
+        
+        (selectedWarehouse.places || []).forEach(place => {
+            const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
+            if (itemToAction.size === 'Паллета') {
+                if (place.type === 'shelving') newDisabledPlaces.push(place.id);
+                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) newDisabledPlaces.push(place.id);
+            }
+        });
+        setDisabledPlaces(newDisabledPlaces);
+        // Сбрасываем выбранное место при смене склада
+        if (destination.warehouseId !== itemToAction.warehouseId) {
+            setDestination(prev => ({...prev, placeId: null}));
+        }
+
+    }, [destination.warehouseId, itemToAction, warehouses, items]);
+
+    const handleMove = () => {
+        if (destination.placeId === null) {
+            alert('Пожалуйста, выберите новое место для перемещения.');
+            return;
+        }
+        onMove(destination);
+    };
+
+    const handleWarehouseChange = (e) => {
+        const newWarehouseId = Number(e.target.value);
+        setDestination({ warehouseId: newWarehouseId, placeId: null });
+    };
+
+    const handlePlaceSelect = (placeInfo) => {
+        setDestination(prev => ({ ...prev, placeId: placeInfo.placeId }));
+    };
+
+    const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
+                <h2 className="text-2xl font-bold mb-2 text-gray-800">Действия с позицией</h2>
+                <p className="mb-6 text-gray-600">"{itemToAction.name}"</p>
+
+                <div className="space-y-4">
+                    <label className="block text-sm font-medium text-gray-700">Переместить на склад:</label>
+                    <select name="warehouseId" value={destination.warehouseId || ''} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
+                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+
+                    {selectedWarehouse && (
+                        <div>
+                            <h3 className="font-semibold mb-2">Выберите новое место на складе "{selectedWarehouse.name}"</h3>
+                            <div className="max-h-64 overflow-auto p-2 bg-gray-100 rounded-lg">
+                                <CompactPlacesGrid
+                                    places={selectedWarehouse.places || []}
+                                    items={items.filter(i => i.warehouseId === selectedWarehouse.id && i.id !== itemToAction.id)}
+                                    itemTypes={itemTypes}
+                                    onPlaceSelect={handlePlaceSelect}
+                                    selectedPlaceInfo={destination}
+                                    disabledPlaces={disabledPlaces}
+                                    warehouseId={selectedWarehouse.id}
+                                />
+                            </div>
+                        </div>
+                    )}
+                </div>
+
+                <div className="flex justify-between items-center mt-8">
+                    {/* Кнопка списания */}
+                    <button onClick={() => onWriteOff(itemToAction.id)} className="px-5 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold flex items-center gap-2">
+                        <TrashIcon /> Списать
+                    </button>
+                    {/* Кнопки отмены и перемещения */}
+                    <div className="flex space-x-4">
+                        <button onClick={onCancel} className="px-5 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                        <button onClick={handleMove} disabled={destination.placeId === null} className="px-5 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, error
     const [scanError, setScanError] = useState('');
@@ -895,6 +993,7 @@ export default function App() {
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [movingItem, setMovingItem] = useState(null); 
   const [verifyingItem, setVerifyingItem] = useState(null);
+  const [itemToAction, setItemToAction] = useState(null); // Состояние для нового модального окна
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1052,6 +1151,23 @@ export default function App() {
     setMovingItem(null);
   };
 
+  // --- [НОВЫЕ ОБРАБОТЧИКИ] Для модального окна ItemActionModal ---
+  const handleMoveItem = (destination) => {
+    setItems(prevItems => prevItems.map(item =>
+        item.id === itemToAction.id
+            ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
+            : item
+    ));
+    setItemToAction(null); // Закрываем модальное окно
+  };
+
+  const handleWriteOffItem = (itemId) => {
+    if (window.confirm('Вы уверены, что хотите списать эту позицию? Это действие необратимо.')) {
+        setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+        setItemToAction(null); // Закрываем модальное окно
+    }
+  };
+
   const handleVerificationSuccess = (verifiedItem) => {
     setMovingItem(verifiedItem);
     setVerifyingItem(null);
@@ -1119,6 +1235,8 @@ export default function App() {
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
 
   if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
+
+  const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
@@ -1189,7 +1307,7 @@ export default function App() {
 
                 <div className="space-y-4">
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
-                        <TruckIcon /> Переместить позицию
+                        <TruckIcon /> Переместить позицию по QR
                     </button>
                     {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (
                         <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
@@ -1216,7 +1334,7 @@ export default function App() {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
                                     return (
-                                    <div key={item.id} className="bg-gray-50 p-3 rounded-lg flex items-start justify-between">
+                                    <div key={item.id} onClick={() => isActionableUser && setItemToAction(item)} className={`bg-gray-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer hover:bg-gray-100 transition' : ''}`}>
                                         <div className="flex items-start gap-3">
                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                             <div>
@@ -1225,7 +1343,7 @@ export default function App() {
                                                 <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
                                             </div>
                                         </div>
-                                        <button onClick={() => setVerifyingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                        <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                     </div>
                                 )})}
                             </div>
@@ -1238,7 +1356,7 @@ export default function App() {
                                     {unassignedFilteredItems.map(item => {
                                         const itemType = itemTypes.find(it => it.name === item.type);
                                         return (
-                                        <div key={item.id} className="bg-red-50 p-3 rounded-lg flex items-start justify-between">
+                                        <div key={item.id} onClick={() => isActionableUser && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer hover:bg-red-100 transition' : ''}`}>
                                             <div className="flex items-start gap-3">
                                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                 <div>
@@ -1247,7 +1365,7 @@ export default function App() {
                                                     <p className="text-sm text-red-600 mt-1">Местоположение не задано</p>
                                                 </div>
                                             </div>
-                                            <button onClick={() => setVerifyingItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                            <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                         </div>
                                     )})}
                                 </div>
@@ -1264,6 +1382,7 @@ export default function App() {
         )}
       </div>
       
+      {/* Модальные окна */}
       {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onDelete={handleDeleteWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(selectedWarehouseId)} />}
@@ -1274,6 +1393,9 @@ export default function App() {
       {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
+      
+      {/* [НОВОЕ] Модальное окно для перемещения/списания */}
+      {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
 
     </div>
   );
