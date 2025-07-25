@@ -1312,6 +1312,7 @@ export default function App() {
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1565,6 +1566,15 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
+  // <-- НОВЫЙ ОБРАБОТЧИК -->
+  const toggleWarehouseExpansion = (warehouseId) => {
+    setExpandedWarehouses(prev =>
+        prev.includes(warehouseId)
+            ? prev.filter(id => id !== warehouseId)
+            : [...prev, warehouseId]
+    );
+  };
+
   // --- Рендеринг ---
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
@@ -1653,22 +1663,36 @@ export default function App() {
                            </div>
                         )}
                     </div>
+                    {/* --- ИЗМЕНЕННЫЙ БЛОК --- */}
                     <div className="bg-white rounded-xl shadow-md p-5 space-y-4 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                        {warehousesToDisplay.map(warehouse => (
-                            <div key={warehouse.id}>
-                                <div className="flex justify-between items-center mb-3">
-                                    <h3 className="text-sm font-semibold text-gray-500">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
-                                    {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (<button onClick={() => setPlacesEditorOpen(true)} className="text-gray-400 hover:text-blue-600 transition p-1"><EditIcon /></button>)}
+                        {warehousesToDisplay.map(warehouse => {
+                            const isExpanded = expandedWarehouses.includes(warehouse.id);
+                            return (
+                                <div key={warehouse.id}>
+                                    <div className="flex justify-between items-center mb-2">
+                                        <h3 className="text-sm font-semibold text-gray-500">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
+                                        <div className="flex items-center gap-2">
+                                            {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (
+                                                <button onClick={() => setPlacesEditorOpen(true)} className="text-gray-400 hover:text-blue-600 transition p-1"><EditIcon /></button>
+                                            )}
+                                            <button onClick={() => toggleWarehouseExpansion(warehouse.id)} className="text-gray-500 hover:text-blue-600 p-1">
+                                                <ChevronDownIcon className="transition-transform duration-300" style={{ transform: isExpanded ? 'rotate(180deg)' : 'rotate(0deg)' }} />
+                                            </button>
+                                        </div>
+                                    </div>
+                                    {isExpanded && (
+                                        (warehouse.places && warehouse.places.length > 0) ? (
+                                        <>
+                                            <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
+                                            <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
+                                        </>
+                                        ) : (<div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>)
+                                    )}
                                 </div>
-                                {(warehouse.places && warehouse.places.length > 0) ? (
-                                <>
-                                    <CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} />
-                                    <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                                </>
-                                ) : (<div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>)}
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
+                    {/* --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА --- */}
                 </div>
 
                 <div className="space-y-4">
