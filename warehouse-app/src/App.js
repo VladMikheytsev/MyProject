@@ -1,7 +1,4 @@
 import React, { useState, useEffect, useRef } from 'react';
-import React, { useState, useEffect, useRef } from 'react';
-import jsPDF from 'jspdf';
-import 'jspdf-autotable';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -1433,69 +1430,6 @@ export default function App() {
     }
   };
   
-    // --- Основной компонент приложения ---
-    export default function App() {
-    // ... все ваши состояния (useState) ...
-
-    const hasLoadedData = useRef(false);
-    const SESSION_STORAGE_KEY = 'warehouseAppSession';
-
-    // НОВАЯ ФУНКЦИЯ ДЛЯ ГЕНЕРАЦИИ PDF
-    const generateScenarioPDF = (scenario) => {
-        // Находим нужные данные по ID
-        const fromWarehouse = warehouses.find(w => w.id === scenario.fromWarehouseId)?.name || 'Неизвестно';
-        const toWarehouse = warehouses.find(w => w.id === scenario.toWarehouseId)?.name || 'Неизвестно';
-        const driver = users.find(u => u.id === scenario.driverId);
-        const driverName = driver ? `${driver.firstName} ${driver.lastName}` : 'Неизвестно';
-
-        // Создаем новый документ PDF
-        const doc = new jsPDF();
-
-        // Заголовок документа
-        doc.setFontSize(18);
-        doc.text('Сценарий перемещения', 14, 22);
-
-        // Информация о сценарии
-        doc.setFontSize(11);
-        doc.text(`ID Сценария: ${scenario.id}`, 14, 32);
-        doc.text(`Дата создания: ${new Date().toLocaleString()}`, 14, 38);
-
-        // Детали перемещения
-        doc.setFontSize(12);
-        doc.text(`Откуда: ${fromWarehouse}`, 14, 50);
-        doc.text(`Куда: ${toWarehouse}`, 14, 56);
-        doc.text(`Водитель: ${driverName}`, 14, 62);
-
-        // Формируем данные для таблицы
-        const tableColumn = ["Наименование позиции", "Тип", "Количество"];
-        const tableRows = [];
-
-        Object.entries(scenario.items).forEach(([itemId, quantity]) => {
-            const item = items.find(i => i.id === itemId);
-            if (item) {
-                const itemData = [
-                    item.name,
-                    item.type,
-                    quantity
-                ];
-                tableRows.push(itemData);
-            }
-        });
-
-        // Добавляем таблицу в документ
-        doc.autoTable({
-            startY: 70,
-            head: [tableColumn],
-            body: tableRows,
-        });
-
-        // Сохраняем файл
-        doc.save(`scenario_${scenario.id}.pdf`);
-    };
-
-    // --- Обработчики аутентификации и модерации ---
-    // ... остальной код обработчиков ...
-
   const handleCreateScenario = (scenarioData) => {
     const newScenario = {
       ...scenarioData,
@@ -1503,7 +1437,6 @@ export default function App() {
       status: 'new',
     };
     setScenarios(prev => [...prev, newScenario]);
-    generateScenarioPDF(newScenario);
     setCreateScenarioModalOpen(false);
   };
 
