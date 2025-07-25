@@ -139,7 +139,7 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
-// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
+// --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const printRef = useRef();
@@ -170,8 +170,7 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
                 <div ref={printRef} className="text-center p-4">
-                    <h2 className="text-xl font-bold mb-1 text-gray-800">{item.name}</h2>
-                    <p className="text-sm text-gray-500 mb-4">ID: {item.id}</p>
+                    <h2 className="text-xl font-bold mb-4 text-gray-800">{item.name}</h2>
                     {qrCodeUrl ? (
                         <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
                     ) : (
@@ -1312,7 +1311,7 @@ export default function App() {
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [isViewScenariosModalOpen, setViewScenariosModalOpen] = useState(false);
-  const [expandedWarehouses, setExpandedWarehouses] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1566,7 +1565,6 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  // <-- НОВЫЙ ОБРАБОТЧИК -->
   const toggleWarehouseExpansion = (warehouseId) => {
     setExpandedWarehouses(prev =>
         prev.includes(warehouseId)
@@ -1663,7 +1661,6 @@ export default function App() {
                            </div>
                         )}
                     </div>
-                    {/* --- ИЗМЕНЕННЫЙ БЛОК --- */}
                     <div className="bg-white rounded-xl shadow-md p-5 space-y-4 lg:col-start-2 lg:row-start-1 lg:row-span-2">
                         {warehousesToDisplay.map(warehouse => {
                             const isExpanded = expandedWarehouses.includes(warehouse.id);
@@ -1692,7 +1689,6 @@ export default function App() {
                             );
                         })}
                     </div>
-                    {/* --- КОНЕЦ ИЗМЕНЕННОГО БЛОКА --- */}
                 </div>
 
                 <div className="space-y-4">
