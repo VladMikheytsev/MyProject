@@ -354,7 +354,6 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         }
     }, [newItem.warehouseId, newItem.size, warehouses, items]);
 
-    // --- ИСПРАВЛЕНИЕ: Преобразование warehouseId в число ---
     const handleChange = (e) => { 
         const { name, value } = e.target;
         const isWarehouseSelect = name === 'warehouseId';
@@ -559,7 +558,6 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
         handleCancel();
     };
     
-    // --- ИСПРАВЛЕНИЕ: Преобразование assignedWarehouseId в число ---
     const handleChange = (e) => {
         const { name, value } = e.target;
         const processedValue = (name === 'assignedWarehouseId' && value !== 'office') ? Number(value) : value;
@@ -990,7 +988,6 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
                         <div className="space-y-4">
-                            {/* --- ИСПРАВЛЕНИЕ: Преобразование в число --- */}
                             <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                             </select>
@@ -1015,7 +1012,6 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
-                                {/* --- ИСПРАВЛЕНИЕ: Преобразование в число --- */}
                                 <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(Number(e.target.value))} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -1126,6 +1122,7 @@ const ViewScenariosModal = ({ scenarios, warehouses, items, users, currentUser, 
         </div>
     );
 };
+
 const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [username, setUsername] = useState('');
     const [password, setPassword] = useState('');
@@ -1179,7 +1176,8 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        setFormData(prev => ({ ...prev, [name]: value }));
+        const processedValue = (name === 'assignedWarehouseId' && value !== 'office') ? Number(value) : value;
+        setFormData(prev => ({ ...prev, [name]: processedValue }));
     };
 
     const handleSubmit = async (e) => {
