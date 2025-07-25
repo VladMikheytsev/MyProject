@@ -1,71 +1,21 @@
 {
-    "warehouses": [
-        {
-            "name": "1",
-            "address": "1",
-            "hours": "1",
-            "gate_code": "1",
-            "lock_code": "1",
-            "id": 1753394687667,
-            "places": [
-                {
-                    "id": 17,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 18,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 24,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                },
-                {
-                    "id": 25,
-                    "type": "pallet",
-                    "orientation": "36*30"
-                }
-            ]
-        }
-    ],
-    "items": [
-        {
-            "name": "ыфыф",
-            "type": "Jdhdhdh",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": 1753394687667,
-            "placeId": 17,
-            "id": 1753395309951
-        },
-        {
-            "name": "Hdhdhdhhd",
-            "type": "Jdhdhdh",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": 1753394687667,
-            "placeId": 18,
-            "id": 1753395325089
-        }
-    ],
+    "warehouses": [],
+    "items": [],
     "itemTypes": [
         {
-            "name": "Jdhdhdh",
-            "color": "#4dbbcc",
-            "id": 1753395272328
+            "id": 1,
+            "name": "Гель",
+            "color": "#3b82f6"
+        },
+        {
+            "id": 2,
+            "name": "Расходники",
+            "color": "#16a34a"
+        },
+        {
+            "id": 3,
+            "name": "Коробки",
+            "color": "#f97316"
         }
     ]
-
-    "users": [
-  {
-    "first_name": "Иван",
-    "last_name": "Иванов",
-    "phone": "+12131111111",
-    "role": "не подтвержден",
-    "telegram_id": 12345678
-  }
-]
 }
