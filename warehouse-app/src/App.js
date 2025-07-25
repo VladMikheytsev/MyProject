@@ -1051,7 +1051,7 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
 const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete }) => {
-    const formatUserName = (userId) => {
+    const getUserNameById = (userId) => {
         if (!userId) return 'Неизвестно';
         const user = users.find(u => u.id === userId);
         return user ? `${user.firstName} ${user.lastName.charAt(0)}.` : 'Неизвестно';
@@ -1084,13 +1084,13 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800">Управление сценариями</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">Управление задачами</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
 
                 {currentUser.role !== 'Водитель' && (
                     <button onClick={onOpenCreate} className="w-full flex items-center justify-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md mb-4">
-                        <FilePlusIcon /> Создать сценарий
+                        <FilePlusIcon /> Новая задача
                     </button>
                 )}
                 
@@ -1099,14 +1099,14 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                         <div key={s.id} className="bg-gray-50 p-4 rounded-lg">
                             <div className="flex justify-between items-start">
                                 <div>
-                                    <p className="font-bold text-gray-800 text-lg">Сценарий #{s.number}</p>
+                                    <p className="font-bold text-gray-800 text-lg">Документ #{s.number}</p>
                                     <p className="text-xs text-gray-400 mb-2">Создан: {new Date(s.createdAt).toLocaleString('ru-RU')}</p>
                                     <p><span className="font-semibold">Из:</span> {getWarehouseName(s.fromWarehouseId)}</p>
                                     <p><span className="font-semibold">В:</span> {getWarehouseName(s.toWarehouseId)}</p>
                                     <div className="text-sm text-gray-600 mt-2 border-t pt-2 space-y-1">
-                                         <p>Отправитель: {formatUserName(s.creatorId)}</p>
-                                         {(s.status === 'accepted' || s.status === 'completed') && <p>Водитель: {formatUserName(s.driverId)}</p>}
-                                         {s.status === 'completed' && <p>Получатель: {formatUserName(s.completerId)}</p>}
+                                         <p>Отправитель: {getUserNameById(s.creatorId)}</p>
+                                         {(s.status === 'accepted' || s.status === 'completed') && <p>Водитель: {getUserNameById(s.driverId)}</p>}
+                                         {s.status === 'completed' && <p>Получатель: {getUserNameById(s.completerId)}</p>}
                                     </div>
                                 </div>
                                 <div className="text-sm font-semibold">
@@ -1143,14 +1143,21 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
     );
 };
 
-const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) => {
+const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, warehouses }) => {
     const [step, setStep] = useState(1);
     const [fromWarehouseId, setFromWarehouseId] = useState(warehouses[0]?.id || null);
     const [toWarehouseId, setToWarehouseId] = useState(null);
-    const [selectedItems, setSelectedItems] = useState({}); // { itemId: quantity }
+    const [selectedItems, setSelectedItems] = useState({});
     const [driverId, setDriverId] = useState(null);
 
     const drivers = users.filter(u => u.role === 'Водитель');
+
+    const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
+    const lockedItemIds = activeScenarios.flatMap(s => Object.keys(s.items));
+
+    const itemsOnWarehouse = fromWarehouseId
+        ? items.filter(i => i.warehouseId === fromWarehouseId && !lockedItemIds.includes(i.id))
+        : [];
 
     const handleItemToggle = (item) => {
         const newSelectedItems = { ...selectedItems };
@@ -1180,15 +1187,13 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
         }
         onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId });
     };
-    
-    const itemsOnWarehouse = fromWarehouseId ? items.filter(i => i.warehouseId === fromWarehouseId) : [];
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 {step === 1 && (
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">Шаг 1: Выбор позиций</h2>
+                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 1</h2>
                         <div className="space-y-4">
                             <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -1210,7 +1215,7 @@ const CreateScenarioModal = ({ warehouses, items, users, onCreate, onClose }) =>
                 )}
                 {step === 2 && (
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">Шаг 2: Назначение</h2>
+                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 2</h2>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
@@ -1737,6 +1742,9 @@ export default function App() {
   const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
   
+  const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
+  const lockedItemIds = activeScenarios.flatMap(s => Object.keys(s.items));
+  
   const assignedFilteredItems = (activeItemTypeFilter === 'all'
     ? itemsToDisplay
     : itemsToDisplay.filter(item => item.type === activeItemTypeFilter)
@@ -1837,7 +1845,7 @@ export default function App() {
                 <div className="space-y-4">
                      <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
                         <ScenariosIcon />
-                        <span className="flex-1 text-left">Сценарии</span>
+                        <span className="flex-1 text-left">Задачи</span>
                         {notificationCount > 0 && (
                             <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-red-100 bg-red-600 rounded-full">
                                 {notificationCount}
@@ -1874,12 +1882,13 @@ export default function App() {
                                     const itemType = itemTypes.find(it => it.name === item.type);
                                     const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
                                     const isUnplaced = item.placeId === null;
-                                    
+                                    const isLocked = lockedItemIds.includes(item.id);
+
                                     return (
                                         <div 
                                             key={item.id} 
-                                            onClick={() => isActionableUser && setItemToAction(item)}
-                                            className={`${isUnplaced ? 'bg-red-50 hover:bg-red-100' : 'bg-gray-50 hover:bg-gray-100'} p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer transition' : ''}`}
+                                            onClick={() => isActionableUser && !isLocked && setItemToAction(item)}
+                                            className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
                                         >
                                             <div className="flex items-start gap-3">
                                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
@@ -1895,7 +1904,7 @@ export default function App() {
                                             </div>
                                             <div className="flex items-center">
                                                 <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
                                             </div>
                                         </div>
                                 )})}
@@ -1908,8 +1917,9 @@ export default function App() {
                                 <div className="space-y-3">
                                     {unassignedFilteredItems.map(item => {
                                         const itemType = itemTypes.find(it => it.name === item.type);
+                                        const isLocked = lockedItemIds.includes(item.id);
                                         return (
-                                        <div key={item.id} onClick={() => isActionableUser && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser ? 'cursor-pointer hover:bg-red-100 transition' : ''}`}>
+                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
                                             <div className="flex items-start gap-3">
                                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                 <div>
@@ -1920,7 +1930,7 @@ export default function App() {
                                             </div>
                                             <div className="flex items-center">
                                                 <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
+                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
                                             </div>
                                         </div>
                                     )})}
@@ -1969,7 +1979,7 @@ export default function App() {
             onDelete={handleDeleteScenario}
             onClose={() => setScenariosModalOpen(false)} 
         />}
-      {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
+      {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       
     </div>
   );

@@ -165,7 +165,38 @@
             "gate_code": "*1137#",
             "lock_code": "5147",
             "id": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "places": []
+            "places": [
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 3,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
         },
         {
             "name": "Storage 19",
@@ -193,7 +224,7 @@
             "size": "Паллета",
             "quantity": 1,
             "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "placeId": null,
+            "placeId": 1,
             "id": "85513774-30f4-4e7d-8c0b-03783a464a9d"
         },
         {
@@ -202,7 +233,7 @@
             "size": "Паллета",
             "quantity": 1,
             "warehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
-            "placeId": null,
+            "placeId": 2,
             "id": "03e075a6-bbad-49f4-88a5-0070744edabb"
         },
         {
@@ -265,5 +296,20 @@
             "role": "Водитель"
         }
     ],
-    "scenarios": []
+    "scenarios": [
+        {
+            "fromWarehouseId": "3d84d655-4be4-46c6-afe6-d6febf964e6b",
+            "toWarehouseId": "11f15699-726c-4b4f-b04d-f4b7aadad645",
+            "items": {
+                "85513774-30f4-4e7d-8c0b-03783a464a9d": 1,
+                "03e075a6-bbad-49f4-88a5-0070744edabb": 1
+            },
+            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
+            "id": "f932f72b-61d4-4934-8948-2f3533b3c67e",
+            "number": 1,
+            "status": "new",
+            "creatorId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
+            "createdAt": "2025-07-25T21:23:52.650Z"
+        }
+    ]
 }
