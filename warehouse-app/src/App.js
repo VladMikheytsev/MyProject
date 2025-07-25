@@ -1403,11 +1403,12 @@ export default function App() {
   const [verifyingItem, setVerifyingItem] = useState(null);
   const [itemToAction, setItemToAction] = useState(null); 
   const [itemToPrint, setItemToPrint] = useState(null);
+  const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
-  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const hasLoadedData = useRef(false);
+  const printComponentRef = useRef();
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
   // --- Обработчики аутентификации и модерации ---
@@ -1654,8 +1655,11 @@ export default function App() {
         prevScenarios.map(s => {
             if (s.id === scenarioId) {
                 const updatedScenario = { ...s, status: newStatus };
-                if (newStatus === 'completed') {
-                    updatedScenario.completerId = currentUser.id; 
+                if (newStatus === 'accepted') {
+                    updatedScenario.acceptedAt = new Date().toISOString();
+                } else if (newStatus === 'completed') {
+                    updatedScenario.completedAt = new Date().toISOString();
+                    updatedScenario.completerId = currentUser.id;
                     const itemIdsToMove = Object.keys(updatedScenario.items);
                     const destinationWarehouseId = updatedScenario.toWarehouseId;
                     setItems(prevItems =>
@@ -1725,20 +1729,9 @@ export default function App() {
     );
   };
   
-  const calculateFreePalletSpaces = (warehouse, allItems) => {
-    const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
-    const totalPalletPlaces = palletPlaces.length;
-    if (totalPalletPlaces === 0) return 0;
-
-    const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
-    const occupiedPalletPlaceIds = new Set();
-    allItems.filter(item => item.warehouseId === warehouse.id).forEach(item => {
-        if (palletPlaceIds.has(item.placeId)) {
-            occupiedPalletPlaceIds.add(item.placeId);
-        }
-    });
-    return totalPalletPlaces - occupiedPalletPlaceIds.size;
-  };
+  const handlePrintScenario = useReactToPrint({
+    content: () => printComponentRef.current,
+  });
 
   // --- Рендеринг ---
   if (!authChecked) {
@@ -1759,16 +1752,7 @@ export default function App() {
   if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
   const userRole = currentUser.role;
-  let warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
-
-    if (selectedWarehouseId === null) {
-        warehousesToDisplay.sort((a, b) => {
-            const freeA = calculateFreePalletSpaces(a, items);
-            const freeB = calculateFreePalletSpaces(b, items);
-            return freeB - freeA;
-        });
-    }
-
+  const warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
   const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
@@ -1953,7 +1937,7 @@ export default function App() {
                                         const itemType = itemTypes.find(it => it.name === item.type);
                                         const isLocked = lockedItemIds.has(item.id);
                                         return (
-                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
+                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : ''}`}>
                                             <div className="flex items-start gap-3">
                                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                 <div>
