@@ -444,8 +444,11 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
 };
 
 const ContactsModal = ({ users, warehouses, onClose }) => {
+    const displayedRoles = ['Администратор', 'Сотрудник склада', 'Водитель'];
+    const relevantUsers = users.filter(user => displayedRoles.includes(user.role));
+
     const contactsByWarehouse = warehouses.reduce((acc, warehouse) => {
-        const warehouseUsers = users.filter(user => user.assignedWarehouseId === warehouse.id);
+        const warehouseUsers = relevantUsers.filter(user => user.assignedWarehouseId === warehouse.id);
         if (warehouseUsers.length > 0) {
             acc[warehouse.id] = {
                 name: warehouse.name,
@@ -455,6 +458,11 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
         return acc;
     }, {});
 
+    const officeUsers = relevantUsers.filter(user => user.assignedWarehouseId === 'office' || !warehouses.some(w => w.id === user.assignedWarehouseId));
+
+    const hasWarehouseContacts = Object.keys(contactsByWarehouse).length > 0;
+    const hasOfficeContacts = officeUsers.length > 0;
+
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up" onClick={e => e.stopPropagation()}>
@@ -463,23 +471,39 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
                 <div className="space-y-6 max-h-[70vh] overflow-y-auto">
-                    {Object.keys(contactsByWarehouse).length > 0 ? (
-                        Object.values(contactsByWarehouse).map(warehouseData => (
-                            <div key={warehouseData.name}>
-                                <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">{warehouseData.name}</h3>
-                                <div className="space-y-3">
-                                    {warehouseData.users.map(user => (
-                                        <div key={user.id} className="bg-gray-50 p-3 rounded-lg">
-                                            <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
-                                            <p className="text-sm text-gray-600">{user.position}</p>
-                                            <p className="text-sm text-gray-500 mt-1">Тел: {user.phone}</p>
-                                        </div>
-                                    ))}
-                                </div>
-                            </div>
-                        ))
+                    {!hasWarehouseContacts && !hasOfficeContacts ? (
+                        <p className="text-gray-500 text-center py-8">Нет сотрудников для отображения.</p>
                     ) : (
-                        <p className="text-gray-500 text-center py-8">Нет сотрудников, привязанных к складам.</p>
+                        <>
+                            {Object.values(contactsByWarehouse).map(warehouseData => (
+                                <div key={warehouseData.name}>
+                                    <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">{warehouseData.name}</h3>
+                                    <div className="space-y-3">
+                                        {warehouseData.users.map(user => (
+                                            <div key={user.id} className="bg-gray-50 p-3 rounded-lg">
+                                                <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
+                                                <p className="text-sm text-gray-600">{user.position}</p>
+                                                <p className="text-sm text-gray-500 mt-1">Тел: {user.phone}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            ))}
+                            {hasOfficeContacts && (
+                                <div>
+                                    <h3 className="text-lg font-bold text-gray-700 border-b pb-2 mb-3">Офис / Не привязаны</h3>
+                                    <div className="space-y-3">
+                                        {officeUsers.map(user => (
+                                            <div key={user.id} className="bg-gray-50 p-3 rounded-lg">
+                                                <p className="font-bold text-gray-900">{user.firstName} {user.lastName}</p>
+                                                <p className="text-sm text-gray-600">{user.position}</p>
+                                                <p className="text-sm text-gray-500 mt-1">Тел: {user.phone}</p>
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                            )}
+                        </>
                     )}
                 </div>
             </div>
