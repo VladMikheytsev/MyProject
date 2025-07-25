@@ -11,6 +11,8 @@
     "react-dom": "^19.1.0",
     "react-scripts": "^5.0.1",
     "web-vitals": "^2.1.4"
+    "qrcode": "^1.5.3",
+    "react-to-print": "^2.15.1"
   },
   "scripts": {
     "start": "react-scripts start",
