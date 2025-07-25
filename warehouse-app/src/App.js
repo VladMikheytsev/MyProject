@@ -15,27 +15,46 @@ const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heigh
 
 
 // --- API Configuration ---
+// !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
+const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
+
 const api = {
-  fetchAllData: async (key) => {
+  async request(endpoint, method = 'GET', body = null) {
+    const url = `${API_BASE_URL}${endpoint}`;
+    const headers = { 'Content-Type': 'application/json' };
+    const options = {
+      method,
+      headers,
+    };
+    if (body) {
+      options.body = JSON.stringify(body);
+    }
+
     try {
-      await new Promise(res => setTimeout(res, 500));
-      const data = localStorage.getItem(key);
-      return data ? JSON.parse(data) : null;
+      const response = await fetch(url, options);
+      if (!response.ok) {
+        const errorData = await response.json().catch(() => ({ message: response.statusText }));
+        throw new Error(errorData.message || 'Сетевой ответ был не в порядке');
+      }
+      return await response.json();
     } catch (error) {
-      console.error(`Ошибка при загрузке данных из localStorage по ключу ${key}:`, error);
-      return null;
+      console.error(`Ошибка при запросе к ${endpoint}:`, error);
+      throw error;
     }
   },
-  saveAllData: async (key, fullState) => {
-    try {
-        await new Promise(res => setTimeout(res, 500));
-        localStorage.setItem(key, JSON.stringify(fullState));
-        console.log(`Данные успешно сохранены в localStorage по ключу ${key}`);
-    } catch (error) {
-        console.error(`Ошибка при сохранении данных в localStorage по ключу ${key}:`, error);
-    }
-  },
+
+  // --- Методы для данных (склады, товары) ---
+  fetchAppData: () => api.request('/data'),
+  saveAppData: (data) => api.request('/data', 'POST', data),
+
+  // --- Методы для пользователей ---
+  fetchUsers: () => api.request('/users'),
+  loginUser: (credentials) => api.request('/login', 'POST', credentials),
+  registerUser: (userData) => api.request('/register', 'POST', userData),
+  updateUser: (userData) => api.request(`/users/${userData.id}`, 'PUT', userData),
+  deleteUser: (userId) => api.request(`/users/${userId}`, 'DELETE'),
 };
+
 
 // --- Компоненты дизайна паллет и стеллажей (без изменений) ---
 const PalletLines = ({ orientation = 'vertical' }) => {
@@ -561,14 +580,18 @@ const LoginView = ({ onLogin, onSwitchToRegister }) => {
     const [password, setPassword] = useState('');
     const [error, setError] = useState('');
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         if (!username || !password) {
             setError('Имя пользователя и пароль обязательны.');
             return;
         }
-        onLogin(username, password, setError);
+        try {
+            await onLogin({ username, password });
+        } catch (err) {
+            setError(err.message || 'Не удалось войти. Пожалуйста, проверьте свои учетные данные.');
+        }
     };
 
     return (
@@ -608,7 +631,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
         setFormData(prev => ({ ...prev, [name]: value }));
     };
 
-    const handleSubmit = (e) => {
+    const handleSubmit = async (e) => {
         e.preventDefault();
         setError('');
         const { username, password, firstName, lastName, position, phone } = formData;
@@ -616,7 +639,11 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
             setError('Все поля обязательны для заполнения.');
             return;
         }
-        onRegister(formData, setError);
+        try {
+            await onRegister(formData);
+        } catch (err) {
+            setError(err.message || 'Не удалось зарегистрироваться.');
+        }
     };
 
     return (
@@ -692,37 +719,18 @@ export default function App() {
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   
   const hasLoadedData = useRef(false);
-  const USERS_STORAGE_KEY = 'warehouseAppUsers';
-  const DATA_STORAGE_KEY = 'warehouseAppData';
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
   // --- Обработчики аутентификации и модерации ---
-  const handleLogin = (username, password, setError) => {
-      const user = users.find(u => u.username === username && u.password === password);
-      if (user) {
-          const now = new Date().getTime();
-          setCurrentUser(user);
-          localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
-      } else {
-          setError('Неверное имя пользователя или пароль.');
-      }
+  const handleLogin = async (credentials) => {
+      const user = await api.loginUser(credentials);
+      const now = new Date().getTime();
+      setCurrentUser(user);
+      localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
   };
 
-  const handleRegister = (formData, setError) => {
-      if (users.some(u => u.username === formData.username)) {
-          setError('Пользователь с таким именем уже существует.');
-          return;
-      }
-      const newUser = { 
-          ...formData,
-          id: crypto.randomUUID(),
-          role: 'На модерации', // Роль по умолчанию
-          assignedWarehouseId: formData.assignedWarehouseId === 'office' ? 'office' : Number(formData.assignedWarehouseId)
-      };
-      const updatedUsers = [...users, newUser];
-      setUsers(updatedUsers);
-      api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
-      
+  const handleRegister = async (formData) => {
+      const newUser = await api.registerUser(formData);
       const now = new Date().getTime();
       setCurrentUser(newUser);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: newUser, loginTime: now }));
@@ -737,119 +745,94 @@ export default function App() {
       setSelectedWarehouseId(null);
   };
 
-  const handleUpdateUser = (updatedUser) => {
-    const updatedUsers = users.map(u => u.id === updatedUser.id ? updatedUser : u);
-    setUsers(updatedUsers);
-    api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
+  const handleUpdateUser = async (updatedUser) => {
+    try {
+        const savedUser = await api.updateUser(updatedUser);
+        setUsers(users.map(u => u.id === savedUser.id ? savedUser : u));
+    } catch (error) {
+        console.error("Не удалось обновить пользователя:", error);
+    }
   };
 
-  const handleDeleteUser = (userId) => {
-    const updatedUsers = users.filter(u => u.id !== userId);
-    setUsers(updatedUsers);
-    api.saveAllData(USERS_STORAGE_KEY, updatedUsers);
+  const handleDeleteUser = async (userId) => {
+    try {
+        await api.deleteUser(userId);
+        setUsers(users.filter(u => u.id !== userId));
+    } catch (error) {
+        console.error("Не удалось удалить пользователя:", error);
+    }
   };
 
 
   // --- Эффекты ---
   
-  // Первичная загрузка и проверка пользователей
+  // Проверка сессии и загрузка начальных данных
   useEffect(() => {
-    const loadUsers = async () => {
-        let loadedUsers = await api.fetchAllData(USERS_STORAGE_KEY);
-        
-        const superUser = { 
-            id: 'vladislav-admin', 
-            username: 'Vladislav', 
-            password: 'Eh45TbrNMi986V7', 
-            role: 'Администратор',
-            firstName: 'Владислав',
-            lastName: 'Модератор',
-            position: 'Главный администратор',
-            phone: '000-000-0000',
-            assignedWarehouseId: 'office'
-        };
-
-        if (!loadedUsers || loadedUsers.length === 0) {
-            loadedUsers = [superUser];
-        } else {
-            const superUserExists = loadedUsers.some(u => u.username === 'Vladislav');
-            if (!superUserExists) {
-                loadedUsers.push(superUser);
-            }
-        }
-        
-        setUsers(loadedUsers);
-        await api.saveAllData(USERS_STORAGE_KEY, loadedUsers);
-    };
-    loadUsers();
-  }, []);
-
-  // Проверка сессии при начальной загрузке
-  useEffect(() => {
-    const checkSession = () => {
+    const initializeApp = async () => {
+      // 1. Проверить сессию
+      let sessionUser = null;
       try {
         const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
         if (savedSession) {
           const { user, loginTime } = JSON.parse(savedSession);
           const now = new Date().getTime();
           const ONE_HOUR = 3600 * 1000;
-
           if (now - loginTime < ONE_HOUR) {
-            // Сессия действительна, логиним пользователя
-            setCurrentUser(user);
-            // Обновляем временную метку, чтобы продлить сессию
+            sessionUser = user;
             localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
           } else {
-            // Сессия истекла
             localStorage.removeItem(SESSION_STORAGE_KEY);
           }
         }
       } catch (error) {
-        console.error("Не удалось проанализировать данные сеанса:", error);
+        console.error("Не удалось проверить сеанс:", error);
         localStorage.removeItem(SESSION_STORAGE_KEY);
       }
+      
       setAuthChecked(true);
-    };
-
-    checkSession();
-  }, []); // Запускается только один раз при монтировании компонента
-
-  // Загрузка данных приложения после входа
-  useEffect(() => {
-    if (!currentUser || currentUser.role === 'На модерации') {
-        setLoading(false);
-        return;
-    };
-
-    const loadInitialData = async () => {
-        setLoading(true);
-        const data = await api.fetchAllData(DATA_STORAGE_KEY);
-        if (data) {
-            setWarehouses(data.warehouses || []);
-            setItems(data.items || []);
-            setItemTypes(data.itemTypes || [
-                {id: 1, name: 'Гель', color: '#3b82f6'},
-                {id: 2, name: 'Расходники', color: '#16a34a'},
-                {id: 3, name: 'Коробки', color: '#f97316'}
-            ]);
-            
-            if ((data.warehouses || []).length > 0 && selectedWarehouseId === null) {
-                setSelectedWarehouseId(data.warehouses[0].id);
+      
+      if (sessionUser) {
+        setCurrentUser(sessionUser);
+        // 2. Если пользователь вошел в систему, загрузить все данные
+        if (sessionUser.role !== 'На модерации') {
+            setLoading(true);
+            try {
+                const [appData, usersData] = await Promise.all([
+                    api.fetchAppData(),
+                    api.fetchUsers()
+                ]);
+                setWarehouses(appData.warehouses || []);
+                setItems(appData.items || []);
+                setItemTypes(appData.itemTypes || []);
+                setUsers(usersData || []);
+                hasLoadedData.current = true;
+            } catch (error) {
+                console.error("Не удалось загрузить начальные данные приложения:", error);
+            } finally {
+                setLoading(false);
             }
         }
-        setLoading(false);
-        setTimeout(() => { hasLoadedData.current = true; }, 100);
+      } else {
+        // Если пользователь не вошел в систему, нам все еще нужны склады для регистрации
+        try {
+            const appData = await api.fetchAppData();
+            setWarehouses(appData.warehouses || []);
+        } catch(error) {
+            console.error("Не удалось загрузить склады для регистрации:", error);
+        }
+      }
     };
-    loadInitialData();
-  }, [currentUser]);
+
+    initializeApp();
+  }, []);
 
   // Автоматическое сохранение данных приложения
   useEffect(() => {
-    if (!hasLoadedData.current || !currentUser) return;
+    if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
     const fullState = { warehouses, items, itemTypes };
-    api.saveAllData(DATA_STORAGE_KEY, fullState);
-  }, [warehouses, items, itemTypes, currentUser]);
+    api.saveAppData(fullState);
+  }, [warehouses, items, itemTypes, currentUser, loading]);
 
 
   // --- Обработчики действий в приложении ---
@@ -905,7 +888,7 @@ export default function App() {
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
 
-  if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка...</div></div>;
+  if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
