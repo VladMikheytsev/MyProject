@@ -1471,6 +1471,48 @@ export default function App() {
     });
   }, [warehouses, items, itemTypes, scenarios, currentUser, loading]);
 
+  // --- Новый эффект для автоматического обновления данных (Polling) ---
+    const stateRef = useRef();
+    stateRef.current = { warehouses, items, itemTypes, scenarios, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
+
+    useEffect(() => {
+        if (!currentUser || currentUser.role === 'На модерации') {
+            return;
+        }
+
+        const intervalId = setInterval(async () => {
+            const currentState = stateRef.current;
+            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem;
+
+            if (isEditing) {
+                console.log("Polling paused: user is editing.");
+                return;
+            }
+
+            try {
+                const [newData, newUsers] = await Promise.all([api.fetchAppData(), api.fetchUsers()]);
+
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios };
+                if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
+                    console.log("App data has changed, updating state.");
+                    setWarehouses(newData.warehouses || []);
+                    setItems(newData.items || []);
+                    setItemTypes(newData.itemTypes || []);
+                    setScenarios(newData.scenarios || []);
+                }
+
+                if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
+                    console.log("Users data has changed, updating state.");
+                    setUsers(newUsers || []);
+                }
+            } catch (error) {
+                console.error("Ошибка при фоновом обновлении данных:", error);
+            }
+        }, 5000); // Опрос каждые 5 секунд
+
+        return () => clearInterval(intervalId); // Очистка интервала
+    }, [currentUser]);
+
 
   // --- Обработчики действий в приложении ---
   const handleSaveWarehouse = (data) => {
