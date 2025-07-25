@@ -12,12 +12,11 @@ const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heig
 const UserIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M20 21v-2a4 4 0 0 0-4-4H8a4 4 0 0 0-4 4v2"></path><circle cx="12" cy="7" r="4"></circle></svg>;
 const ContactsIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M17 18a2 2 0 0 0-2-2H9a2 2 0 0 0-2 2"/><rect x="3" y="4" width="18" height="18" rx="2"/><circle cx="12" cy="10" r="2"/><line x1="8" y1="2" x2="8" y2="4"/><line x1="16" y1="2" x2="16" y2="4"/></svg>;
 const UsersIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M16 21v-2a4 4 0 0 0-4-4H6a4 4 0 0 0-4 4v2"/><circle cx="9" cy="7" r="4"/><path d="M22 21v-2a4 4 0 0 0-3-3.87"/><path d="M16 3.13a4 4 0 0 1 0 7.75"/></svg>;
-const PrinterIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 
 
 // --- API Configuration ---
 // !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
-const API_BASE_URL = "https://your-ngrok-url.ngrok-free.app"; 
+const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
 
 const api = {
   async request(endpoint, method = 'GET', body = null) {
@@ -694,52 +693,6 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-const PrintLabelModal = ({ item, user, onClose }) => {
-    if (!item) return null;
-
-    const printContentRef = useRef();
-    const qrCodeUrl = `https://api.qrserver.com/v1/create-qr-code/?data=${encodeURIComponent(item.id)}&size=120x120&margin=0`;
-
-    const handlePrint = () => {
-        const printWindow = window.open('', '', 'height=400,width=600');
-        printWindow.document.write('<html><head><title>Печать этикетки</title>');
-        printWindow.document.write('<style> body { margin: 0; padding: 0; font-family: sans-serif; } .label { width: 3in; height: 2in; padding: 0.1in; border: 1px solid #ccc; display: flex; flex-direction: column; justify-content: space-between; box-sizing: border-box; } .label-header { font-size: 14px; font-weight: bold; text-align: center; } .label-body { display: flex; align-items: center; justify-content: center; gap: 10px; } .label-qr img { max-width: 1.2in; max-height: 1.2in; } .label-footer { font-size: 9px; color: #555; display: flex; justify-content: space-between; } </style>');
-        printWindow.document.write('</head><body>');
-        printWindow.document.write(printContentRef.current.innerHTML);
-        printWindow.document.write('</body></html>');
-        printWindow.document.close();
-        printWindow.focus();
-        printWindow.print();
-        printWindow.close();
-    };
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex items-center justify-center p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl p-6 animate-fade-in-up">
-                <h2 className="text-xl font-bold mb-4 text-gray-800">Предпросмотр этикетки</h2>
-                <div ref={printContentRef}>
-                    <div className="w-[288px] h-[192px] p-2 border border-dashed border-gray-400 flex flex-col justify-between font-sans bg-white text-black" style={{ width: '3in', height: '2in' }}>
-                        <div className="text-center font-bold text-lg truncate">{item.name}</div>
-                        <div className="flex items-center justify-center gap-4 flex-grow">
-                            <img src={qrCodeUrl} alt="QR Code" className="w-28 h-28" />
-                        </div>
-                        <div className="text-xs text-gray-600 flex justify-between border-t pt-1">
-                            <span>{user.firstName} {user.lastName}</span>
-                            <span>{new Date().toLocaleString()}</span>
-                        </div>
-                    </div>
-                </div>
-                <div className="flex justify-end space-x-4 mt-6">
-                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
-                    <button onClick={handlePrint} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
-                        <PrinterIcon /> Печать
-                    </button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -764,7 +717,6 @@ export default function App() {
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
-  const [itemToPrint, setItemToPrint] = useState(null);
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -906,9 +858,6 @@ export default function App() {
     setItemTypes(types);
     setItemTypesManagerOpen(false);
   };
-  const handlePrintItem = (item) => {
-    setItemToPrint(item);
-  };
   
   const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
   const handleStartEditWarehouse = (warehouse) => { setWarehouseListOpen(false); setEditingWarehouse(warehouse); };
@@ -957,12 +906,10 @@ export default function App() {
                         <span>Модерация</span>
                     </button>
                 )}
-                {userRole !== 'Администратор' && (
-                    <button onClick={() => setContactsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
-                        <ContactsIcon />
-                        <span>Контакты</span>
-                    </button>
-                )}
+                <button onClick={() => setContactsModalOpen(true)} className="flex items-center gap-2 px-4 py-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
+                    <ContactsIcon />
+                    <span>Контакты</span>
+                </button>
                 <button onClick={handleLogout} className="flex items-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
                     <LogOutIcon />
                     <span>Выйти</span>
@@ -1042,10 +989,7 @@ export default function App() {
                                                 <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
                                             </div>
                                         </div>
-                                        <div className="flex items-center">
-                                            <button onClick={() => handlePrintItem(item)} className="text-gray-400 hover:text-blue-600 p-2"><PrinterIcon/></button>
-                                            <button className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
-                                        </div>
+                                        <button className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>
                                     </div>
                                 )})}
                             </div>
@@ -1068,7 +1012,6 @@ export default function App() {
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
-      {itemToPrint && <PrintLabelModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
     </div>
   );
 }
