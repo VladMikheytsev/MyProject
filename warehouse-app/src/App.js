@@ -1479,12 +1479,15 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 backgroundRepeat: 'no-repeat',
                 backgroundPosition: 'center',
                 backgroundSize: 'contain',
-                opacity: 0.08, // Прозрачность для эффекта водяного знака
-                zIndex: 1      // Убедимся, что он под контентом
+                opacity: 0.15, // Прозрачность увеличена для лучшей видимости
+                zIndex: 1,
+                // Свойства ниже принудительно заставляют браузер печатать фон
+                colorAdjust: 'exact',
+                WebkitPrintColorAdjust: 'exact'
             }}></div>
             
             {/* Контейнер для основного контента с более высоким z-index */}
-            <div style={{position: 'relative', zIndex: 2}}>
+            <div style={{position: 'relative', zIndex: 2, backgroundColor: 'transparent'}}>
                 <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                     <p><strong>Company:</strong> Diva Fam Inc.</p>
                     <p><strong>Document number:</strong> {scenario.number}</p>
