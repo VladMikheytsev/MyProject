@@ -1507,9 +1507,9 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             </main>
 
             <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
-                 <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                 <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                 <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
             </footer>
         </div>
     );
