@@ -1529,10 +1529,41 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             </main>
 
             <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
-                 <p className="flex items-center"><strong>Transferred by:    </strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                 <p className="flex items-center"><strong>Driver:    </strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                 <p className="flex items-center"><strong>Received by:    </strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                <p className="flex items-center w-full">
+                    <span className="flex-1 text-left">
+                        <strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)}
+                    </span>
+                    <span className="flex-1 text-center">
+                        {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', display: 'inline-block'}} />}
+                    </span>
+                    <span className="flex-1 text-right">
+                        {currentDate}
+                    </span>
+                </p>
+                <p className="flex items-center w-full">
+                    <span className="flex-1 text-left">
+                        <strong>Driver:</strong> {getUserNameById(scenario.driverId)}
+                    </span>
+                    <span className="flex-1 text-center">
+                        {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', display: 'inline-block'}} />}
+                    </span>
+                    <span className="flex-1 text-right">
+                        {currentDate}
+                    </span>
+                </p>
+                <p className="flex items-center w-full">
+                    <span className="flex-1 text-left">
+                        <strong>Received by:</strong> {getUserNameById(scenario.completerId)}
+                    </span>
+                    <span className="flex-1 text-center">
+                        {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', display: 'inline-block'}} />}
+                    </span>
+                    <span className="flex-1 text-right">
+                        {currentDate}
+                    </span>
+                </p>
             </footer>
+
         </div>
     );
 });
