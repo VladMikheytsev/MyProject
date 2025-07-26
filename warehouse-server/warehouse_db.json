@@ -942,36 +942,6 @@
     ],
     "scenarios": [
         {
-            "fromWarehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
-            "toWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
-            "items": {
-                "5ca2a762-01fa-4cff-8a79-8c6c3ab138f4": 7500
-            },
-            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
-            "creatorSignatureId": "sig_fbeaa1d4-5ca2-4e33-b044-6bbc869e84a5",
-            "id": "0dc5b103-bf6c-4efb-8c9b-84f1d0ef1926",
-            "number": 2,
-            "status": "new",
-            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
-            "createdAt": "2025-07-26T04:21:22.731Z"
-        },
-        {
-            "fromWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
-            "toWarehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
-            "items": {
-                "65287547-9f84-49b6-92ab-52a02fc3beb8": 1008,
-                "91c95c56-b4ab-451a-850b-4b54d26d7476": 1008,
-                "75c9eccb-9c95-4ee3-9704-0ba6ec3c9d04": 5000
-            },
-            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
-            "creatorSignatureId": "sig_710f6176-dd00-49a3-8601-0cda65ef7957",
-            "id": "3eae6ec9-182e-4742-acae-f0ad9db9302e",
-            "number": 3,
-            "status": "new",
-            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
-            "createdAt": "2025-07-26T04:40:30.470Z"
-        },
-        {
             "fromWarehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "toWarehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
             "items": {
