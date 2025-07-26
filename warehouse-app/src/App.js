@@ -23,7 +23,7 @@ const CheckCircleIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18"
 const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><polyline points="12 6 12 12 16 14"></polyline></svg>;
 const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
-const PrintIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
+const PrintIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 
 
 // --- API Configuration ---
@@ -143,11 +143,11 @@ const PalletStats = ({ places = [], items = [] }) => {
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const printRef = useRef();
+    const qrCodePrintRef = useRef();
     const titleRef = useRef(null); // Ref для заголовка
 
-    const handlePrint = useReactToPrint({
-        content: () => printRef.current,
+    const handlePrintQRCode = useReactToPrint({
+        content: () => qrCodePrintRef.current,
         documentTitle: `QR-Code-${item.name}`,
     });
     
@@ -195,7 +195,7 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
-                <div ref={printRef} className="text-center p-4 flex flex-col items-center">
+                <div ref={qrCodePrintRef} className="text-center p-4 flex flex-col items-center">
                     <h2 
                         ref={titleRef} 
                         className="font-bold text-gray-800" 
@@ -216,7 +216,7 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
                 </div>
                 <div className="flex justify-center space-x-4 mt-6">
                     <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
-                    <button onClick={handlePrint} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
+                    <button onClick={handlePrintQRCode} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
                         <PrintIcon /> Печать
                     </button>
                 </div>
@@ -1050,7 +1050,7 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
 };
 
 // --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
-const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete }) => {
+const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete, onPrint }) => {
     const getUserNameById = (userId) => {
         if (!userId) return 'Неизвестно';
         const user = users.find(u => u.id === userId);
@@ -1134,11 +1134,16 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 {(currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада') && s.status === 'accepted' && (
                                      <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
                                 )}
-                                {currentUser.role === 'Администратор' && (
-                                    <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full ml-auto">
-                                        <TrashIcon width="20" height="20" />
-                                    </button>
-                                )}
+                                <div className="ml-auto flex items-center gap-2">
+                                  {currentUser.role === 'Администратор' && (
+                                      <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full">
+                                          <TrashIcon width="20" height="20" />
+                                      </button>
+                                  )}
+                                  <button onClick={() => onPrint(s)} className="p-2 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-full" aria-label={`Печать документа #${s.number}`}>
+                                      <PrintIcon width="20" height="20" />
+                                  </button>
+                                </div>
                             </div>
                         </div>
                     )) : <p className="text-center text-gray-500 py-8">Нет доступных задач.</p>}
@@ -1373,7 +1378,7 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [ОБНОВЛЕННЫЙ] Компонент для отображения мест на одном складе ---
+// --- [НОВЫЙ] Компонент для отображения мест на одном складе ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggleExpand, onPlaceSelect, onEditPlaces, userRole }) => {
     return (
         <div className="bg-white rounded-xl shadow-md p-4">
@@ -1425,6 +1430,72 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
     );
 };
 
+// --- [НОВЫЙ] Компонент для печатной формы задачи ---
+const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users }, ref) => {
+    const getUserNameById = (userId) => {
+        if (!userId) return '';
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName.charAt(0)}.` : 'Неизвестно';
+    };
+
+    const getWarehouseName = (id) => warehouses.find(w => w.id === id)?.name || 'Неизвестно';
+    const getFullItemDetails = (itemId) => items.find(i => i.id === itemId);
+    const currentDate = new Date().toLocaleDateString('ru-RU');
+
+    return (
+        <div ref={ref} style={{ padding: '2cm', display: 'flex', flexDirection: 'column', minHeight: '90vh', fontFamily: 'sans-serif' }}>
+            <header style={{ textAlign: 'left', marginBottom: '40px' }}>
+                <p><strong>Company:</strong> Diva Fam Inc.</p>
+                <p><strong>Document number:</strong> {scenario.number}</p>
+                <p><strong>Transfer date:</strong> {new Date(scenario.createdAt).toLocaleDateString('ru-RU')}</p>
+                <p><strong>From Warehouse:</strong> {getWarehouseName(scenario.fromWarehouseId)}</p>
+                <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
+            </header>
+
+            <main style={{ flexGrow: 1 }}>
+                <div style={{ textAlign: 'center', margin: '40px 0' }}>
+                    <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Product/Material Name</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Size</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Quantity</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Weight</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Lot Number</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Production date</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(scenario.items).map(([itemId, quantity]) => {
+                            const item = getFullItemDetails(itemId);
+                            return item ? (
+                                <tr key={itemId}>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.name}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.type}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.size}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{quantity}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                </tr>
+                            ) : null;
+                        })}
+                    </tbody>
+                </table>
+            </main>
+
+            <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
+                 <p><strong>Transferent by:</strong> {getUserNameById(scenario.creatorId)} {currentDate}</p>
+                 <p><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {currentDate}</p>
+                 <p><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {currentDate}</p>
+            </footer>
+        </div>
+    );
+});
+
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -1460,9 +1531,25 @@ export default function App() {
   
   const [isPlacesSectionExpanded, setIsPlacesSectionExpanded] = useState(true);
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
+
+  // --- [НОВОЕ] Состояние и реф для печати задач ---
+  const [scenarioToPrint, setScenarioToPrint] = useState(null);
+  const scenarioPrintRef = useRef();
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
+
+  // --- [НОВОЕ] Хук для печати задач ---
+  const handlePrintScenario = useReactToPrint({
+      content: () => scenarioPrintRef.current,
+      onAfterPrint: () => setScenarioToPrint(null), // Очищаем состояние после печати
+  });
+
+  useEffect(() => {
+      if (scenarioToPrint) {
+          handlePrintScenario();
+      }
+  }, [scenarioToPrint, handlePrintScenario]);
 
   // --- Обработчики аутентификации и модерации ---
   const handleLogin = async (credentials) => {
@@ -2053,7 +2140,7 @@ export default function App() {
       {/* Модальное окно для печати QR-кода */}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
 
-      {/* Новые модальные окна для сценариев */}
+      {/* Модальные окна для сценариев */}
       {isScenariosModalOpen && <ScenariosModal 
             scenarios={scenarios} 
             warehouses={warehouses} 
@@ -2063,10 +2150,23 @@ export default function App() {
             onUpdateStatus={handleUpdateScenarioStatus}
             onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} 
             onDelete={handleDeleteScenario}
-            onClose={() => setScenariosModalOpen(false)} 
+            onClose={() => setScenariosModalOpen(false)}
+            onPrint={(scenario) => setScenarioToPrint(scenario)}
         />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       
+      {/* Скрытый компонент для печати задачи */}
+      <div style={{ display: 'none' }}>
+          {scenarioToPrint && (
+              <ScenarioPrintDocument
+                  ref={scenarioPrintRef}
+                  scenario={scenarioToPrint}
+                  warehouses={warehouses}
+                  items={items}
+                  users={users}
+              />
+          )}
+      </div>
     </div>
   );
 }

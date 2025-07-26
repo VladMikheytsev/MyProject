@@ -1,6 +1,226 @@
 {
     "warehouses": [
         {
+            "name": "Склад NOHO",
+            "address": "8134 Lankershim Blvd., North Hollywood",
+            "hours": "6AM - 9AM",
+            "gate_code": "-",
+            "lock_code": "5147",
+            "id": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 3,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 4,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 5,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 11,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 12,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 19,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 26,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 28,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 32,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 33,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 35,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 36,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 37,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 38,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 39,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 40,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 42,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 43,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 44,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 45,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 46,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 47,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
+        },
+        {
             "name": "Storage 25",
             "address": "195 East Arrow Hwy., San Dimas",
             "hours": "7AM - 5:45PM",
@@ -609,15 +829,6 @@
                     "orientation": "30*36"
                 }
             ]
-        },
-        {
-            "name": "Склад NOHO",
-            "address": "8134 Lankershim Blvd., North Hollywood",
-            "hours": "6AM - 9AM",
-            "gate_code": "-",
-            "lock_code": "5147",
-            "id": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
-            "places": []
         }
     ],
     "items": [
@@ -626,9 +837,45 @@
             "type": "FF-NJ",
             "size": "Паллета",
             "quantity": "1008",
-            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
-            "placeId": 0,
+            "warehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "placeId": null,
             "id": "65287547-9f84-49b6-92ab-52a02fc3beb8"
+        },
+        {
+            "name": "SPB",
+            "type": "FF-TX",
+            "size": "Паллета",
+            "quantity": "1008",
+            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "placeId": 1,
+            "id": "91c95c56-b4ab-451a-850b-4b54d26d7476"
+        },
+        {
+            "name": "6x4x4",
+            "type": "Коробки",
+            "size": "Паллета",
+            "quantity": "5000",
+            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "placeId": null,
+            "id": "75c9eccb-9c95-4ee3-9704-0ba6ec3c9d04"
+        },
+        {
+            "name": "Скотч зеленый",
+            "type": "Скотч",
+            "size": "Коробка",
+            "quantity": "36",
+            "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
+            "placeId": 1,
+            "id": "feae96d5-ad3e-49e2-9ec9-bba90970f26b"
+        },
+        {
+            "name": "ABG",
+            "type": "Наклейки",
+            "size": "Коробка",
+            "quantity": "7500",
+            "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
+            "placeId": 1,
+            "id": "5ca2a762-01fa-4cff-8a79-8c6c3ab138f4"
         }
     ],
     "itemTypes": [
@@ -641,6 +888,21 @@
             "name": "FF-NJ",
             "color": "#007af5",
             "id": "a799220c-ea1a-47c9-8f51-f600b1762345"
+        },
+        {
+            "name": "FF-TX",
+            "color": "#ff0088",
+            "id": "6b886bea-326d-45fd-a50a-f131e4709164"
+        },
+        {
+            "name": "Скотч",
+            "color": "#61ffc2",
+            "id": "c65502fe-d7f5-4533-a899-bb6e6c336ec8"
+        },
+        {
+            "name": "Наклейки",
+            "color": "#ff881a",
+            "id": "3a11e6df-7f2c-4ec0-affa-8bc272e75e51"
         }
     ],
     "users": [
@@ -652,7 +914,7 @@
             "lastName": "Rakh",
             "position": "Координатор по логистике",
             "phone": "7475004702",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "role": "На модерации"
         },
         {
@@ -663,9 +925,75 @@
             "lastName": "Шкряба",
             "position": "Заместитель координатора по логистике",
             "phone": "+1(213)334-16-47",
-            "assignedWarehouseId": "office",
+            "assignedWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "role": "Администратор"
+        },
+        {
+            "id": "86db454b-afec-429c-835b-5782ddd91e9f",
+            "username": "Test2",
+            "password": "Test2",
+            "firstName": "Алексей",
+            "lastName": "Рагимов",
+            "position": "Водитель",
+            "phone": "-",
+            "assignedWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "role": "Водитель"
         }
     ],
-    "scenarios": []
+    "scenarios": [
+        {
+            "fromWarehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
+            "toWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "items": {
+                "feae96d5-ad3e-49e2-9ec9-bba90970f26b": 5
+            },
+            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
+            "id": "71518873-1a7c-4e21-96d1-56fdbc0f407c",
+            "number": 4,
+            "status": "new",
+            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "createdAt": "2025-07-26T02:00:23.196Z"
+        },
+        {
+            "fromWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "toWarehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "items": {
+                "91c95c56-b4ab-451a-850b-4b54d26d7476": 1008
+            },
+            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
+            "id": "a621f7f9-9226-4ca6-8ada-f50bd521318e",
+            "number": 2,
+            "status": "accepted",
+            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "createdAt": "2025-07-26T01:55:13.672Z"
+        },
+        {
+            "fromWarehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
+            "toWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "items": {
+                "75c9eccb-9c95-4ee3-9704-0ba6ec3c9d04": 5000
+            },
+            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
+            "id": "0af09cf1-72a7-4ee6-a8a7-101fd89ca9c7",
+            "number": 3,
+            "status": "completed",
+            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "createdAt": "2025-07-26T01:56:27.277Z",
+            "completerId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda"
+        },
+        {
+            "fromWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "toWarehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "items": {
+                "65287547-9f84-49b6-92ab-52a02fc3beb8": 1008
+            },
+            "driverId": "86db454b-afec-429c-835b-5782ddd91e9f",
+            "id": "3777a9f3-ac10-4e26-9745-dd953110b040",
+            "number": 1,
+            "status": "completed",
+            "creatorId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "createdAt": "2025-07-26T01:53:40.058Z",
+            "completerId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda"
+        }
+    ]
 }
