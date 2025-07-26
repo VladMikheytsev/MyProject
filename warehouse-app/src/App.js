@@ -1373,7 +1373,7 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [НОВЫЙ] Компонент для отображения мест на одном складе ---
+// --- [ОБНОВЛЕННЫЙ] Компонент для отображения мест на одном складе ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggleExpand, onPlaceSelect, onEditPlaces, userRole }) => {
     return (
         <div className="bg-white rounded-xl shadow-md p-4">
@@ -1395,26 +1395,28 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
                     {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                 </div>
             </div>
+
+            <div className="mt-4 pt-4 border-t border-gray-200">
+                <PalletStats places={warehouse.places || []} items={items.filter(i => i.warehouseId === warehouse.id)} />
+            </div>
+
             {isExpanded && (
-                <div className="mt-4 pt-4 border-t border-gray-200">
+                <div className="mt-4">
                     {(warehouse.places && warehouse.places.length > 0) ? (
-                        <>
-                            <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                            <div className="mt-4 overflow-auto">
-                                <CompactPlacesGrid
-                                    places={warehouse.places}
-                                    items={items.filter(i => i.warehouseId === warehouse.id)}
-                                    itemTypes={itemTypes}
-                                    onPlaceSelect={onPlaceSelect}
-                                    warehouseId={warehouse.id}
-                                />
-                            </div>
-                        </>
+                        <div className="overflow-auto">
+                            <CompactPlacesGrid
+                                places={warehouse.places}
+                                items={items.filter(i => i.warehouseId === warehouse.id)}
+                                itemTypes={itemTypes}
+                                onPlaceSelect={onPlaceSelect}
+                                warehouseId={warehouse.id}
+                            />
+                        </div>
                     ) : (
-                        <div className="text-center text-gray-400 py-8">
+                         <div className="text-center text-gray-400 py-8">
                             <span>Места не сконфигурированы. Нажмите иконку </span>
                             <EditIcon />
-                            <span>, чтобы их настроить.</span>
+                            <span> в заголовке, чтобы их настроить.</span>
                         </div>
                     )}
                 </div>
@@ -1456,7 +1458,6 @@ export default function App() {
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   
-  // --- [НОВОЕ] Состояния для управления сворачиваемыми блоками ---
   const [isPlacesSectionExpanded, setIsPlacesSectionExpanded] = useState(true);
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
@@ -1899,7 +1900,7 @@ export default function App() {
                         )}
                 </div>
 
-                {/* --- [НОВЫЙ] Раздел с местами на складах --- */}
+                {/* --- [ОБНОВЛЕННЫЙ] Раздел с местами на складах --- */}
                 <div className="bg-gray-200 rounded-xl">
                     <div onClick={() => setIsPlacesSectionExpanded(p => !p)} className="flex justify-between items-center p-4 cursor-pointer group">
                         <h2 className="text-base font-bold text-gray-700 uppercase group-hover:text-blue-700">Места на складах</h2>
