@@ -1449,6 +1449,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
     );
 };
 
+// --- [ИЗМЕНЕНО] Компонент для печатной формы с загрузкой логотипа с бэкенда ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1460,17 +1461,17 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     const getFullItemDetails = (itemId) => items.find(i => i.id === itemId);
     const currentDate = new Date().toLocaleDateString('ru-RU');
     
-    const logoUrl = "https://i.ibb.co/3sGDcTB/Logo.jpg";
+    // [ИЗМЕНЕНО] Формируем URL к логотипу на нашем бэкенде
+    const logoUrl = `${API_BASE_URL}/static/logo.png`;
 
     return (
         <div ref={ref} style={{ 
             padding: '2cm', 
             fontFamily: 'sans-serif', 
             position: 'relative', 
-            minHeight: '90vh', // Гарантирует, что контейнер занимает почти всю высоту страницы
-            display: 'flex',
-            flexDirection: 'column'
+            minHeight: '90vh' 
         }}>
+            {/* Используем сформированный URL в src */}
             <img
                 src={logoUrl}
                 alt="Logo"
@@ -1483,6 +1484,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 }}
             />
 
+            {/* Контент документа */}
             <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
                 <p><strong>Document number:</strong> {scenario.number}</p>
@@ -1491,7 +1493,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
             </header>
 
-            <main style={{ flexGrow: 1 }}> {/* Этот элемент растягивается, выталкивая footer вниз */}
+            <main style={{ flexGrow: 1 }}>
                 <div style={{ textAlign: 'center', margin: '40px 0' }}>
                     <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
                 </div>
@@ -1558,6 +1560,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                     </span>
                 </p>
             </footer>
+
         </div>
     );
 });
