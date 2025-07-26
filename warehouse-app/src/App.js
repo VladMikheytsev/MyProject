@@ -2,6 +2,8 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas'; // --- [НОВЫЙ] Импорт для подписи ---
+import jsPDF from 'jspdf';
+import html2canvas from 'html2canvas';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -1810,6 +1812,54 @@ export default function App() {
         return () => clearInterval(intervalId); // Очистка интервала
     }, [currentUser]);
 
+    const generateAndUploadPdf = async (scenario) => {
+    // Находим скрытый контейнер для печати
+    const printElement = scenarioPrintRef.current;
+    if (!printElement) {
+        console.error("Компонент для печати не доступен.");
+        return;
+    }
+
+    console.log("🚀 Начинаю генерацию PDF для документа №", scenario.number);
+    try {
+        const canvas = await html2canvas(printElement, { scale: 2, useCORS: true });
+        const imgData = canvas.toDataURL('image/png');
+
+        const pdf = new jsPDF({ orientation: 'p', unit: 'mm', format: 'a4' });
+
+        const pdfWidth = pdf.internal.pageSize.getWidth();
+        const pdfHeight = pdf.internal.pageSize.getHeight();
+        const canvasWidth = canvas.width;
+        const canvasHeight = canvas.height;
+        const ratio = canvasWidth / canvasHeight;
+        const widthInPdf = pdfWidth;
+        const heightInPdf = widthInPdf / ratio > pdfHeight ? pdfHeight : widthInPdf / ratio;
+
+        pdf.addImage(imgData, 'PNG', 0, 0, widthInPdf, heightInPdf);
+
+        const pdfBlob = pdf.output('blob');
+        const fileName = `${scenario.number}.pdf`;
+
+        // Отправляем файл на сервер
+        const response = await fetch(`${API_BASE_URL}/upload-pdf/${fileName}`, {
+            method: 'POST',
+            body: pdfBlob,
+            headers: { 'Content-Type': 'application/pdf' },
+        });
+
+        if (!response.ok) throw new Error('Ошибка при загрузке PDF на сервер.');
+
+        const result = await response.json();
+        console.log('✅ Результат загрузки PDF:', result.message);
+
+    } catch (error) {
+        console.error('🔥 Ошибка при генерации или загрузке PDF:', error);
+    }
+};
+
+
+
+
 
   // --- Обработчики действий в приложении ----
   const handleSaveWarehouse = (data) => {
@@ -1878,23 +1928,41 @@ export default function App() {
     setCreateScenarioModalOpen(false);
   };
   
-  const handleConfirmActionWithSignature = (signatureData) => {
+    const handleConfirmActionWithSignature = (signatureData) => {
         if (!pendingAction) return;
 
         const { scenario, newStatus } = pendingAction;
         const signatureId = `sig_${crypto.randomUUID()}`;
         setSignatures(prev => ({ ...prev, [signatureId]: signatureData }));
 
+        let updatedScenario = { ...scenario }; // Создаем копию для обновления
+
+        if (newStatus === 'accepted') {
+            updatedScenario.driverSignatureId = signatureId;
+            updatedScenario.status = newStatus;
+        }
+
+        if (newStatus === 'completed') {
+            updatedScenario.completerId = currentUser.id;
+            updatedScenario.completerSignatureId = signatureId;
+            updatedScenario.status = newStatus;
+
+            // Запускаем генерацию и загрузку PDF
+            // Используем setTimeout, чтобы React успел отрендерить финальную версию документа
+            const finalScenarioState = { ...updatedScenario };
+            setScenarioToPrint(finalScenarioState); // Рендерим компонент для печати
+            setTimeout(() => {
+                generateAndUploadPdf(finalScenarioState)
+                    .finally(() => setScenarioToPrint(null)); // Очищаем после генерации
+            }, 500); // Небольшая задержка для рендеринга
+        }
+
+        // Обновляем состояние сценариев в приложении
         setScenarios(prevScenarios =>
             prevScenarios.map(s => {
                 if (s.id === scenario.id) {
-                    const updatedScenario = { ...s, status: newStatus };
-                    if (newStatus === 'accepted') {
-                        updatedScenario.driverSignatureId = signatureId;
-                    }
+                    // Перемещаем товары на склад назначения при завершении
                     if (newStatus === 'completed') {
-                        updatedScenario.completerId = currentUser.id;
-                        updatedScenario.completerSignatureId = signatureId;
                         const itemIdsToMove = Object.keys(updatedScenario.items);
                         const destinationWarehouseId = updatedScenario.toWarehouseId;
                         setItems(prevItems =>
