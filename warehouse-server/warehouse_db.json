@@ -1,17 +1,17 @@
 {
     "warehouses": [
         {
-            "name": "Название склада",
-            "address": "Адрес",
-            "hours": "Часы работы",
-            "gate_code": "Код ворот",
-            "lock_code": "Код замка",
-            "id": "ebbc9733-f5f6-4e7d-aa1d-22150df1ca73",
+            "name": "Склад SD",
+            "address": "325 East Arrow St., San Dimas",
+            "hours": "6AM - 9PM",
+            "gate_code": "",
+            "lock_code": "5147",
+            "id": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "places": [
                 {
                     "id": 0,
                     "type": "pallet",
-                    "orientation": "36*30"
+                    "orientation": "30*36"
                 },
                 {
                     "id": 1,
@@ -31,7 +31,7 @@
                 {
                     "id": 4,
                     "type": "pallet",
-                    "orientation": "36*30"
+                    "orientation": "30*36"
                 },
                 {
                     "id": 5,
@@ -61,30 +61,20 @@
                 {
                     "id": 11,
                     "type": "pallet",
-                    "orientation": "36*30"
+                    "orientation": "30*36"
                 },
                 {
                     "id": 12,
                     "type": "pallet",
                     "orientation": "30*36"
-                }
-            ]
-        },
-        {
-            "name": "Склад 2",
-            "address": "2",
-            "hours": "2",
-            "gate_code": "2",
-            "lock_code": "2",
-            "id": "8fca8273-4ba8-4af9-bd3b-f700b5fe4d00",
-            "places": [
+                },
                 {
-                    "id": 9,
+                    "id": 14,
                     "type": "pallet",
                     "orientation": "30*36"
                 },
                 {
-                    "id": 10,
+                    "id": 15,
                     "type": "pallet",
                     "orientation": "30*36"
                 },
@@ -101,7 +91,22 @@
                 {
                     "id": 18,
                     "type": "pallet",
-                    "orientation": "36*30"
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 19,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
                 },
                 {
                     "id": 23,
@@ -117,21 +122,505 @@
                     "id": 25,
                     "type": "pallet",
                     "orientation": "30*36"
+                },
+                {
+                    "id": 26,
+                    "type": "pallet",
+                    "orientation": "30*36"
                 }
             ]
-        }
-    ],
-    "items": [
+        },
         {
-            "name": "6x4x4",
-            "type": "Коробки",
-            "size": "Паллета",
-            "quantity": "7500",
-            "warehouseId": "8fca8273-4ba8-4af9-bd3b-f700b5fe4d00",
-            "placeId": 24,
-            "id": "bac6446d-871f-4bbb-8df4-423f3f7e0a25"
+            "name": "Storage 25",
+            "address": "195 East Arrow Hwy., San Dimas",
+            "hours": "7AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "bce250b3-3245-4655-a46f-3e2b06d34868",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 3,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 4,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 11,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 28,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 32,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                }
+            ]
+        },
+        {
+            "name": "Storage K013",
+            "address": "919 West Gladstone St., San Dimas",
+            "hours": "6AM - 10PM",
+            "gate_code": "*00134702#",
+            "lock_code": "5147",
+            "id": "ecc4c1ac-56b7-4e78-9280-959bad274575",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 28,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 35,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 36,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 37,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 42,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                }
+            ]
+        },
+        {
+            "name": "Storage 134",
+            "address": "195 East Arrow Hwy., San Dimas",
+            "hours": "6AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
+            "places": [
+                {
+                    "id": 11,
+                    "type": "shelving",
+                    "orientation": "40*15"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 19,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 22,
+                    "type": "shelving",
+                    "orientation": "15*40"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 26,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 29,
+                    "type": "shelving",
+                    "orientation": "15*40"
+                },
+                {
+                    "id": 30,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 31,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 32,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 33,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 36,
+                    "type": "shelving",
+                    "orientation": "15*40"
+                },
+                {
+                    "id": 37,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 38,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 39,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 40,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 44,
+                    "type": "shelving",
+                    "orientation": "40*15"
+                }
+            ]
+        },
+        {
+            "name": "Storage 291",
+            "address": "195 East Arrow Hwy., San Dimas",
+            "hours": "6AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "00221057-de86-4922-99c4-9c39ba32cbb4",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "36*30"
+                }
+            ]
+        },
+        {
+            "name": "Storage 19",
+            "address": "195 East Arrow Hwy., San Dimas",
+            "hours": "6AM - 5:45PM",
+            "gate_code": "*1137#",
+            "lock_code": "5147",
+            "id": "d29a21cf-2034-4a82-b463-f908051a7949",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "shelving",
+                    "orientation": "40*15"
+                },
+                {
+                    "id": 1,
+                    "type": "shelving",
+                    "orientation": "40*15"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 28,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 29,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
+        },
+        {
+            "name": "Склад Cataracta",
+            "address": "440 South Cataract Ave., Unit G, San Dimas",
+            "hours": "7AM - 9AM",
+            "gate_code": "",
+            "lock_code": "5147",
+            "id": "ce8e766e-f0a7-4a2e-a69e-81a9d94fb9ed",
+            "places": [
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                }
+            ]
+        },
+        {
+            "name": "Склад NOHO",
+            "address": "8134 Lankershim Blvd., North Hollywood",
+            "hours": "6AM - 9AM",
+            "gate_code": "-",
+            "lock_code": "5147",
+            "id": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "places": []
         }
     ],
+    "items": [],
     "itemTypes": [
         {
             "name": "Коробки",
@@ -141,42 +630,27 @@
     ],
     "users": [
         {
-            "id": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
-            "username": "Test1",
-            "password": "Test1",
-            "firstName": "Владислав",
-            "lastName": "Шкряба",
-            "position": "Зам Зав Склад",
-            "phone": "2133341647",
-            "assignedWarehouseId": "c8414422-04d9-4490-8296-805b117daae8",
-            "role": "Администратор"
+            "id": "ca373ee9-0dd1-4437-8596-2ff8e71e9ccb",
+            "username": "Tsmla93",
+            "password": "qwerty",
+            "firstName": "Sam",
+            "lastName": "Rakh",
+            "position": "Координатор по логистике",
+            "phone": "7475004702",
+            "assignedWarehouseId": "office",
+            "role": "На модерации"
         },
         {
-            "id": "92836587-ace8-4ae7-95a0-355060789b72",
-            "username": "Test2",
-            "password": "test2",
-            "firstName": "A",
-            "lastName": "A",
-            "position": "A",
-            "phone": "4",
-            "assignedWarehouseId": "f2ff5910-4d26-4040-ae20-e9abe0b1d74e",
-            "role": "Водитель"
+            "id": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "username": "Vladislav",
+            "password": "Kamora23",
+            "firstName": "Владислав",
+            "lastName": "Шкряба",
+            "position": "Заместитель координатора по логистике",
+            "phone": "+1(213)334-16-47",
+            "assignedWarehouseId": "office",
+            "role": "Администратор"
         }
     ],
-    "scenarios": [
-        {
-            "fromWarehouseId": "ebbc9733-f5f6-4e7d-aa1d-22150df1ca73",
-            "toWarehouseId": "8fca8273-4ba8-4af9-bd3b-f700b5fe4d00",
-            "items": {
-                "bac6446d-871f-4bbb-8df4-423f3f7e0a25": 7500
-            },
-            "driverId": "92836587-ace8-4ae7-95a0-355060789b72",
-            "id": "1c4ca03a-beaf-43a1-9430-a50998ef2ba3",
-            "number": 1,
-            "status": "completed",
-            "creatorId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602",
-            "createdAt": "2025-07-25T22:37:59.175Z",
-            "completerId": "11c35f84-0c5d-4aed-8a04-7ea066a5c602"
-        }
-    ]
+    "scenarios": []
 }
