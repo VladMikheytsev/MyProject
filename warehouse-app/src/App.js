@@ -1449,7 +1449,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
     );
 };
 
-// --- [ИЗМЕНЕНО] Компонент для печатной формы задачи с тегом <img> для водяного знака ---
+// --- [ИЗМЕНЕНО] Компонент для печатной формы задачи с логотипом в правом верхнем углу ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1464,7 +1464,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     // Логотип в формате Base64
     const logoBase64 = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgAjoDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1VWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AP38ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z";
 
-    // Основной контейнер теперь создает контекст наложения для дочерних элементов
     return (
         <div ref={ref} style={{ 
             padding: '2cm', 
@@ -1472,24 +1471,21 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             position: 'relative', 
             minHeight: '90vh' 
         }}>
-            {/* Водяной знак как тег <img>, спозиционированный абсолютно позади контента */}
+            {/* Логотип как тег <img>, спозиционированный в правом верхнем углу */}
             <img
                 src={`data:image/jpeg;base64,${logoBase64}`}
-                alt="Watermark"
+                alt="Logo"
                 style={{
                     position: 'absolute',
-                    top: '50%',
-                    left: '50%',
-                    transform: 'translate(-50%, -50%)',
-                    width: '75%', // Немного уменьшен для полей
-                    height: 'auto', // Сохраняем пропорции
-                    opacity: 0.1,
-                    zIndex: -1      // Помещаем за контентом
+                    top: '2cm',
+                    right: '2cm',
+                    width: '150px', // Задаем фиксированную ширину
+                    height: 'auto'  // Высота подстроится автоматически для сохранения пропорций
                 }}
             />
 
             {/* Контент документа */}
-            <header style={{ textAlign: 'left', marginBottom: '40px', backgroundColor: 'transparent' }}>
+            <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
                 <p><strong>Document number:</strong> {scenario.number}</p>
                 <p><strong>Transfer date:</strong> {new Date(scenario.createdAt).toLocaleDateString('ru-RU')}</p>
@@ -1497,7 +1493,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
             </header>
 
-            <main style={{ flexGrow: 1, backgroundColor: 'transparent' }}>
+            <main style={{ flexGrow: 1 }}>
                 <div style={{ textAlign: 'center', margin: '40px 0' }}>
                     <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
                 </div>
@@ -1532,7 +1528,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 </table>
             </main>
 
-            <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px', backgroundColor: 'transparent' }}>
+            <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
                  <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
                  <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
                  <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
@@ -1540,7 +1536,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         </div>
     );
 });
-
 
 // --- [НОВЫЙ] Модальное окно для подтверждения действия с подписью ---
 const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
