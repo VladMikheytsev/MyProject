@@ -1449,7 +1449,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
     );
 };
 
-// --- [ИЗМЕНЕНО] Компонент для печатной формы задачи с фоновым логотипом ---
+// --- [ИЗМЕНЕНО] Компонент для печатной формы задачи с тегом <img> для водяного знака ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1464,79 +1464,79 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     // Логотип в формате Base64
     const logoBase64 = "/9j/4AAQSkZJRgABAQEAYABgAAD/2wBDAAgGBgcGBQgHBwcJCQgKDBQNDAsLDBkSEw8UHRofHh0aHBwgJC4nICIsIxwcKDcpLDAxNDQ0Hyc5PTgyPC4zNDL/2wBDAQkJCQwLDBgNDRgyIRwhMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjIyMjL/wAARCAAgAjoDASIAAhEBAxEB/8QAHwAAAQUBAQEBAQEAAAAAAAAAAAECAwQFBgcICQoL/8QAtRAAAgEDAwIEAwUFBAQAAAF9AQIDAAQRBRIhMUEGE1FhByJxFDKBkaEII0KxwRVS0fAkM2JyggkKFhcYGRolJicoKSo0NTY3ODk6Q0RFRkdISUpTVFVWV1hZWmNkZWZnaGlqc3R1dnd4eXqDhIWGh4iJipKTlJWWl5iZmqKjpKWmp6ipqrKztLW2t7i5usLDxMXGx8jJytLT1NXW19jZ2uHi4+Tl5ufo6erx8vP09fb3+Pn6/8QAHwEAAwEBAQEBAQEBAQAAAAAAAAECAwQFBgcICQoL/8QAtREAAgECBAQDBAcFBAQAAQJ3AAECAxEEBSExBhJBUQdhcRMiMoEIFEKRobHBCSMzUvAVYnLRChYkNOEl8RcYGRomJygpKjU2Nzg5OkNERUZHSElKU1VWV1hZWmNkZWZnaGlqc3R1dnd4eXqCg4SFhoeIiYqSk5SVlpeYmZqio6Slpqeoqaqys7S1tre4ubrCw8TFxsfIycrS09TV1tfY2dri4+Tl5ufo6ery8/T19vf4+fr/2gAMAwEAAhEDEQA/AP38ooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooAKKKKACiiigAooooA//Z";
 
-
+    // Основной контейнер теперь создает контекст наложения для дочерних элементов
     return (
-        <div ref={ref} style={{ padding: '2cm', display: 'flex', flexDirection: 'column', minHeight: '90vh', fontFamily: 'sans-serif', position: 'relative' }}>
-            {/* Див для водяного знака */}
-            <div style={{
-                position: 'absolute',
-                top: '50%',
-                left: '50%',
-                transform: 'translate(-50%, -50%)',
-                width: '80%',
-                height: '80%',
-                backgroundImage: `url(data:image/jpeg;base64,${logoBase64})`,
-                backgroundRepeat: 'no-repeat',
-                backgroundPosition: 'center',
-                backgroundSize: 'contain',
-                opacity: 0.15, // Прозрачность увеличена для лучшей видимости
-                zIndex: 1,
-                // Свойства ниже принудительно заставляют браузер печатать фон
-                colorAdjust: 'exact',
-                WebkitPrintColorAdjust: 'exact'
-            }}></div>
-            
-            {/* Контейнер для основного контента с более высоким z-index */}
-            <div style={{position: 'relative', zIndex: 2, backgroundColor: 'transparent'}}>
-                <header style={{ textAlign: 'left', marginBottom: '40px' }}>
-                    <p><strong>Company:</strong> Diva Fam Inc.</p>
-                    <p><strong>Document number:</strong> {scenario.number}</p>
-                    <p><strong>Transfer date:</strong> {new Date(scenario.createdAt).toLocaleDateString('ru-RU')}</p>
-                    <p><strong>From Warehouse:</strong> {getWarehouseName(scenario.fromWarehouseId)}</p>
-                    <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
-                </header>
+        <div ref={ref} style={{ 
+            padding: '2cm', 
+            fontFamily: 'sans-serif', 
+            position: 'relative', 
+            minHeight: '90vh' 
+        }}>
+            {/* Водяной знак как тег <img>, спозиционированный абсолютно позади контента */}
+            <img
+                src={`data:image/jpeg;base64,${logoBase64}`}
+                alt="Watermark"
+                style={{
+                    position: 'absolute',
+                    top: '50%',
+                    left: '50%',
+                    transform: 'translate(-50%, -50%)',
+                    width: '75%', // Немного уменьшен для полей
+                    height: 'auto', // Сохраняем пропорции
+                    opacity: 0.1,
+                    zIndex: -1      // Помещаем за контентом
+                }}
+            />
 
-                <main style={{ flexGrow: 1 }}>
-                    <div style={{ textAlign: 'center', margin: '40px 0' }}>
-                        <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
-                    </div>
-                    <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
-                        <thead>
-                            <tr>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Product/Material Name</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Size</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Quantity</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Weight</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Lot Number</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Production date</th>
-                                <th style={{ border: '1px solid black', padding: '8px' }}>Notes</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {Object.entries(scenario.items).map(([itemId, quantity]) => {
-                                const item = getFullItemDetails(itemId);
-                                return item ? (
-                                    <tr key={itemId}>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}>{item.name}</td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}>{item.type}</td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}>{item.size}</td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}>{quantity}</td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}></td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}></td>
-                                        <td style={{ border: '1px solid black', padding: '8px' }}></td>
-                                    </tr>
-                                ) : null;
-                            })}
-                        </tbody>
-                    </table>
-                </main>
+            {/* Контент документа */}
+            <header style={{ textAlign: 'left', marginBottom: '40px', backgroundColor: 'transparent' }}>
+                <p><strong>Company:</strong> Diva Fam Inc.</p>
+                <p><strong>Document number:</strong> {scenario.number}</p>
+                <p><strong>Transfer date:</strong> {new Date(scenario.createdAt).toLocaleDateString('ru-RU')}</p>
+                <p><strong>From Warehouse:</strong> {getWarehouseName(scenario.fromWarehouseId)}</p>
+                <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
+            </header>
 
-                <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
-                     <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                     <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                     <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
-                </footer>
-            </div>
+            <main style={{ flexGrow: 1, backgroundColor: 'transparent' }}>
+                <div style={{ textAlign: 'center', margin: '40px 0' }}>
+                    <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
+                </div>
+                <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
+                    <thead>
+                        <tr>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Product/Material Name</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Size</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Quantity</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Weight</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Lot Number</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Production date</th>
+                            <th style={{ border: '1px solid black', padding: '8px' }}>Notes</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {Object.entries(scenario.items).map(([itemId, quantity]) => {
+                            const item = getFullItemDetails(itemId);
+                            return item ? (
+                                <tr key={itemId}>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.name}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.type}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{item.size}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}>{quantity}</td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                    <td style={{ border: '1px solid black', padding: '8px' }}></td>
+                                </tr>
+                            ) : null;
+                        })}
+                    </tbody>
+                </table>
+            </main>
+
+            <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px', backgroundColor: 'transparent' }}>
+                 <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+            </footer>
         </div>
     );
 });
