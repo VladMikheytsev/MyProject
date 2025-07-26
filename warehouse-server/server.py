@@ -2,6 +2,7 @@
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
+from fastapi.staticfiles import StaticFiles  # <-- [ДОБАВЛЕНО] Импорт для статических файлов
 from pydantic import BaseModel
 import json
 import uuid
@@ -22,6 +23,10 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
+# <-- [ДОБАВЛЕНО] Подключение папки static для раздачи файлов
+# Все запросы к /static/... будут искать файлы в папке "static"
+app.mount("/static", StaticFiles(directory="static"), name="static")
+
 # --- Глобальная переменная для хранения данных ---
 db = {
     "warehouses": [],
@@ -29,7 +34,7 @@ db = {
     "itemTypes": [],
     "users": [],
     "scenarios": [],
-    "signatures": {} # <-- [ИЗМЕНЕНО] Добавлено поле для хранения подписей
+    "signatures": {}
 }
 
 # --- Модели данных (Pydantic) ---
@@ -51,7 +56,7 @@ class AppData(BaseModel):
     items: list
     itemTypes: list
     scenarios: list
-    signatures: dict # <-- [ИЗМЕНЕНО] Добавлена модель для получения подписей
+    signatures: dict
 
 def load_data():
     global db
@@ -96,7 +101,7 @@ async def get_app_data():
         "items": db.get("items", []),
         "itemTypes": db.get("itemTypes", []),
         "scenarios": db.get("scenarios", []),
-        "signatures": db.get("signatures", {}) # <-- [ИЗМЕНЕНО] Возвращаем подписи
+        "signatures": db.get("signatures", {})
     }
 
 @app.post("/data")
@@ -106,7 +111,7 @@ async def save_app_data(data: AppData):
     db["items"] = data.items
     db["itemTypes"] = data.itemTypes
     db["scenarios"] = data.scenarios
-    db["signatures"] = data.signatures # <-- [ИЗМЕНЕНО] Сохраняем подписи
+    db["signatures"] = data.signatures
     save_data()
     return {"message": "Данные успешно сохранены"}
 

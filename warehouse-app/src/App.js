@@ -1449,7 +1449,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
     );
 };
 
-// --- [ИСПРАВЛЕНО] Компонент для печатной формы задачи с корректной строкой Base64 ---
+// --- [ИЗМЕНЕНО] Компонент для печатной формы с загрузкой логотипа с бэкенда ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1461,8 +1461,8 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     const getFullItemDetails = (itemId) => items.find(i => i.id === itemId);
     const currentDate = new Date().toLocaleDateString('ru-RU');
     
-    // [ИСПРАВЛЕНО] Проверенная и корректная строка Base64 для вашего логотипа
-    const logoBase64 = "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";
+    // [ИЗМЕНЕНО] Формируем URL к логотипу на нашем бэкенде
+    const logoUrl = `${API_BASE_URL}/static/logo.png`;
 
     return (
         <div ref={ref} style={{ 
@@ -1471,8 +1471,9 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             position: 'relative', 
             minHeight: '90vh' 
         }}>
+            {/* Используем сформированный URL в src */}
             <img
-                src={`data:image/png;base64,${logoBase64}`}
+                src={logoUrl}
                 alt="Logo"
                 style={{
                     position: 'absolute',
@@ -1483,6 +1484,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 }}
             />
 
+            {/* Контент документа */}
             <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
                 <p><strong>Document number:</strong> {scenario.number}</p>
@@ -1496,7 +1498,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                     <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
                 </div>
                 <table style={{ width: '100%', borderCollapse: 'collapse', border: '1px solid black', fontSize: '12px' }}>
-                    {/* ...содержимое таблицы осталось без изменений... */}
                     <thead>
                         <tr>
                             <th style={{ border: '1px solid black', padding: '8px' }}>Product/Material Name</th>
