@@ -14,13 +14,12 @@ DB_FILE = "warehouse_db.json"
 app = FastAPI()
 
 # --- Настройка CORS ---
-# Это позволяет вашему React-приложению (с другого адреса) делать запросы к серверу
 app.add_middleware(
     CORSMiddleware,
-    allow_origins=["*"],  # Разрешить все источники (для разработки)
+    allow_origins=["*"],
     allow_credentials=True,
-    allow_methods=["*"],  # Разрешить все методы (GET, POST, etc.)
-    allow_headers=["*"],  # Разрешить все заголовки
+    allow_methods=["*"],
+    allow_headers=["*"],
 )
 
 # --- Глобальная переменная для хранения данных ---
@@ -29,7 +28,8 @@ db = {
     "items": [],
     "itemTypes": [],
     "users": [],
-    "scenarios": [] # Добавлено поле для сценариев
+    "scenarios": [],
+    "signatures": {} # <-- [ИЗМЕНЕНО] Добавлено поле для хранения подписей
 }
 
 # --- Модели данных (Pydantic) ---
@@ -50,48 +50,32 @@ class AppData(BaseModel):
     warehouses: list
     items: list
     itemTypes: list
-    scenarios: list # Добавлено поле для сценариев
+    scenarios: list
+    signatures: dict # <-- [ИЗМЕНЕНО] Добавлена модель для получения подписей
 
 def load_data():
     global db
     if os.path.exists(DB_FILE):
         with open(DB_FILE, 'r', encoding='utf-8') as f:
-            # Убедимся, что все ключи существуют
             loaded_db = json.load(f)
             for key in db.keys():
-                db[key] = loaded_db.get(key, [])
+                db[key] = loaded_db.get(key, [] if key != 'signatures' else {})
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
-        # Создаем пользователей по умолчанию, если база данных пуста
         db["users"] = [
             {
-                "id": "vladislav-admin",
-                "username": "Vladislav",
-                "password": "Eh45TbrNMi986V7",
-                "role": "Администратор",
-                "firstName": "Владислав",
-                "lastName": "Модератор",
-                "position": "Главный администратор",
-                "phone": "000-000-0000",
-                "assignedWarehouseId": "office"
+                "id": "vladislav-admin", "username": "Vladislav", "password": "Eh45TbrNMi986V7",
+                "role": "Администратор", "firstName": "Владислав", "lastName": "Модератор",
+                "position": "Главный администратор", "phone": "000-000-0000", "assignedWarehouseId": "office"
             },
             {
-                "id": "moderator-admin",
-                "username": "Moderator",
-                "password": "Eh45TbrNMi986V71!",
-                "role": "Администратор",
-                "firstName": "Старший",
-                "lastName": "Модератор",
-                "position": "Модератор",
-                "phone": "111-111-1111",
-                "assignedWarehouseId": "office"
+                "id": "moderator-admin", "username": "Moderator", "password": "Eh45TbrNMi986V71!",
+                "role": "Администратор", "firstName": "Старший", "lastName": "Модератор",
+                "position": "Модератор", "phone": "111-111-1111", "assignedWarehouseId": "office"
             }
         ]
         save_data()
         print(f"⚠️ Файл {DB_FILE} не найден. Создан новый с пользователями по умолчанию.")
-
-
-
 
 def save_data():
     with open(DB_FILE, 'w', encoding='utf-8') as f:
@@ -105,33 +89,31 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-# Получение всех данных приложения (склады, товары, сценарии)
 @app.get("/data")
 async def get_app_data():
     return {
         "warehouses": db.get("warehouses", []),
         "items": db.get("items", []),
         "itemTypes": db.get("itemTypes", []),
-        "scenarios": db.get("scenarios", []) # Возвращаем сценарии
+        "scenarios": db.get("scenarios", []),
+        "signatures": db.get("signatures", {}) # <-- [ИЗМЕНЕНО] Возвращаем подписи
     }
 
-# Сохранение всех данных приложения
 @app.post("/data")
 async def save_app_data(data: AppData):
     global db
     db["warehouses"] = data.warehouses
     db["items"] = data.items
     db["itemTypes"] = data.itemTypes
-    db["scenarios"] = data.scenarios # Сохраняем сценарии
+    db["scenarios"] = data.scenarios
+    db["signatures"] = data.signatures # <-- [ИЗМЕНЕНО] Сохраняем подписи
     save_data()
     return {"message": "Данные успешно сохранены"}
 
-# Получение всех пользователей
 @app.get("/users")
 async def get_users():
     return db.get("users", [])
 
-# Вход пользователя
 @app.post("/login")
 async def login_user(credentials: UserLogin):
     for user in db["users"]:
@@ -139,7 +121,6 @@ async def login_user(credentials: UserLogin):
             return user
     raise HTTPException(status_code=401, detail="Неверное имя пользователя или пароль")
 
-# Регистрация нового пользователя
 @app.post("/register")
 async def register_user(user_data: UserRegistration):
     global db
@@ -161,7 +142,6 @@ async def register_user(user_data: UserRegistration):
     save_data()
     return new_user
 
-# Обновление пользователя (для модерации)
 @app.put("/users/{user_id}")
 async def update_user(user_id: str, updated_data: Request):
     global db
@@ -179,7 +159,6 @@ async def update_user(user_id: str, updated_data: Request):
     save_data()
     return db["users"][user_index]
 
-# Удаление пользователя
 @app.delete("/users/{user_id}")
 async def delete_user(user_id: str):
     global db
