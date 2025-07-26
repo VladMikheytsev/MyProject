@@ -1,136 +1,6 @@
 {
     "warehouses": [
         {
-            "name": "Склад SD",
-            "address": "325 East Arrow St., San Dimas",
-            "hours": "6AM - 9PM",
-            "gate_code": "",
-            "lock_code": "5147",
-            "id": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
-            "places": [
-                {
-                    "id": 0,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 1,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 2,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 3,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 4,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 5,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 7,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 8,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 9,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 10,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 11,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 12,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 14,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 15,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 16,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 17,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 18,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 19,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 21,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 22,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 23,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 24,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 25,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 26,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                }
-            ]
-        },
-        {
             "name": "Storage 25",
             "address": "195 East Arrow Hwy., San Dimas",
             "hours": "7AM - 5:45PM",
@@ -257,6 +127,136 @@
                     "id": 32,
                     "type": "pallet",
                     "orientation": "36*30"
+                }
+            ]
+        },
+        {
+            "name": "Склад SD",
+            "address": "325 East Arrow St., San Dimas",
+            "hours": "6AM - 9PM",
+            "gate_code": "",
+            "lock_code": "5147",
+            "id": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "places": [
+                {
+                    "id": 0,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 1,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 2,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 3,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 4,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 5,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 7,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 8,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 9,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 10,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 11,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 12,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 14,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 15,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 16,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 17,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 18,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 19,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 21,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 22,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 23,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 24,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 25,
+                    "type": "pallet",
+                    "orientation": "30*36"
+                },
+                {
+                    "id": 26,
+                    "type": "pallet",
+                    "orientation": "30*36"
                 }
             ]
         },
@@ -620,12 +620,27 @@
             "places": []
         }
     ],
-    "items": [],
+    "items": [
+        {
+            "name": "C",
+            "type": "FF-NJ",
+            "size": "Паллета",
+            "quantity": "1008",
+            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "placeId": 0,
+            "id": "65287547-9f84-49b6-92ab-52a02fc3beb8"
+        }
+    ],
     "itemTypes": [
         {
             "name": "Коробки",
             "color": "#aabbcc",
             "id": "97a96781-5ecc-4945-a772-b80b7aea9b86"
+        },
+        {
+            "name": "FF-NJ",
+            "color": "#007af5",
+            "id": "a799220c-ea1a-47c9-8f51-f600b1762345"
         }
     ],
     "users": [

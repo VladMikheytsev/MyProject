@@ -458,44 +458,6 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
         </div>
     );
 };
-// --- [НОВОЕ МОДАЛЬНОЕ ОКНО] Просмотр мест на складе ---
-const PlacesViewModal = ({ warehouse, items, itemTypes, userRole, onClose, onEdit, onPlaceSelect }) => {
-    if (!warehouse) return null;
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-[51]" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <div className="flex justify-between items-center mb-4">
-                    <h2 className="text-2xl font-bold text-gray-800">Места на складе: {warehouse.name}</h2>
-                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
-                </div>
-
-                <div className="border-t border-b py-4">
-                    {(warehouse.places && warehouse.places.length > 0)
-                        ? <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                        : <p className="text-gray-500 text-center">Статистика недоступна, места не сконфигурированы.</p>
-                    }
-                </div>
-
-                <div className="mt-4">
-                    <div className="flex justify-between items-center mb-2">
-                        <h3 className="text-sm font-semibold text-gray-500">СХЕМА РАЗМЕЩЕНИЯ</h3>
-                         {userRole === 'Администратор' && (
-                            <button onClick={onEdit} className="flex items-center gap-2 text-sm text-blue-600 hover:text-blue-800 font-semibold p-2 rounded-lg hover:bg-gray-100">
-                                <EditIcon />
-                                Редактировать схему
-                            </button>
-                        )}
-                    </div>
-                    {(warehouse.places && warehouse.places.length > 0)
-                        ? <div className="mt-2 overflow-auto"><CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={onPlaceSelect} warehouseId={warehouse.id} /></div>
-                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы. Нажмите "Редактировать схему", чтобы добавить их.</div>
-                    }
-                </div>
-            </div>
-        </div>
-    );
-};
 const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, items, userRole }) => {
     const [newItem, setNewItem] = useState({ name: '', type: itemTypes[0]?.name || '', size: 'Паллета', quantity: 1, warehouseId: warehouses[0]?.id || null, placeId: null });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
@@ -611,7 +573,7 @@ const ItemTypesManager = ({ types, onSave, onCancel }) => {
 };
 const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-[52]" onClick={onClose}>
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
                 <div className="flex justify-between items-center mb-4">
                     <h2 className="text-2xl font-bold text-gray-800">Позиции на месте #{place.id + 1}</h2>
@@ -1443,11 +1405,7 @@ export default function App() {
   const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
-  
-  // --- [ИЗМЕНЕНО] Состояния для модальных окон управления местами ---
-  const [isPlacesViewModalOpen, setIsPlacesViewModalOpen] = useState(false);
-  const [viewingPlacesForWarehouse, setViewingPlacesForWarehouse] = useState(null);
-
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
@@ -1758,29 +1716,15 @@ export default function App() {
     );
     setPlacesEditorOpen(false);
   };
+
+  const toggleWarehouseExpansion = (warehouseId) => {
+    setExpandedWarehouses(prev =>
+        prev.includes(warehouseId)
+            ? prev.filter(id => id !== warehouseId)
+            : [...prev, warehouseId]
+    );
+  };
   
-  // --- [НОВЫЕ] Обработчики для модального окна просмотра мест ---
-    const handleOpenPlacesView = (warehouse) => {
-        setViewingPlacesForWarehouse(warehouse);
-        setSelectedWarehouseId(warehouse.id); // Устанавливаем ID для контекста редактора
-        setIsPlacesViewModalOpen(true);
-    };
-
-    const handleClosePlacesView = () => {
-        setIsPlacesViewModalOpen(false);
-        setViewingPlacesForWarehouse(null);
-    };
-
-    const handleEditPlacesFromModal = () => {
-        setIsPlacesViewModalOpen(false); // Закрыть модальное окно просмотра
-        setPlacesEditorOpen(true);      // Открыть модальное окно редактирования
-    };
-
-    const handleSelectPlaceFromModal = (placeInfo) => {
-        setIsPlacesViewModalOpen(false); // Закрыть модальное окно просмотра
-        setViewingPlaceInfo(placeInfo);  // Открыть модальное окно с позициями на месте
-    };
-
   const calculateFreePalletSpaces = (warehouse, allItems) => {
     const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
     const totalPalletPlaces = palletPlaces.length;
@@ -1900,26 +1844,35 @@ export default function App() {
                            </div>
                         )}
                     </div>
-                    {/* --- [ИЗМЕНЕННЫЙ] Блок для отображения и управления местами --- */}
                     <div className="bg-white rounded-xl shadow-md p-5 lg:col-start-2 lg:row-start-1 lg:row-span-2">
-                        {warehousesToDisplay.map((warehouse, index) => (
-                            <div key={warehouse.id} className={index < warehousesToDisplay.length - 1 ? "border-b-2 border-dashed border-gray-200 pb-4 mb-4" : ""}>
-                                <div onClick={() => handleOpenPlacesView(warehouse)} className="cursor-pointer group p-2 -m-2 rounded-lg hover:bg-gray-50 transition">
-                                    <div className="flex justify-between items-center mb-2">
+                        {warehousesToDisplay.map((warehouse, index) => {
+                            const isExpanded = expandedWarehouses.includes(warehouse.id);
+                            return (
+                                <div key={warehouse.id} className={index < warehousesToDisplay.length -1 ? "border-b-2 border-dashed border-gray-200 pb-4 mb-4" : ""}>
+                                    <div onClick={() => toggleWarehouseExpansion(warehouse.id)} className="flex justify-between items-center mb-2 cursor-pointer group">
                                         <h3 className="text-sm font-semibold text-gray-500 group-hover:text-blue-600">МЕСТА ({selectedWarehouseId === null ? `Склад: ${warehouse.name}` : "Выбранный склад"})</h3>
-                                        <div className="text-gray-400 group-hover:text-blue-600 transition-colors">
-                                           <EyeIcon />
+                                        <div className="flex items-center gap-2">
+                                            {userRole === 'Администратор' && selectedWarehouseId === warehouse.id && (
+                                                <button onClick={(e) => { e.stopPropagation(); setPlacesEditorOpen(true); }} className="text-gray-400 hover:text-blue-600 transition p-1 z-10">
+                                                    <EditIcon />
+                                                </button>
+                                            )}
+                                            {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
                                         </div>
                                     </div>
                                     
-                                    {(warehouse.places && warehouse.places.length > 0) ? (
+                                    {(warehouse.places && warehouse.places.length > 0) &&
                                         <PalletStats places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} />
-                                    ) : (
-                                        <p className="text-sm text-center text-gray-400 py-2">Места не сконфигурированы. Нажмите, чтобы посмотреть и настроить.</p>
+                                    }
+
+                                    {isExpanded && (
+                                        (warehouse.places && warehouse.places.length > 0) 
+                                        ? <div className="mt-2"><CompactPlacesGrid places={warehouse.places} items={items.filter(i => i.warehouseId === warehouse.id)} itemTypes={itemTypes} onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)} warehouseId={warehouse.id} /></div>
+                                        : <div className="text-center text-gray-400 py-8">Места не сконфигурированы</div>
                                     )}
                                 </div>
-                            </div>
-                        ))}
+                            );
+                        })}
                     </div>
                 </div>
 
@@ -2041,19 +1994,6 @@ export default function App() {
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
-      
-      {/* --- [ИЗМЕНЕНО] Модальные окна управления местами --- */}
-      {isPlacesViewModalOpen && viewingPlacesForWarehouse && (
-          <PlacesViewModal
-              warehouse={viewingPlacesForWarehouse}
-              items={items}
-              itemTypes={itemTypes}
-              userRole={userRole}
-              onClose={handleClosePlacesView}
-              onEdit={handleEditPlacesFromModal}
-              onPlaceSelect={handleSelectPlaceFromModal}
-          />
-      )}
       
       {/* Модальное окно для перемещения/списания */}
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
