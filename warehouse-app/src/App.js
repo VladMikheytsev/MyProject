@@ -1528,35 +1528,35 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 </table>
             </main>
 
-            <footer style={{ paddingTop: '40px', fontSize: '14px' }}>
+            <footer style={{ paddingTop: '40px', fontSize: '14px', lineHeight: '50px' }}>
                 <p style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
                     <span style={{ width: '5cm', flexShrink: 0 }}>
                         <strong>Transferred by:</strong>
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                        {getUserNameById(scenario.creatorId)}
+                    <span style={{ flex: 1, display: 'flex', alignItems: 'center', position: 'relative' }}>
+                        <span>{getUserNameById(scenario.creatorId)}</span>
                         {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', margin: '0 1.5em'}} />}
-                        {currentDate}
+                        <span style={{ position: 'absolute', left: '4cm' }}>{currentDate}</span>
                     </span>
                 </p>
                 <p style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
                     <span style={{ width: '5cm', flexShrink: 0 }}>
                         <strong>Driver:</strong>
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                        {getUserNameById(scenario.driverId)}
+                    <span style={{ flex: 1, display: 'flex', alignItems: 'center', position: 'relative' }}>
+                        <span>{getUserNameById(scenario.driverId)}</span>
                         {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '50px', margin: '0 1.5em'}} />}
-                        {currentDate}
+                        <span style={{ position: 'absolute', left: '4cm' }}>{currentDate}</span>
                     </span>
                 </p>
                 <p style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
                     <span style={{ width: '5cm', flexShrink: 0 }}>
                         <strong>Received by:</strong>
                     </span>
-                    <span style={{ display: 'flex', alignItems: 'center' }}>
-                        {getUserNameById(scenario.completerId)}
+                    <span style={{ flex: 1, display: 'flex', alignItems: 'center', position: 'relative' }}>
+                        <span>{getUserNameById(scenario.completerId)}</span>
                         {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '50px', margin: '0 1.5em'}} />}
-                        {currentDate}
+                        <span style={{ position: 'absolute', left: '4cm' }}>{currentDate}</span>
                     </span>
                 </p>
             </footer>
