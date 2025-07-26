@@ -1789,7 +1789,7 @@ export default function App() {
     }, [currentUser]);
 
 
-  // --- Обработчики действий в приложении ---
+  // --- Обработчики действий в приложении ----
   const handleSaveWarehouse = (data) => {
     const savedData = { ...data, id: data.id || crypto.randomUUID() };
     setWarehouses(prev => {
