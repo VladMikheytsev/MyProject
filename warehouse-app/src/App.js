@@ -1,6 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
+import SignatureCanvas from 'react-signature-canvas'; // --- [НОВЫЙ] Импорт для подписи ---
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -1129,10 +1130,10 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                             </div>
                             <div className="mt-4 flex gap-4 items-center">
                                 {currentUser.id === s.driverId && s.status === 'new' && (
-                                    <button onClick={() => onUpdateStatus(s.id, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять</button>
+                                    <button onClick={() => onUpdateStatus(s, 'accepted')} className="px-4 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700">Принять</button>
                                 )}
                                 {(currentUser.role === 'Администратор' || currentUser.role === 'Сотрудник склада') && s.status === 'accepted' && (
-                                     <button onClick={() => onUpdateStatus(s.id, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
+                                     <button onClick={() => onUpdateStatus(s, 'completed')} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700">Завершить</button>
                                 )}
                                 <div className="ml-auto flex items-center gap-2">
                                   {currentUser.role === 'Администратор' && (
@@ -1159,6 +1160,7 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
     const [toWarehouseId, setToWarehouseId] = useState(null);
     const [selectedItems, setSelectedItems] = useState({});
     const [driverId, setDriverId] = useState(null);
+    const signatureRef = useRef(null);
 
     const drivers = users.filter(u => u.role === 'Водитель');
 
@@ -1182,20 +1184,21 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
         setSelectedItems(newSelectedItems);
     };
 
-    const handleNext = () => {
-        if (Object.keys(selectedItems).length === 0) {
-            alert('Выберите хотя бы одну позицию для перемещения.');
-            return;
-        }
-        setStep(2);
-    };
-
-    const handleCreate = () => {
+    const handleNextToSignature = () => {
         if (!toWarehouseId || !driverId) {
             alert('Выберите склад-получатель и водителя.');
             return;
         }
-        onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId });
+        setStep(3);
+    };
+
+    const handleCreate = () => {
+        if (signatureRef.current.isEmpty()) {
+            alert('Пожалуйста, поставьте свою подпись.');
+            return;
+        }
+        const signatureData = signatureRef.current.toDataURL();
+        onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId, signatureData });
     };
 
     return (
@@ -1203,7 +1206,7 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 {step === 1 && (
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 1</h2>
+                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 1/3 - Выбор товаров</h2>
                         <div className="space-y-4">
                             <select value={fromWarehouseId || ''} onChange={e => setFromWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                 {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
@@ -1219,13 +1222,13 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
                         </div>
                         <div className="flex justify-between items-center mt-8">
                             <button onClick={onClose} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><XIcon /></button>
-                            <button onClick={handleNext} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700"><ArrowRightIcon /></button>
+                            <button onClick={() => setStep(2)} disabled={Object.keys(selectedItems).length === 0} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"><ArrowRightIcon /></button>
                         </div>
                     </div>
                 )}
                 {step === 2 && (
                     <div>
-                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 2</h2>
+                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 2/3 - Назначение</h2>
                         <div className="space-y-4">
                             <div>
                                 <label className="block text-sm font-medium text-gray-700 mb-1">Склад-получатель:</label>
@@ -1251,7 +1254,23 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
                         </div>
                         <div className="flex justify-between items-center mt-8">
                             <button onClick={() => setStep(1)} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><ArrowLeftIcon /></button>
-                            <button onClick={handleCreate} disabled={!toWarehouseId || !driverId} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-green-600 hover:bg-green-700 disabled:bg-gray-400"><CheckCircleIcon /></button>
+                            <button onClick={handleNextToSignature} disabled={!toWarehouseId || !driverId} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700 disabled:bg-gray-400"><ArrowRightIcon /></button>
+                        </div>
+                    </div>
+                )}
+                {step === 3 && (
+                    <div>
+                        <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 3/3 - Подпись</h2>
+                        <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения создания задачи.</p>
+                        <div className="bg-gray-100 rounded-lg border-2 border-dashed">
+                             <SignatureCanvas ref={signatureRef} canvasProps={{ className: 'w-full h-48' }} />
+                        </div>
+                         <div className="flex justify-center gap-4 mt-4">
+                             <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>
+                         </div>
+                        <div className="flex justify-between items-center mt-8">
+                            <button onClick={() => setStep(2)} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><ArrowLeftIcon /></button>
+                            <button onClick={handleCreate} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-green-600 hover:bg-green-700"><CheckCircleIcon /></button>
                         </div>
                     </div>
                 )}
@@ -1378,7 +1397,7 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [НОВЫЙ] Компонент для отображения мест на одном складе ---
+// --- [ОБНОВЛЕННЫЙ] Компонент для отображения мест на одном складе ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggleExpand, onPlaceSelect, onEditPlaces, userRole }) => {
     return (
         <div className="bg-white rounded-xl shadow-md p-4">
@@ -1431,7 +1450,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggl
 };
 
 // --- [НОВЫЙ] Компонент для печатной формы задачи ---
-const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users }, ref) => {
+const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
         const user = users.find(u => u.id === userId);
@@ -1488,13 +1507,50 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             </main>
 
             <footer style={{ textAlign: 'left', marginTop: 'auto', paddingTop: '40px', fontSize: '14px' }}>
-                 <p><strong>Transferent by:</strong> {getUserNameById(scenario.creatorId)} {currentDate}</p>
-                 <p><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {currentDate}</p>
-                 <p><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {currentDate}</p>
+                 <p className="flex items-center"><strong>Transferred by:</strong> {getUserNameById(scenario.creatorId)} {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Driver:</strong> {getUserNameById(scenario.driverId)} {signatures[scenario.driverSignatureId] && <img src={signatures[scenario.driverSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
+                 <p className="flex items-center"><strong>Received by:</strong> {getUserNameById(scenario.completerId)} {signatures[scenario.completerSignatureId] && <img src={signatures[scenario.completerSignatureId]} alt="signature" style={{height: '25px', verticalAlign: 'middle', margin: '0 10px'}} />} {currentDate}</p>
             </footer>
         </div>
     );
 });
+
+// --- [НОВЫЙ] Модальное окно для подтверждения действия с подписью ---
+const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
+    const signatureRef = useRef(null);
+
+    const handleConfirm = () => {
+        if (signatureRef.current.isEmpty()) {
+            alert('Пожалуйста, поставьте подпись для подтверждения.');
+            return;
+        }
+        const signatureData = signatureRef.current.toDataURL();
+        onConfirm(signatureData);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
+                <h2 className="text-2xl font-bold mb-4">{title}</h2>
+                <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения действия.</p>
+                <div className="bg-gray-100 rounded-lg border-2 border-dashed">
+                    <SignatureCanvas ref={signatureRef} canvasProps={{ className: 'w-full h-48' }} />
+                </div>
+                <div className="flex justify-center gap-4 mt-4">
+                    <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>
+                </div>
+                <div className="flex justify-between items-center mt-8">
+                    <button onClick={onCancel} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300">
+                        <ArrowLeftIcon />
+                    </button>
+                    <button onClick={handleConfirm} className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-green-600 hover:bg-green-700">
+                        <CheckCircleIcon />
+                    </button>
+                </div>
+            </div>
+        </div>
+    );
+};
 
 
 // --- Основной компонент приложения ---
@@ -1511,6 +1567,7 @@ export default function App() {
   const [items, setItems] = useState([]);
   const [itemTypes, setItemTypes] = useState([]);
   const [scenarios, setScenarios] = useState([]);
+  const [signatures, setSignatures] = useState({}); // --- [НОВОЕ] Хранилище подписей ---
   const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
@@ -1528,21 +1585,20 @@ export default function App() {
   const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
+  const [pendingAction, setPendingAction] = useState(null); // --- [НОВОЕ] Для подтверждения действий с подписью ---
   
   const [isPlacesSectionExpanded, setIsPlacesSectionExpanded] = useState(true);
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
-
-  // --- [НОВОЕ] Состояние и реф для печати задач ---
+  
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
-  // --- [НОВОЕ] Хук для печати задач ---
   const handlePrintScenario = useReactToPrint({
       content: () => scenarioPrintRef.current,
-      onAfterPrint: () => setScenarioToPrint(null), // Очищаем состояние после печати
+      onAfterPrint: () => setScenarioToPrint(null),
   });
 
   useEffect(() => {
@@ -1573,6 +1629,7 @@ export default function App() {
       setWarehouses([]);
       setItems([]);
       setScenarios([]);
+      setSignatures({});
       setSelectedWarehouseId(null);
   };
 
@@ -1667,6 +1724,7 @@ export default function App() {
                   setItems(appData.items || []);
                   setItemTypes(appData.itemTypes || []);
                   setScenarios(appData.scenarios || []);
+                  setSignatures(appData.signatures || {});
                   setUsers(usersData || []);
                   // По умолчанию разворачиваем все блоки складов
                   setExpandedWarehouses((appData.warehouses || []).map(w => w.id));
@@ -1684,15 +1742,15 @@ export default function App() {
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
-    const fullState = { warehouses, items, itemTypes, scenarios };
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures };
     api.saveAppData(fullState).catch(error => {
       console.error("Ошибка при автоматическом сохранении данных:", error);
     });
-  }, [warehouses, items, itemTypes, scenarios, currentUser, loading]);
+  }, [warehouses, items, itemTypes, scenarios, signatures, currentUser, loading]);
 
   // --- Эффект для автоматического обновления данных (Polling) ---
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -1710,12 +1768,13 @@ export default function App() {
             try {
                 const [newData, newUsers] = await Promise.all([api.fetchAppData(), api.fetchUsers()]);
 
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios };
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
                     setItemTypes(newData.itemTypes || []);
                     setScenarios(newData.scenarios || []);
+                    setSignatures(newData.signatures || {});
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
@@ -1780,8 +1839,13 @@ export default function App() {
   };
   
   const handleCreateScenario = (scenarioData) => {
+    const { signatureData, ...restOfData } = scenarioData;
+    const signatureId = `sig_${crypto.randomUUID()}`;
+    setSignatures(prev => ({...prev, [signatureId]: signatureData }));
+
     const newScenario = {
-      ...scenarioData,
+      ...restOfData,
+      creatorSignatureId: signatureId,
       id: crypto.randomUUID(),
       number: Math.max(0, ...scenarios.map(s => s.number || 0)) + 1,
       status: 'new',
@@ -1791,35 +1855,42 @@ export default function App() {
     setScenarios(prev => [...prev, newScenario]);
     setCreateScenarioModalOpen(false);
   };
+  
+  const handleConfirmActionWithSignature = (signatureData) => {
+        if (!pendingAction) return;
 
-  const handleUpdateScenarioStatus = (scenarioId, newStatus) => {
-    setScenarios(prevScenarios =>
-        prevScenarios.map(s => {
-            if (s.id === scenarioId) {
-                const updatedScenario = { ...s, status: newStatus };
-                if (newStatus === 'completed') {
-                    updatedScenario.completerId = currentUser.id; 
-                    const itemIdsToMove = Object.keys(updatedScenario.items);
-                    const destinationWarehouseId = updatedScenario.toWarehouseId;
-                    setItems(prevItems =>
-                        prevItems.map(item => {
-                            if (itemIdsToMove.includes(item.id)) {
-                                return {
-                                    ...item,
-                                    warehouseId: destinationWarehouseId,
-                                    placeId: null 
-                                };
-                            }
-                            return item;
-                        })
-                    );
+        const { scenario, newStatus } = pendingAction;
+        const signatureId = `sig_${crypto.randomUUID()}`;
+        setSignatures(prev => ({ ...prev, [signatureId]: signatureData }));
+
+        setScenarios(prevScenarios =>
+            prevScenarios.map(s => {
+                if (s.id === scenario.id) {
+                    const updatedScenario = { ...s, status: newStatus };
+                    if (newStatus === 'accepted') {
+                        updatedScenario.driverSignatureId = signatureId;
+                    }
+                    if (newStatus === 'completed') {
+                        updatedScenario.completerId = currentUser.id;
+                        updatedScenario.completerSignatureId = signatureId;
+                        const itemIdsToMove = Object.keys(updatedScenario.items);
+                        const destinationWarehouseId = updatedScenario.toWarehouseId;
+                        setItems(prevItems =>
+                            prevItems.map(item => {
+                                if (itemIdsToMove.includes(item.id)) {
+                                    return { ...item, warehouseId: destinationWarehouseId, placeId: null };
+                                }
+                                return item;
+                            })
+                        );
+                    }
+                    return updatedScenario;
                 }
-                return updatedScenario;
-            }
-            return s;
-        })
-    );
-  };
+                return s;
+            })
+        );
+        setPendingAction(null);
+    };
   
   const handleDeleteScenario = (scenarioId) => {
     if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
@@ -1987,7 +2058,6 @@ export default function App() {
                         )}
                 </div>
 
-                {/* --- [ОБНОВЛЕННЫЙ] Раздел с местами на складах --- */}
                 <div className="bg-gray-200 rounded-xl">
                     <div onClick={() => setIsPlacesSectionExpanded(p => !p)} className="flex justify-between items-center p-4 cursor-pointer group">
                         <h2 className="text-base font-bold text-gray-700 uppercase group-hover:text-blue-700">Места на складах</h2>
@@ -2134,20 +2204,17 @@ export default function App() {
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       
-      {/* Модальное окно для перемещения/списания */}
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
       
-      {/* Модальное окно для печати QR-кода */}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
 
-      {/* Модальные окна для сценариев */}
       {isScenariosModalOpen && <ScenariosModal 
             scenarios={scenarios} 
             warehouses={warehouses} 
             items={items} 
             users={users} 
             currentUser={currentUser} 
-            onUpdateStatus={handleUpdateScenarioStatus}
+            onUpdateStatus={(scenario, newStatus) => setPendingAction({ scenario, newStatus })}
             onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} 
             onDelete={handleDeleteScenario}
             onClose={() => setScenariosModalOpen(false)}
@@ -2155,7 +2222,14 @@ export default function App() {
         />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       
-      {/* Скрытый компонент для печати задачи */}
+      {pendingAction && (
+          <ActionConfirmationModal 
+              title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'}
+              onConfirm={handleConfirmActionWithSignature}
+              onCancel={() => setPendingAction(null)}
+          />
+      )}
+
       <div style={{ display: 'none' }}>
           {scenarioToPrint && (
               <ScenarioPrintDocument
@@ -2164,6 +2238,7 @@ export default function App() {
                   warehouses={warehouses}
                   items={items}
                   users={users}
+                  signatures={signatures}
               />
           )}
       </div>
