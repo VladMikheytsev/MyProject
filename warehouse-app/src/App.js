@@ -1536,7 +1536,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                     <span style={{ flex: 1, display: 'flex', alignItems: 'center', position: 'relative' }}>
                         <span>{getUserNameById(scenario.creatorId)}</span>
                         {signatures[scenario.creatorSignatureId] && <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={{height: '50px', margin: '0 1.5em'}} />}
-                        <span style={{ position: 'absolute', left: '6cm' }}>{currentDate}</span>
+                        <span style={{ position: 'absolute', left: '5cm' }}>{currentDate}</span>
                     </span>
                 </p>
                 <p style={{ display: 'flex', alignItems: 'center', marginBottom: '1em' }}>
