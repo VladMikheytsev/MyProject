@@ -358,7 +358,7 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Редактирование мест</h2>
                 <div style={{ borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black', padding: '4px', width: 'fit-content', margin: '0 auto' }}>
-                    <div className="grid grid-cols-7 gap-1 justify-center">
+                    <div className="grid grid-cols-7 justify-center" style={{ gap: '3px' }}>
                         {placeStates.map((state, id) => {
                             const { className, style } = getButtonStyle(state);
                             return (
@@ -407,9 +407,9 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
     const sortedActiveCols = Array.from(activeCols).sort((a, b) => a - b);
 
     return (
-        <div className="flex flex-col gap-1 p-2" style={{ width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black' }}>
+        <div className="flex flex-col p-2" style={{ gap: '3px', width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black' }}>
             {sortedActiveRows.map(row => (
-                <div key={row} className="flex gap-1">
+                <div key={row} className="flex" style={{ gap: '3px' }}>
                     {sortedActiveCols.map(col => {
                         const id = row * 7 + col;
                         const place = places.find(p => p.id === id);
