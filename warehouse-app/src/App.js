@@ -1984,40 +1984,68 @@ export default function App() {
   };
   
   const handleConfirmActionWithSignature = (signatureData) => {
-        if (!pendingAction) return;
+    if (!pendingAction) return;
 
-        const { scenario, newStatus } = pendingAction;
-        const signatureId = `sig_${crypto.randomUUID()}`;
-        setSignatures(prev => ({ ...prev, [signatureId]: signatureData }));
+    const { scenario, newStatus } = pendingAction;
+    const signatureId = `sig_${crypto.randomUUID()}`;
+    setSignatures(prev => ({ ...prev, [signatureId]: signatureData }));
 
-        setScenarios(prevScenarios =>
-            prevScenarios.map(s => {
-                if (s.id === scenario.id) {
-                    const updatedScenario = { ...s, status: newStatus };
-                    if (newStatus === 'accepted') {
-                        updatedScenario.driverSignatureId = signatureId;
-                    }
-                    if (newStatus === 'completed') {
-                        updatedScenario.completerId = currentUser.id;
-                        updatedScenario.completerSignatureId = signatureId;
-                        const itemIdsToMove = Object.keys(updatedScenario.items);
-                        const destinationWarehouseId = updatedScenario.toWarehouseId;
-                        setItems(prevItems =>
-                            prevItems.map(item => {
-                                if (itemIdsToMove.includes(item.id)) {
-                                    return { ...item, warehouseId: destinationWarehouseId, placeId: null };
-                                }
-                                return item;
-                            })
-                        );
-                    }
-                    return updatedScenario;
+    setScenarios(prevScenarios =>
+        prevScenarios.map(s => {
+            if (s.id === scenario.id) {
+                const updatedScenario = { ...s, status: newStatus };
+                if (newStatus === 'accepted') {
+                    updatedScenario.driverSignatureId = signatureId;
                 }
-                return s;
-            })
-        );
-        setPendingAction(null);
-    };
+                if (newStatus === 'completed') {
+                    updatedScenario.completerId = currentUser.id;
+                    updatedScenario.completerSignatureId = signatureId;
+                    
+                    const itemsToMoveInScenario = updatedScenario.items;
+                    const destinationWarehouseId = updatedScenario.toWarehouseId;
+
+                    setItems(prevItems => {
+                        let newItems = [...prevItems];
+                        const itemsToAdd = [];
+
+                        for (const itemId in itemsToMoveInScenario) {
+                            const moveQuantity = itemsToMoveInScenario[itemId];
+                            const originalItemIndex = newItems.findIndex(i => i.id === itemId);
+                            if (originalItemIndex === -1) continue;
+
+                            const originalItem = newItems[originalItemIndex];
+
+                            if (moveQuantity < originalItem.quantity) {
+                                newItems[originalItemIndex] = {
+                                    ...originalItem,
+                                    quantity: originalItem.quantity - moveQuantity
+                                };
+                                const movedItemPart = {
+                                    ...originalItem,
+                                    id: crypto.randomUUID(),
+                                    quantity: moveQuantity,
+                                    warehouseId: destinationWarehouseId,
+                                    placeId: null
+                                };
+                                itemsToAdd.push(movedItemPart);
+                            } else {
+                                newItems[originalItemIndex] = {
+                                    ...originalItem,
+                                    warehouseId: destinationWarehouseId,
+                                    placeId: null
+                                };
+                            }
+                        }
+                        return [...newItems, ...itemsToAdd];
+                    });
+                }
+                return updatedScenario;
+            }
+            return s;
+        })
+    );
+    setPendingAction(null);
+};
   
   const handleDeleteScenario = (scenarioId) => {
     if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
