@@ -1207,6 +1207,25 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
     const [selectedItems, setSelectedItems] = useState({});
     const [driverId, setDriverId] = useState(null);
     const signatureRef = useRef(null);
+    const signatureContainerRef = useRef(null);
+    const [signatureCanvasSize, setSignatureCanvasSize] = useState({ width: 0, height: 192 });
+
+    useLayoutEffect(() => {
+        const updateSize = () => {
+            if (signatureContainerRef.current) {
+                setSignatureCanvasSize({
+                    width: signatureContainerRef.current.offsetWidth,
+                    height: 192
+                });
+            }
+        };
+        
+        if (step === 3) {
+            window.addEventListener('resize', updateSize);
+            updateSize();
+            return () => window.removeEventListener('resize', updateSize);
+        }
+    }, [step]);
 
     const drivers = users.filter(u => u.role === 'Водитель');
 
@@ -1308,8 +1327,15 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
                     <div>
                         <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 3/3 - Подпись</h2>
                         <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения создания задачи.</p>
-                        <div className="bg-gray-100 rounded-lg border-2 border-dashed">
-                             <SignatureCanvas ref={signatureRef} canvasProps={{ className: 'w-full h-48' }} />
+                        <div ref={signatureContainerRef} className="bg-gray-100 rounded-lg border-2 border-dashed w-full h-48">
+                             <SignatureCanvas 
+                                ref={signatureRef} 
+                                canvasProps={{ 
+                                    width: signatureCanvasSize.width, 
+                                    height: signatureCanvasSize.height, 
+                                    className: 'block' 
+                                }} 
+                             />
                         </div>
                          <div className="flex justify-center gap-4 mt-4">
                              <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>
@@ -1634,6 +1660,24 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
 // --- [НОВЫЙ] Модальное окно для подтверждения действия с подписью ---
 const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
     const signatureRef = useRef(null);
+    const signatureContainerRef = useRef(null);
+    const [signatureCanvasSize, setSignatureCanvasSize] = useState({ width: 0, height: 192 });
+
+    useLayoutEffect(() => {
+        const updateSize = () => {
+            if (signatureContainerRef.current) {
+                setSignatureCanvasSize({
+                    width: signatureContainerRef.current.offsetWidth,
+                    height: 192
+                });
+            }
+        };
+        
+        window.addEventListener('resize', updateSize);
+        updateSize();
+
+        return () => window.removeEventListener('resize', updateSize);
+    }, []);
 
     const handleConfirm = () => {
         if (signatureRef.current.isEmpty()) {
@@ -1649,8 +1693,15 @@ const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-4">{title}</h2>
                 <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения действия.</p>
-                <div className="bg-gray-100 rounded-lg border-2 border-dashed">
-                    <SignatureCanvas ref={signatureRef} canvasProps={{ className: 'w-full h-48' }} />
+                <div ref={signatureContainerRef} className="bg-gray-100 rounded-lg border-2 border-dashed w-full h-48">
+                    <SignatureCanvas 
+                        ref={signatureRef} 
+                        canvasProps={{ 
+                            width: signatureCanvasSize.width, 
+                            height: signatureCanvasSize.height, 
+                            className: 'block' 
+                        }} 
+                    />
                 </div>
                 <div className="flex justify-center gap-4 mt-4">
                     <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>

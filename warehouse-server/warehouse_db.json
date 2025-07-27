@@ -377,26 +377,6 @@
                     "id": 33,
                     "type": "pallet",
                     "orientation": "30*36"
-                },
-                {
-                    "id": 36,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 38,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 39,
-                    "type": "pallet",
-                    "orientation": "30*36"
-                },
-                {
-                    "id": 41,
-                    "type": "pallet",
-                    "orientation": "30*36"
                 }
             ]
         },
