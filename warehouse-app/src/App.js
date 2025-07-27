@@ -1793,8 +1793,8 @@ export default function App() {
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null); // --- [НОВОЕ] Для подтверждения действий с подписью ---
   
-  // --- [НОВОЕ] Состояния для вкладок и свайпов ---
-  const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
+  // --- [ИЗМЕНЕНО] Состояния для вкладок и свайпов ---
+  const [mainViewTab, setMainViewTab] = useState('positions'); // 'warehouses', 'places', или 'positions'
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -2318,7 +2318,7 @@ export default function App() {
       <div className="max-w-7xl mx-auto">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 {/* --- [НОВЫЙ] Компонент с вкладками --- */}
+                 {/* --- [ИЗМЕНЕНО] Компонент с вкладками --- */}
                  <div className="bg-white rounded-xl shadow-md overflow-hidden">
                     {/* Заголовки вкладок */}
                     <div className="flex border-b">
@@ -2333,6 +2333,12 @@ export default function App() {
                             className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'places' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                         >
                             Места
+                        </button>
+                        <button 
+                            onClick={() => setMainViewTab('positions')} 
+                            className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'positions' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                        >
+                            Позиции
                         </button>
                     </div>
 
@@ -2432,11 +2438,91 @@ export default function App() {
                                 </div>
                             </div>
                         )}
+                        
+                        {mainViewTab === 'positions' && (
+                             <div className="p-4">
+                                {(userRole === 'Администратор' || userRole === 'Сотрудник склада' || userRole === 'Водитель') && (
+                                    <div>
+                                        <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ НА СКЛАДЕ</h3>
+                                        <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
+                                            <button onClick={() => setActiveItemTypeFilter('all')} className={`px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
+                                            {itemTypes.map(type => (
+                                                <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
+                                                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                                                    {type.name}
+                                                </button>
+                                            ))}
+                                        </div>
+                                        {sortedAssignedFilteredItems.length > 0 ? (
+                                            <div className="space-y-3">
+                                                {sortedAssignedFilteredItems.map(item => {
+                                                    const itemType = itemTypes.find(it => it.name === item.type);
+                                                    const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
+                                                    const isUnplaced = item.placeId === null;
+                                                    const isLocked = lockedItemIds.has(item.id);
+
+                                                    return (
+                                                        <div 
+                                                            key={item.id} 
+                                                            onClick={() => isActionableUser && !isLocked && setItemToAction(item)}
+                                                            className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
+                                                        >
+                                                            <div className="flex items-start gap-3">
+                                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                                <div>
+                                                                    <p className="font-bold text-gray-800">{item.name}</p>
+                                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                    {isUnplaced ? (
+                                                                        <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
+                                                                    ) : (
+                                                                        <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center">
+                                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
+                                                            </div>
+                                                        </div>
+                                                )})}
+                                            </div>
+                                        ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
+                                        
+                                        {sortedUnassignedFilteredItems.length > 0 && (
+                                            <div className="mt-6 pt-4 border-t">
+                                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
+                                                <div className="space-y-3">
+                                                    {sortedUnassignedFilteredItems.map(item => {
+                                                        const itemType = itemTypes.find(it => it.name === item.type);
+                                                        const isLocked = lockedItemIds.has(item.id);
+                                                        return (
+                                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
+                                                            <div className="flex items-start gap-3">
+                                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                                <div>
+                                                                    <p className="font-bold text-gray-800">{item.name}</p>
+                                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                    <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
+                                                                </div>
+                                                            </div>
+                                                            <div className="flex items-center">
+                                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
+                                                            </div>
+                                                        </div>
+                                                    )})}
+                                                </div>
+                                            </div>
+                                        )}
+                                    </div>
+                                )}
+                            </div>
+                        )}
                     </div>
                 </div>
 
 
-                <div className="space-y-4">
+                <div className="space-y-4 mt-6">
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon />
                         <span className="flex-1 text-left">Переместить позицию по QR</span>
@@ -2448,82 +2534,6 @@ export default function App() {
                         </button>
                     )}
                 </div>
-                
-                {(userRole === 'Администратор' || userRole === 'Сотрудник склада' || userRole === 'Водитель') && (
-                    <div className="bg-white rounded-xl shadow-md p-5">
-                        <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ НА СКЛАДЕ</h3>
-                        <div className="flex flex-wrap gap-2 mb-4 border-b pb-4">
-                            <button onClick={() => setActiveItemTypeFilter('all')} className={`px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                            {itemTypes.map(type => (
-                                <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                                    {type.name}
-                                </button>
-                            ))}
-                        </div>
-                        {sortedAssignedFilteredItems.length > 0 ? (
-                            <div className="space-y-3">
-                                {sortedAssignedFilteredItems.map(item => {
-                                    const itemType = itemTypes.find(it => it.name === item.type);
-                                    const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                    const isUnplaced = item.placeId === null;
-                                    const isLocked = lockedItemIds.has(item.id);
-
-                                    return (
-                                        <div 
-                                            key={item.id} 
-                                            onClick={() => isActionableUser && !isLocked && setItemToAction(item)}
-                                            className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
-                                        >
-                                            <div className="flex items-start gap-3">
-                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                <div>
-                                                    <p className="font-bold text-gray-800">{item.name}</p>
-                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                    {isUnplaced ? (
-                                                        <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
-                                                    ) : (
-                                                        <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
-                                                    )}
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
-                                            </div>
-                                        </div>
-                                )})}
-                            </div>
-                        ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
-                        
-                        {sortedUnassignedFilteredItems.length > 0 && (
-                            <div className="mt-6 pt-4 border-t">
-                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
-                                <div className="space-y-3">
-                                    {sortedUnassignedFilteredItems.map(item => {
-                                        const itemType = itemTypes.find(it => it.name === item.type);
-                                        const isLocked = lockedItemIds.has(item.id);
-                                        return (
-                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
-                                            <div className="flex items-start gap-3">
-                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                <div>
-                                                    <p className="font-bold text-gray-800">{item.name}</p>
-                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                    <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
-                                                </div>
-                                            </div>
-                                            <div className="flex items-center">
-                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
-                                            </div>
-                                        </div>
-                                    )})}
-                                </div>
-                            </div>
-                        )}
-                    </div>
-                )}
             </div>
         ) : (
             <div className="text-center py-10 bg-white rounded-xl shadow-md">
