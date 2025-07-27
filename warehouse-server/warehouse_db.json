@@ -226,24 +226,6 @@
     ],
     "items": [
         {
-            "name": "вфывфыв",
-            "type": "Коробки",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
-            "placeId": null,
-            "id": "cee068c5-9e37-4399-9e0f-ad622046c481"
-        },
-        {
-            "name": "Hdhdh",
-            "type": "Коробки",
-            "size": "Паллета",
-            "quantity": 1,
-            "warehouseId": "unassigned",
-            "placeId": null,
-            "id": "2cbd4667-0996-45cb-8a18-f2ef581dc70c"
-        },
-        {
             "name": "Опрот",
             "type": "Коробки",
             "size": "Паллета",
@@ -260,6 +242,15 @@
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 1,
             "id": "66d94a66-79fe-4e53-b2a7-db6424f56f82"
+        },
+        {
+            "name": "Рорпп",
+            "type": "Коробки",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "placeId": 2,
+            "id": "bb8986ea-3b35-4792-9e1e-4420948fbbc6"
         }
     ],
     "itemTypes": [
@@ -335,7 +326,7 @@
             "firstName": "Бекир",
             "lastName": "Резаев",
             "position": "Водитель ",
-            "phone": "4244409378",
+            "phone": "+14244409378",
             "assignedWarehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "role": "Водитель"
         }

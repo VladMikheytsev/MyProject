@@ -504,25 +504,33 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Создать позицию</h2>
                 <div className="space-y-4">
                     <input type="text" name="name" value={newItem.name} onChange={handleChange} placeholder="Наименование" className="w-full p-3 border rounded-lg" />
+                    
                     <div>
-                        <label className="block text-sm font-medium text-gray-700 mb-1">Доступные типы:</label>
-                        <div className="flex flex-wrap gap-2 p-2 bg-gray-50 rounded-lg">
+                        <div className="flex justify-between items-center mb-2">
+                            <label className="block text-sm font-medium text-gray-700">Тип позиции:</label>
+                            {userRole === 'Администратор' && (
+                                <button onClick={onManageTypes} className="p-2 bg-gray-100 rounded-lg hover:bg-gray-200"><EditIcon /></button>
+                            )}
+                        </div>
+                        <div className="flex overflow-x-auto space-x-2 pb-2">
                             {itemTypes.map(t => (
-                                <div key={t.id} className="flex items-center gap-2 bg-white p-1 pr-2 rounded-full border">
-                                    <div style={{ width: '20px', height: '20px', backgroundColor: t.color, borderRadius: '50%' }}></div>
-                                    <span className="text-sm">{t.name}</span>
-                                </div>
+                                <button 
+                                    key={t.id} 
+                                    onClick={() => setNewItem(prev => ({ ...prev, type: t.name }))}
+                                    className={`flex-shrink-0 flex items-center gap-2 px-3 py-2 text-sm font-semibold rounded-full transition-all duration-200 ${newItem.type === t.name ? 'ring-2 ring-offset-1' : ''}`} 
+                                    style={{
+                                        backgroundColor: newItem.type === t.name ? t.color : '#e5e7eb', 
+                                        color: newItem.type === t.name ? 'white' : '#374151',
+                                        borderColor: t.color
+                                    }}
+                                >
+                                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white', opacity: newItem.type === t.name ? 1 : 0.5}}></div>
+                                    {t.name}
+                                </button>
                             ))}
                         </div>
                     </div>
-                    <div className="flex items-center gap-2">
-                        <select name="type" value={newItem.type} onChange={handleChange} className="w-full p-3 border rounded-lg">
-                            {itemTypes.map(t => <option key={t.id} value={t.name}>{t.name}</option>)}
-                        </select>
-                        {userRole === 'Администратор' && (
-                            <button onClick={onManageTypes} className="p-3 bg-gray-200 rounded-lg hover:bg-gray-300"><EditIcon /></button>
-                        )}
-                    </div>
+
                     <div className="grid grid-cols-2 gap-4">
                         <select name="size" value={newItem.size} onChange={handleChange} className="w-full p-3 border rounded-lg"><option>Паллета</option><option>Коробка</option><option>Шт</option></select>
                         <input type="number" name="quantity" value={newItem.quantity} onChange={handleChange} placeholder="Количество" min="1" className="w-full p-3 border rounded-lg" />
