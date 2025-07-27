@@ -413,9 +413,9 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
     const sortedActiveCols = Array.from(activeCols).sort((a, b) => a - b);
 
     return (
-        <div className="flex flex-col p-2" style={{ gap: '3px', width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black' }}>
+        <div className="flex flex-col p-2" style={{ width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black' }}>
             {sortedActiveRows.map(row => (
-                <div key={row} className="flex" style={{ gap: '3px' }}>
+                <div key={row} className="flex">
                     {sortedActiveCols.map(col => {
                         const id = row * 7 + col;
                         const place = places.find(p => p.id === id);
@@ -447,8 +447,10 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
                             }
                         }
                         
+                        const margin = place?.type === 'pallet' ? '5px' : '1.5px';
+
                         return (
-                            <div key={col} className="flex items-center justify-center" style={{ width: '45px', height: '45px' }}>
+                            <div key={col} className="flex items-center justify-center" style={{ width: '45px', height: '45px', margin: margin }}>
                                 <div onClick={() => isClickable && onPlaceSelect({placeId: id, warehouseId: warehouseId})} className={`rounded-sm flex items-center justify-center gap-1 ${isClickable ? 'cursor-pointer' : ''} ${isDisabled ? 'opacity-30' : ''} ${isSelected ? 'ring-4 ring-offset-2 ring-red-500' : ''}`} style={{...style, backgroundColor}}>
                                   {place && place.type === 'pallet' && itemsOnThisPlace.length === 0 && <PalletLines orientation={place.orientation === '30*36' ? 'vertical' : 'horizontal'} />}
                                   {place && place.type === 'shelving' && <ShelvingLines orientation={place.orientation === '15*40' ? 'vertical' : 'horizontal'} />}
@@ -1521,7 +1523,7 @@ const WarehouseInfoBlock = ({ warehouse, items, onEdit, userRole }) => {
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
     return (
         <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col relative">
-            <div className="flex justify-between items-start mb-2">
+            <div className="flex justify-between items-center mb-2">
                  <h3 className="text-xl font-bold text-gray-800">{warehouse.name}</h3>
                  {userRole === 'Администратор' && (
                     <button
