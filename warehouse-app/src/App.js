@@ -1590,7 +1590,8 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         maxHeight: '100%',
         objectFit: 'contain',
         pointerEvents: 'none',
-        opacity: 0.8
+        opacity: 0.8,
+        zIndex: -1
     };
 
     return (
@@ -1646,13 +1647,12 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             
             <footer style={{
                 position: 'absolute',
-                top: '50%',
+                bottom: '2cm',
                 left: '2cm',
                 right: '2cm',
-                transform: 'translateY(-50%)',
                 fontSize: '14px'
             }}>
-                <div style={{ marginBottom: '1em' }}>
+                <div style={{ marginBottom: '0.75em' }}>
                     <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Transferred by:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.creatorId)}</span>
@@ -1666,7 +1666,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                         <span style={{ marginLeft: 'auto' }}>{currentDate}</span>
                     </div>
                 </div>
-                <div style={{ marginBottom: '1em' }}>
+                <div style={{ marginBottom: '0.75em' }}>
                     <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Driver:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.driverId)}</span>
