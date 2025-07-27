@@ -230,7 +230,7 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
 // --- Модальные окна ---
 
 // --- [НОВОЕ МОДАЛЬНОЕ ОКНО] Редактор профиля пользователя ---
-const ProfileEditorModal = ({ user, warehouses, onSave, onClose }) => {
+const ProfileEditorModal = ({ user, warehouses, onSave, onClose, onLogout }) => {
     const [userData, setUserData] = useState({ ...user });
 
     const handleChange = (e) => {
@@ -259,9 +259,15 @@ const ProfileEditorModal = ({ user, warehouses, onSave, onClose }) => {
                         {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                     </select>
                 </div>
-                <div className="flex justify-end space-x-4 mt-8">
-                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
-                    <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить</button>
+                <div className="flex justify-between items-center mt-8">
+                    <button onClick={onLogout} className="flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
+                        <LogOutIcon />
+                        <span>Выйти</span>
+                    </button>
+                    <div className="flex space-x-4">
+                        <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                        <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить</button>
+                    </div>
                 </div>
             </div>
         </div>
@@ -2190,6 +2196,15 @@ export default function App() {
   const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
+  useEffect(() => {
+    if (currentUser && warehouses.length > 0) {
+        const userWarehouseIndex = sortedWarehouses.findIndex(w => w.id === currentUser.assignedWarehouseId);
+        if (userWarehouseIndex !== -1) {
+            setActiveIndex(userWarehouseIndex);
+        }
+    }
+  }, [currentUser, warehouses]);
+
 
   // --- Рендеринг ---
   if (!authChecked) {
@@ -2255,8 +2270,13 @@ export default function App() {
                 <button onClick={() => setContactsModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ContactsIcon />
                 </button>
-                <button onClick={handleLogout} className="flex flex-1 items-center justify-center p-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition">
-                    <LogOutIcon />
+                 <button onClick={() => setScenariosModalOpen(true)} className="relative flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
+                    <ScenariosIcon />
+                    {notificationCount > 0 && (
+                        <span className="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-red-100 bg-red-600 rounded-full">
+                            {notificationCount}
+                        </span>
+                    )}
                 </button>
             </div>
         </div>
@@ -2383,15 +2403,6 @@ export default function App() {
 
 
                 <div className="space-y-4">
-                     <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
-                        <ScenariosIcon />
-                        <span className="flex-1 text-left">Задачи</span>
-                        {notificationCount > 0 && (
-                            <span className="inline-flex items-center justify-center w-6 h-6 text-xs font-bold text-red-100 bg-red-600 rounded-full">
-                                {notificationCount}
-                            </span>
-                        )}
-                    </button>
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
                         <TruckIcon />
                         <span className="flex-1 text-left">Переместить позицию по QR</span>
@@ -2489,7 +2500,7 @@ export default function App() {
       </div>
       
       {/* Модальные окна */}
-      {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} />}
+      {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} onLogout={handleLogout} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === warehouseIdForEditor) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === warehouseIdForEditor).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(warehouseIdForEditor)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
