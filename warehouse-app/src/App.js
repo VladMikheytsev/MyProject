@@ -1706,9 +1706,6 @@ export default function App() {
   const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
   const [activeWarehouseIndex, setActiveWarehouseIndex] = useState(0);
   const [activePlacesIndex, setActivePlacesIndex] = useState(0);
-
-  const touchStartX = useRef(0);
-  const touchEndX = useRef(0);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -2103,28 +2100,6 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  // --- [НОВОЕ] Обработчики свайпов для основного вида ---
-  const handleMainViewTouchStart = (e) => {
-    touchEndX.current = 0; 
-    touchStartX.current = e.targetTouches[0].clientX;
-  };
-  const handleMainViewTouchMove = (e) => {
-    touchEndX.current = e.targetTouches[0].clientX;
-  };
-  const handleMainViewTouchEnd = () => {
-    if (touchStartX.current === 0 || touchEndX.current === 0) return;
-    const swipeDistance = touchStartX.current - touchEndX.current;
-    const swipeThreshold = 50; 
-
-    if (swipeDistance > swipeThreshold) {
-      if (mainViewTab === 'warehouses') setMainViewTab('places');
-    } else if (swipeDistance < -swipeThreshold) {
-      if (mainViewTab === 'places') setMainViewTab('warehouses');
-    }
-    touchStartX.current = 0;
-    touchEndX.current = 0;
-  };
-
   // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
@@ -2255,9 +2230,6 @@ export default function App() {
                     {/* Контейнер для свайпа */}
                     <div
                         className="overflow-hidden"
-                        onTouchStart={handleMainViewTouchStart}
-                        onTouchMove={handleMainViewTouchMove}
-                        onTouchEnd={handleMainViewTouchEnd}
                     >
                         <div className="flex transition-transform duration-300" style={{ transform: `translateX(${mainViewTab === 'warehouses' ? '0%' : '-50%'})`, width: '200%' }}>
                             {/* Панель "Склады" */}
