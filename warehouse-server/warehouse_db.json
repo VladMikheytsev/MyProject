@@ -88,6 +88,15 @@
             "warehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
             "placeId": null,
             "id": "cee068c5-9e37-4399-9e0f-ad622046c481"
+        },
+        {
+            "name": "Hdhdh",
+            "type": "Коробки",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
+            "placeId": 0,
+            "id": "2cbd4667-0996-45cb-8a18-f2ef581dc70c"
         }
     ],
     "itemTypes": [
