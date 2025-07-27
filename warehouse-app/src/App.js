@@ -1572,6 +1572,27 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     // [ИЗМЕНЕНО] Формируем URL к логотипу на нашем бэкенде
     const logoUrl = `${API_BASE_URL}/static/logo.png`;
 
+    const signatureLineStyle = {
+        display: 'flex',
+        alignItems: 'flex-end',
+        height: '48px',
+        position: 'relative',
+        borderBottom: '1px solid #333',
+        paddingBottom: '4px'
+    };
+
+    const signatureImageStyle = {
+        position: 'absolute',
+        left: '50%',
+        top: '50%',
+        transform: 'translate(-50%, -50%)',
+        height: '48px',
+        maxHeight: '100%',
+        objectFit: 'contain',
+        pointerEvents: 'none',
+        opacity: 0.8
+    };
+
     return (
         <div ref={ref} style={{ 
             padding: '2cm', 
@@ -1630,76 +1651,46 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 right: '2cm', 
                 fontSize: '14px' 
             }}>
-                <div style={{ marginBottom: '1.5em' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '48px', lineHeight: 1 }}>
+                <div style={{ marginBottom: '1em' }}>
+                    <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Transferred by:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.creatorId)}</span>
-                        <div style={{ flexGrow: 1, position: 'relative', margin: '0 1em', height: '100%' }}>
-                            {signatures[scenario.creatorSignatureId] && 
-                                <img 
-                                    src={signatures[scenario.creatorSignatureId]} 
-                                    alt="signature" 
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        height: '48px',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                        pointerEvents: 'none'
-                                    }} 
-                                />
-                            }
-                        </div>
-                        <span>{currentDate}</span>
+                        {signatures[scenario.creatorSignatureId] && 
+                            <img 
+                                src={signatures[scenario.creatorSignatureId]} 
+                                alt="signature" 
+                                style={signatureImageStyle} 
+                            />
+                        }
+                        <span style={{ marginLeft: 'auto' }}>{currentDate}</span>
                     </div>
                 </div>
-                <div style={{ marginBottom: '1.5em' }}>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '48px', lineHeight: 1 }}>
+                <div style={{ marginBottom: '1em' }}>
+                    <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Driver:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.driverId)}</span>
-                        <div style={{ flexGrow: 1, position: 'relative', margin: '0 1em', height: '100%' }}>
-                            {signatures[scenario.driverSignatureId] && 
-                                <img 
-                                    src={signatures[scenario.driverSignatureId]} 
-                                    alt="signature" 
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        height: '48px',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                        pointerEvents: 'none'
-                                    }} 
-                                />
-                            }
-                        </div>
-                        <span>{currentDate}</span>
+                        {signatures[scenario.driverSignatureId] && 
+                            <img 
+                                src={signatures[scenario.driverSignatureId]} 
+                                alt="signature" 
+                                style={signatureImageStyle} 
+                            />
+                        }
+                        <span style={{ marginLeft: 'auto' }}>{currentDate}</span>
                     </div>
                 </div>
                 <div>
-                    <div style={{ display: 'flex', alignItems: 'flex-end', height: '48px', lineHeight: 1 }}>
+                    <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Received by:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.completerId)}</span>
-                        <div style={{ flexGrow: 1, position: 'relative', margin: '0 1em', height: '100%' }}>
-                            {signatures[scenario.completerSignatureId] && 
-                                <img 
-                                    src={signatures[scenario.completerSignatureId]} 
-                                    alt="signature" 
-                                    style={{
-                                        position: 'absolute',
-                                        bottom: 0,
-                                        left: 0,
-                                        height: '48px',
-                                        maxHeight: '100%',
-                                        objectFit: 'contain',
-                                        pointerEvents: 'none'
-                                    }} 
-                                />
-                            }
-                        </div>
-                        <span>{currentDate}</span>
+                        {signatures[scenario.completerSignatureId] && 
+                            <img 
+                                src={signatures[scenario.completerSignatureId]} 
+                                alt="signature" 
+                                style={signatureImageStyle} 
+                            />
+                        }
+                        <span style={{ marginLeft: 'auto' }}>{currentDate}</span>
                     </div>
                 </div>
             </footer>
