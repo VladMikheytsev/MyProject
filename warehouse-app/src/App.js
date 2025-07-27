@@ -767,51 +767,62 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
     );
 };
 
+// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно перемещения с разделением ---
 const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCancel }) => {
+    const [moveQuantity, setMoveQuantity] = useState(itemToMove.quantity);
+    const [unit, setUnit] = useState('шт.');
     const [destination, setDestination] = useState({
         warehouseId: itemToMove.warehouseId,
         placeId: null
     });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
+    const quantityInputRef = useRef(null);
 
     useEffect(() => {
         const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
         if (!selectedWarehouse) return;
 
         const otherItems = items.filter(i => i.id !== itemToMove.id);
-
         const newDisabledPlaces = [];
         (selectedWarehouse.places || []).forEach(place => {
             const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
             if (itemToMove.size === 'Паллета') {
-                if (place.type === 'shelving') {
-                    newDisabledPlaces.push(place.id);
-                }
-                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) {
-                    newDisabledPlaces.push(place.id);
-                }
+                if (place.type === 'shelving') newDisabledPlaces.push(place.id);
+                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) newDisabledPlaces.push(place.id);
             }
         });
         setDisabledPlaces(newDisabledPlaces);
         setDestination(prev => ({...prev, placeId: null}));
-
     }, [destination.warehouseId, itemToMove, warehouses, items]);
 
     const handleSave = () => {
+        const quantity = parseInt(moveQuantity, 10);
+        if (isNaN(quantity) || quantity <= 0) {
+            alert('Пожалуйста, введите корректное количество.');
+            return;
+        }
+        if (quantity > itemToMove.quantity) {
+            alert(`Нельзя переместить больше, чем есть в наличии (${itemToMove.quantity}).`);
+            return;
+        }
         if (destination.placeId === null) {
             alert('Пожалуйста, выберите новое место.');
             return;
         }
-        onSave(destination);
+        onSave({ destination, quantity, unit });
     };
 
     const handleWarehouseChange = (e) => {
-        const newWarehouseId = Number(e.target.value);
+        const newWarehouseId = e.target.value;
         setDestination({ warehouseId: newWarehouseId, placeId: null });
     };
 
     const handlePlaceSelect = (placeInfo) => {
         setDestination(prev => ({ ...prev, placeId: placeInfo.placeId }));
+    };
+
+    const handleQuantityFocus = (e) => {
+        e.target.value = '';
     };
 
     const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
@@ -820,14 +831,48 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение позиции</h2>
-                <p className="mb-6 text-gray-600">"{itemToMove.name}"</p>
+                <p className="mb-6 text-gray-600">"{itemToMove.name}" (Доступно: {itemToMove.quantity})</p>
 
                 <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700">Целевой склад:</label>
-                    <select name="warehouseId" value={destination.warehouseId} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
-                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                    </select>
+                    {/* Поля для количества и единиц */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Количество:</label>
+                            <input
+                                ref={quantityInputRef}
+                                type="number"
+                                defaultValue={itemToMove.quantity}
+                                onFocus={handleQuantityFocus}
+                                onChange={(e) => setMoveQuantity(e.target.value)}
+                                placeholder="Количество"
+                                min="1"
+                                max={itemToMove.quantity}
+                                className="w-full p-3 border rounded-lg"
+                            />
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Единица:</label>
+                            <select
+                                value={unit}
+                                onChange={(e) => setUnit(e.target.value)}
+                                className="w-full p-3 border rounded-lg bg-white"
+                            >
+                                <option>Паллета</option>
+                                <option>Коробка</option>
+                                <option>шт.</option>
+                            </select>
+                        </div>
+                    </div>
 
+                    {/* Выбор склада */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Целевой склад:</label>
+                        <select value={destination.warehouseId || ''} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
+                            {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                        </select>
+                    </div>
+
+                    {/* Выбор места */}
                     {selectedWarehouse && (
                         <div>
                             <h3 className="font-semibold mb-2">Выберите новое место на складе "{selectedWarehouse.name}"</h3>
@@ -854,6 +899,7 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
         </div>
     );
 };
+
 
 // --- Модальное окно для действий с позицией (ОБНОВЛЕННЫЙ ДИЗАЙН) ---
 const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, onWriteOff, onCancel }) => {
@@ -897,7 +943,7 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
     };
 
     const handleWarehouseChange = (e) => {
-        const newWarehouseId = Number(e.target.value);
+        const newWarehouseId = e.target.value;
         setDestination({ warehouseId: newWarehouseId, placeId: null });
     };
 
@@ -1863,12 +1909,43 @@ export default function App() {
     setItemTypesManagerOpen(false);
   };
 
-  const handleSaveItemMove = (destination) => {
-    setItems(prevItems => prevItems.map(item =>
-        item.id === movingItem.id
-            ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
-            : item
-    ));
+  // --- [ОБНОВЛЕННАЯ ФУНКЦИЯ] Обработка перемещения с разделением ---
+  const handleSaveItemMove = ({ destination, quantity, unit }) => {
+    setItems(prevItems => {
+        const originalItem = prevItems.find(item => item.id === movingItem.id);
+        if (!originalItem) return prevItems;
+
+        // Если перемещается всё количество, просто обновляем позицию
+        if (quantity >= originalItem.quantity) {
+            return prevItems.map(item =>
+                item.id === movingItem.id
+                    ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
+                    : item
+            );
+        }
+
+        // Если количество меньше, разделяем позицию
+        // 1. Уменьшаем количество у оригинальной позиции
+        const updatedOriginalItem = {
+            ...originalItem,
+            quantity: originalItem.quantity - quantity
+        };
+
+        // 2. Создаем новую позицию с перемещаемым количеством
+        const newItem = {
+            ...originalItem, // Копируем все свойства
+            id: crypto.randomUUID(), // Генерируем новый уникальный ID
+            quantity: quantity,
+            warehouseId: destination.warehouseId,
+            placeId: destination.placeId
+            // Свойство 'unit' можно добавить сюда, если нужно его хранить
+        };
+
+        // 3. Обновляем массив позиций
+        return prevItems.map(item =>
+            item.id === movingItem.id ? updatedOriginalItem : item
+        ).concat(newItem);
+    });
     setMovingItem(null);
   };
 
@@ -2251,7 +2328,10 @@ export default function App() {
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
+      
+      {/* --- [ИЗМЕНЕНО] Используем новое модальное окно --- */}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
+      
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
