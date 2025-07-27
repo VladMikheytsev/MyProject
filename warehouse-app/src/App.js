@@ -447,7 +447,7 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
                             }
                         }
                         
-                        const margin = place?.type === 'pallet' ? '5px' : '1.5px';
+                        const margin = place?.type === 'pallet' ? '3px' : '1.5px';
 
                         return (
                             <div key={col} className="flex items-center justify-center" style={{ width: '45px', height: '45px', margin: margin }}>
