@@ -1818,15 +1818,15 @@ export default function App() {
   const handleLogin = async (credentials) => {
       const user = await api.loginUser(credentials);
       const now = new Date().getTime();
-      setCurrentUser(user);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
+      window.location.reload();
   };
 
   const handleRegister = async (formData) => {
       const newUser = await api.registerUser(formData);
       const now = new Date().getTime();
-      setCurrentUser(newUser);
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: newUser, loginTime: now }));
+      window.location.reload();
   };
   
   const handleLogout = () => {
