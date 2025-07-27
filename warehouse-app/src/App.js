@@ -1704,8 +1704,6 @@ export default function App() {
   
   // --- [НОВОЕ] Состояния для вкладок и свайпов ---
   const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
-  const [activeWarehouseIndex, setActiveWarehouseIndex] = useState(0);
-  const [activePlacesIndex, setActivePlacesIndex] = useState(0);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -2101,7 +2099,7 @@ export default function App() {
   };
 
   // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
-  const useSwipeNavigation = (itemCount) => {
+  const useSwipeNavigation = (itemCount, onSwipe) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
     const touchEndX = useRef(0);
@@ -2119,22 +2117,28 @@ export default function App() {
         if (touchStartX.current === 0 || touchEndX.current === 0) return;
         const swipeDistance = touchStartX.current - touchEndX.current;
         const swipeThreshold = 50;
-
+        
+        let newIndex = activeIndex;
         if (swipeDistance > swipeThreshold) {
-            setActiveIndex(prev => Math.min(itemCount - 1, prev + 1));
+            newIndex = Math.min(itemCount - 1, activeIndex + 1);
         } else if (swipeDistance < -swipeThreshold) {
-            setActiveIndex(prev => Math.max(0, prev - 1));
+            newIndex = Math.max(0, activeIndex - 1);
         }
+        
+        if (newIndex !== activeIndex) {
+            setActiveIndex(newIndex);
+            if(onSwipe) onSwipe(newIndex);
+        }
+
         touchStartX.current = 0;
         touchEndX.current = 0;
     };
     
-    return { activeIndex, handleTouchStart, handleTouchMove, handleTouchEnd };
+    return { activeIndex, setActiveIndex, handleTouchStart, handleTouchMove, handleTouchEnd };
   };
   
   const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
-  const warehouseSwipe = useSwipeNavigation(sortedWarehouses.length);
-  const placesSwipe = useSwipeNavigation(sortedWarehouses.length);
+  const { activeIndex: activeWarehouseIndex, setActiveIndex: setActiveWarehouseIndex, ...warehouseSwipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
 
   // --- Рендеринг ---
@@ -2227,15 +2231,12 @@ export default function App() {
                         </button>
                     </div>
 
-                    {/* Контейнер для свайпа */}
-                    <div
-                        className="overflow-hidden"
-                    >
-                        <div className="flex transition-transform duration-300" style={{ transform: `translateX(${mainViewTab === 'warehouses' ? '0%' : '-50%'})`, width: '200%' }}>
-                            {/* Панель "Склады" */}
-                            <div className="w-1/2 p-4">
-                                <div className="overflow-hidden" {...warehouseSwipe}>
-                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${warehouseSwipe.activeIndex * 100}%)` }}>
+                    {/* Контейнер для контента вкладок */}
+                    <div className="overflow-hidden">
+                        {mainViewTab === 'warehouses' && (
+                            <div className="p-4">
+                                <div className="overflow-hidden" {...warehouseSwipeHandlers}>
+                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeWarehouseIndex * 100}%)` }}>
                                         {sortedWarehouses.map(w => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 <WarehouseInfoBlock 
@@ -2250,36 +2251,34 @@ export default function App() {
                                 </div>
                                 <div className="flex justify-center items-center mt-4 space-x-2">
                                     {sortedWarehouses.map((_, index) => (
-                                        <div key={index} className={`w-2 h-2 rounded-full ${index === warehouseSwipe.activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeWarehouseIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                                     ))}
                                 </div>
+                                {userRole === 'Администратор' && (
+                                    <button onClick={() => setEditingWarehouse({})} className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition">
+                                        <PlusIcon /> Добавить склад
+                                    </button>
+                                )}
                             </div>
+                        )}
 
-                            {/* Панель "Места" */}
-                            <div className="w-1/2 p-4">
-                                <div className="overflow-hidden" {...placesSwipe}>
-                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${placesSwipe.activeIndex * 100}%)` }}>
-                                        {sortedWarehouses.map(w => (
-                                            <div key={w.id} className="w-full flex-shrink-0 px-1">
-                                                <WarehousePlacesBlock 
-                                                    warehouse={w}
-                                                    items={items}
-                                                    itemTypes={itemTypes}
-                                                    onPlaceSelect={setViewingPlaceInfo}
-                                                    onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
-                                                    userRole={userRole}
-                                                />
-                                            </div>
-                                        ))}
-                                    </div>
-                                </div>
-                                 <div className="flex justify-center items-center mt-4 space-x-2">
-                                    {sortedWarehouses.map((_, index) => (
-                                        <div key={index} className={`w-2 h-2 rounded-full ${index === placesSwipe.activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                    ))}
-                                </div>
+                        {mainViewTab === 'places' && (
+                             <div className="p-4">
+                                {(() => {
+                                    const selectedWarehouse = sortedWarehouses[activeWarehouseIndex];
+                                    return selectedWarehouse ? (
+                                        <WarehousePlacesBlock 
+                                            warehouse={selectedWarehouse}
+                                            items={items}
+                                            itemTypes={itemTypes}
+                                            onPlaceSelect={setViewingPlaceInfo}
+                                            onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
+                                            userRole={userRole}
+                                        />
+                                    ) : <p className="text-center text-gray-500 py-4">Склад не найден.</p>;
+                                })()}
                             </div>
-                        </div>
+                        )}
                     </div>
                 </div>
 
