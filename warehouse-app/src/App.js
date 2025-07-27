@@ -2099,7 +2099,7 @@ export default function App() {
   };
 
   // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
-  const useSwipeNavigation = (itemCount, onSwipe) => {
+  const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
     const touchEndX = useRef(0);
@@ -2127,7 +2127,6 @@ export default function App() {
         
         if (newIndex !== activeIndex) {
             setActiveIndex(newIndex);
-            if(onSwipe) onSwipe(newIndex);
         }
 
         touchStartX.current = 0;
@@ -2234,8 +2233,8 @@ export default function App() {
                     {/* Контейнер для контента вкладок */}
                     <div className="overflow-hidden">
                         {mainViewTab === 'warehouses' && (
-                            <div className="p-4">
-                                <div className="overflow-hidden" {...warehouseSwipeHandlers}>
+                            <div className="p-4" {...warehouseSwipeHandlers}>
+                                <div className="overflow-hidden">
                                     <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeWarehouseIndex * 100}%)` }}>
                                         {sortedWarehouses.map(w => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
@@ -2263,7 +2262,7 @@ export default function App() {
                         )}
 
                         {mainViewTab === 'places' && (
-                             <div className="p-4">
+                             <div className="p-4" {...warehouseSwipeHandlers}>
                                 {(() => {
                                     const selectedWarehouse = sortedWarehouses[activeWarehouseIndex];
                                     return selectedWarehouse ? (
