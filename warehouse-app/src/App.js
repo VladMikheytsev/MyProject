@@ -2099,7 +2099,7 @@ export default function App() {
   };
 
   // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
-  const useSwipeNavigation = (itemCount, onIndexChange) => {
+  const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
     const touchEndX = useRef(0);
@@ -2127,7 +2127,6 @@ export default function App() {
         
         if (newIndex !== activeIndex) {
             setActiveIndex(newIndex);
-            if(onIndexChange) onIndexChange(newIndex);
         }
 
         touchStartX.current = 0;
@@ -2138,7 +2137,7 @@ export default function App() {
   };
   
   const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
-  const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
+  const { activeIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
 
   // --- Рендеринг ---
