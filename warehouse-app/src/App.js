@@ -1443,57 +1443,40 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [ОБНОВЛЕННЫЙ] Компонент для отображения мест на одном складе ---
-const WarehousePlacesBlock = ({ warehouse, items, itemTypes, isExpanded, onToggleExpand, onPlaceSelect, onEditPlaces, userRole }) => {
+// --- [НОВЫЙ] Компонент для отображения информации о складе во вкладке ---
+const WarehouseInfoBlock = ({ warehouse, items, onEdit, userRole }) => {
     return (
-        <div className="bg-white rounded-xl shadow-md p-4">
-            <div onClick={onToggleExpand} className="flex justify-between items-center cursor-pointer group">
-                <h3 className="text-xl font-bold text-gray-800 group-hover:text-blue-600">{warehouse.name}</h3>
-                <div className="flex items-center gap-2">
-                    {userRole === 'Администратор' && (
-                        <button
-                            onClick={(e) => {
-                                e.stopPropagation(); // Предотвратить сворачивание/разворачивание
-                                onEditPlaces(warehouse.id);
-                            }}
-                            className="text-gray-400 hover:text-blue-600 transition p-1 z-10"
-                            aria-label={`Редактировать места на складе ${warehouse.name}`}
-                        >
-                            <EditIcon />
-                        </button>
-                    )}
-                    {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+        <div className="bg-gray-50 rounded-xl p-4">
+            <div className="flex justify-between items-start">
+                <div>
+                    <h3 className="text-xl font-bold text-gray-800">{warehouse.name}</h3>
+                    <p className="text-sm text-gray-500">{warehouse.address}</p>
                 </div>
+                {userRole === 'Администратор' && (
+                    <button
+                        onClick={(e) => {
+                            e.stopPropagation();
+                            onEdit(warehouse);
+                        }}
+                        className="text-gray-400 hover:text-blue-600 transition p-1 z-10"
+                        aria-label={`Редактировать склад ${warehouse.name}`}
+                    >
+                        <EditIcon />
+                    </button>
+                )}
             </div>
-
+             <div className="mt-4 pt-4 border-t border-gray-200">
+                <p className="text-sm text-gray-600">{warehouse.hours}</p>
+                <p className="text-sm text-gray-600 mt-1">Ворота: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.gate_code}</span></p>
+                <p className="text-sm text-gray-600">Замок: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.lock_code}</span></p>
+            </div>
             <div className="mt-4 pt-4 border-t border-gray-200">
                 <PalletStats places={warehouse.places || []} items={items.filter(i => i.warehouseId === warehouse.id)} />
             </div>
-
-            {isExpanded && (
-                <div className="mt-4">
-                    {(warehouse.places && warehouse.places.length > 0) ? (
-                        <div className="overflow-auto">
-                            <CompactPlacesGrid
-                                places={warehouse.places}
-                                items={items.filter(i => i.warehouseId === warehouse.id)}
-                                itemTypes={itemTypes}
-                                onPlaceSelect={onPlaceSelect}
-                                warehouseId={warehouse.id}
-                            />
-                        </div>
-                    ) : (
-                         <div className="text-center text-gray-400 py-8">
-                            <span>Места не сконфигурированы. Нажмите иконку </span>
-                            <EditIcon />
-                            <span> в заголовке, чтобы их настроить.</span>
-                        </div>
-                    )}
-                </div>
-            )}
         </div>
     );
 };
+
 
 // --- [ИЗМЕНЕНО] Компонент для печатной формы с загрузкой логотипа с бэкенда ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
@@ -1664,10 +1647,9 @@ export default function App() {
   const [itemTypes, setItemTypes] = useState([]);
   const [scenarios, setScenarios] = useState([]);
   const [signatures, setSignatures] = useState({}); // --- [НОВОЕ] Хранилище подписей ---
-  const [selectedWarehouseId, setSelectedWarehouseId] = useState(null);
+  const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null); // [ИЗМЕНЕНО]
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
-  const [isWarehouseListOpen, setWarehouseListOpen] = useState(false);
   const [isItemEditorOpen, setItemEditorOpen] = useState(false);
   const [isItemTypesManagerOpen, setItemTypesManagerOpen] = useState(false);
   const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
@@ -1683,8 +1665,11 @@ export default function App() {
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null); // --- [НОВОЕ] Для подтверждения действий с подписью ---
   
-  const [isPlacesSectionExpanded, setIsPlacesSectionExpanded] = useState(true);
-  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
+  // --- [НОВОЕ] Состояния для вкладок и свайпов ---
+  const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
+  const [placesViewTab, setPlacesViewTab] = useState('all'); // 'all' или ID склада
+  const touchStartX = useRef(0);
+  const touchEndX = useRef(0);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -1726,7 +1711,7 @@ export default function App() {
       setItems([]);
       setScenarios([]);
       setSignatures({});
-      setSelectedWarehouseId(null);
+      setWarehouseIdForEditor(null);
   };
 
   const handleUpdateUser = async (updatedUser) => {
@@ -1822,8 +1807,6 @@ export default function App() {
                   setScenarios(appData.scenarios || []);
                   setSignatures(appData.signatures || {});
                   setUsers(usersData || []);
-                  // По умолчанию разворачиваем все блоки складов
-                  setExpandedWarehouses((appData.warehouses || []).map(w => w.id));
                   hasLoadedData.current = true;
               } catch (error) {
                   console.error("Не удалось загрузить данные пользователя:", error);
@@ -1893,11 +1876,10 @@ export default function App() {
         if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
         return [...prev, { ...savedData, places: [] }];
     });
-    setSelectedWarehouseId(savedData.id);
     setEditingWarehouse(null);
   };
   const handleSavePlaces = (placesData) => {
-    setWarehouses(prev => prev.map(w => w.id === selectedWarehouseId ? { ...w, places: placesData } : w));
+    setWarehouses(prev => prev.map(w => w.id === warehouseIdForEditor ? { ...w, places: placesData } : w));
     setPlacesEditorOpen(false);
   };
   const handleSaveItem = (itemData) => {
@@ -2059,17 +2041,13 @@ export default function App() {
     setVerifyingItem(null);
   };
   
-  const handleStartAddNewWarehouse = () => { setWarehouseListOpen(false); setEditingWarehouse({}); };
-  const handleStartEditWarehouse = (warehouse) => { setWarehouseListOpen(false); setEditingWarehouse(warehouse); };
-  const handleSelectWarehouse = (id) => { setSelectedWarehouseId(id); setWarehouseListOpen(false); };
+  const handleStartEditWarehouse = (warehouse) => { setEditingWarehouse(warehouse); };
   
   const handleDeleteWarehouse = (warehouseIdToDelete) => {
-    setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
-    setItems(prev => prev.map(i => i.warehouseId === warehouseIdToDelete ? { ...i, warehouseId: 'unassigned', placeId: null } : i));
-    if (selectedWarehouseId === warehouseIdToDelete) {
-        setSelectedWarehouseId(null);
+    if (window.confirm('Вы уверены, что хотите удалить этот склад? Все связанные с ним товары станут нераспределенными.')) {
+      setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
+      setItems(prev => prev.map(i => i.warehouseId === warehouseIdToDelete ? { ...i, warehouseId: 'unassigned', placeId: null } : i));
     }
-    setWarehouseListOpen(false);
   };
   
   const handleResetPlaces = (warehouseId) => {
@@ -2086,28 +2064,33 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  const toggleWarehouseExpansion = (warehouseId) => {
-    setExpandedWarehouses(prev =>
-        prev.includes(warehouseId)
-            ? prev.filter(id => id !== warehouseId)
-            : [...prev, warehouseId]
-    );
+  // --- [НОВОЕ] Обработчики свайпов ---
+  const handleTouchStart = (e) => {
+    touchEndX.current = 0; // Сброс
+    touchStartX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchMove = (e) => {
+    touchEndX.current = e.targetTouches[0].clientX;
+  };
+
+  const handleTouchEnd = () => {
+    if (touchStartX.current === 0 || touchEndX.current === 0) return;
+    const swipeDistance = touchStartX.current - touchEndX.current;
+    const swipeThreshold = 50; // Мин. дистанция для свайпа
+
+    if (swipeDistance > swipeThreshold) {
+      // Свайп влево
+      if (mainViewTab === 'warehouses') setMainViewTab('places');
+    } else if (swipeDistance < -swipeThreshold) {
+      // Свайп вправо
+      if (mainViewTab === 'places') setMainViewTab('warehouses');
+    }
+    // Сброс
+    touchStartX.current = 0;
+    touchEndX.current = 0;
   };
   
-  const calculateFreePalletSpaces = (warehouse, allItems) => {
-    const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
-    const totalPalletPlaces = palletPlaces.length;
-    if (totalPalletPlaces === 0) return 0;
-
-    const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
-    const occupiedPalletPlaceIds = new Set();
-    allItems.filter(item => item.warehouseId === warehouse.id).forEach(item => {
-        if (palletPlaceIds.has(item.placeId)) {
-            occupiedPalletPlaceIds.add(item.placeId);
-        }
-    });
-    return totalPalletPlaces - occupiedPalletPlaceIds.size;
-  };
 
   // --- Рендеринг ---
   if (!authChecked) {
@@ -2128,17 +2111,9 @@ export default function App() {
   if (loading && !hasLoadedData.current) return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Загрузка данных с сервера...</div></div>;
 
   const userRole = currentUser.role;
-  let warehousesToDisplay = selectedWarehouseId === null ? warehouses : warehouses.filter(w => w.id === selectedWarehouseId);
-
-    if (selectedWarehouseId === null) {
-        warehousesToDisplay.sort((a, b) => {
-            const freeA = calculateFreePalletSpaces(a, items);
-            const freeB = calculateFreePalletSpaces(b, items);
-            return freeB - freeA;
-        });
-    }
-
-  const itemsToDisplay = selectedWarehouseId === null ? items : items.filter(i => i.warehouseId === selectedWarehouseId || i.warehouseId === 'unassigned');
+  const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
+  
+  const itemsToDisplay = items;
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
@@ -2158,7 +2133,6 @@ export default function App() {
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned'));
-
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
@@ -2191,54 +2165,105 @@ export default function App() {
       <div className="max-w-7xl mx-auto">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 <div className="bg-white rounded-xl shadow-md p-5">
-                        <div onClick={() => setWarehouseListOpen(true)} className="cursor-pointer group hover:bg-gray-50 mb-3 -mx-2 -mt-2 p-2 rounded-lg transition">
-                            <div className="flex items-center">
-                                <h3 className="text-2xl font-bold text-gray-900">{selectedWarehouseId === null ? "Все склады" : warehouses.find(w=>w.id === selectedWarehouseId)?.name}</h3>
-                                <ChevronDownIcon className="ml-2 text-gray-400 group-hover:text-blue-600"/>
+                 {/* --- [НОВЫЙ] Компонент с вкладками --- */}
+                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                    {/* Заголовки вкладок */}
+                    <div className="flex border-b">
+                        <button 
+                            onClick={() => setMainViewTab('warehouses')} 
+                            className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'warehouses' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                        >
+                            Склады
+                        </button>
+                        <button 
+                            onClick={() => setMainViewTab('places')} 
+                            className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'places' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                        >
+                            Места
+                        </button>
+                    </div>
+
+                    {/* Контейнер для свайпа */}
+                    <div
+                        className="overflow-hidden"
+                        onTouchStart={handleTouchStart}
+                        onTouchMove={handleTouchMove}
+                        onTouchEnd={handleTouchEnd}
+                    >
+                        <div className="flex transition-transform duration-300" style={{ transform: `translateX(${mainViewTab === 'warehouses' ? '0%' : '-50%'})`, width: '200%' }}>
+                            {/* Панель "Склады" */}
+                            <div className="w-1/2 p-4 space-y-4">
+                                {sortedWarehouses.map(w => (
+                                    <WarehouseInfoBlock 
+                                        key={w.id}
+                                        warehouse={w}
+                                        items={items}
+                                        onEdit={handleStartEditWarehouse}
+                                        userRole={userRole}
+                                    />
+                                ))}
                             </div>
-                            {selectedWarehouseId !== null && <p className="text-gray-600">{warehouses.find(w=>w.id === selectedWarehouseId)?.address}</p>}
+
+                            {/* Панель "Места" */}
+                            <div className="w-1/2 p-4">
+                                {/* Вложенные вкладки для мест */}
+                                <div className="flex overflow-x-auto space-x-2 border-b pb-2 mb-4 scrollbar-hide">
+                                    <button 
+                                        onClick={() => setPlacesViewTab('all')} 
+                                        className={`px-4 py-2 text-sm font-semibold rounded-full flex-shrink-0 ${placesViewTab === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                    >
+                                        Все склады
+                                    </button>
+                                    {sortedWarehouses.map(w => (
+                                        <button 
+                                            key={w.id}
+                                            onClick={() => setPlacesViewTab(w.id)} 
+                                            className={`px-4 py-2 text-sm font-semibold rounded-full flex-shrink-0 ${placesViewTab === w.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                        >
+                                            {w.name}
+                                        </button>
+                                    ))}
+                                </div>
+
+                                {/* Контент мест */}
+                                <div className="overflow-auto">
+                                    {placesViewTab === 'all' ? (
+                                        <div className="flex overflow-x-auto space-x-6 pb-2">
+                                            {sortedWarehouses.map(w => (
+                                                (w.places && w.places.length > 0) && (
+                                                    <div key={w.id} className="flex-shrink-0">
+                                                        <h3 className="font-bold mb-2 text-gray-700">{w.name}</h3>
+                                                        <CompactPlacesGrid 
+                                                            places={w.places}
+                                                            items={items.filter(i => i.warehouseId === w.id)}
+                                                            itemTypes={itemTypes}
+                                                            onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)}
+                                                            warehouseId={w.id}
+                                                        />
+                                                    </div>
+                                                )
+                                            ))}
+                                        </div>
+                                    ) : (
+                                        (() => {
+                                            const selectedWarehouse = warehouses.find(w => w.id === placesViewTab);
+                                            return selectedWarehouse && selectedWarehouse.places && selectedWarehouse.places.length > 0 ? (
+                                                <CompactPlacesGrid 
+                                                    places={selectedWarehouse.places}
+                                                    items={items.filter(i => i.warehouseId === selectedWarehouse.id)}
+                                                    itemTypes={itemTypes}
+                                                    onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)}
+                                                    warehouseId={selectedWarehouse.id}
+                                                />
+                                            ) : <p className="text-center text-gray-500 py-4">Места для этого склада не сконфигурированы.</p>;
+                                        })()
+                                    )}
+                                </div>
+                            </div>
                         </div>
-                        {selectedWarehouseId !== null ? (
-                            <div className="border-t pt-4">
-                                <p className="text-gray-600">{warehouses.find(w=>w.id === selectedWarehouseId)?.hours}</p>
-                                <p className="text-gray-600 mt-1">Ворота: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">{warehouses.find(w=>w.id === selectedWarehouseId)?.gate_code}</span></p>
-                                <p className="text-gray-600">Замок: <span className="font-mono bg-gray-100 px-1.5 py-0.5 rounded">{warehouses.find(w=>w.id === selectedWarehouseId)?.lock_code}</span></p>
-                            </div>
-                        ) : (
-                           <div className="border-t pt-4">
-                               <h3 className="text-sm font-semibold text-gray-500 mb-2">ОБЩАЯ СТАТИСТИКА</h3>
-                               <PalletStats places={warehouses.flatMap(w => w.places || [])} items={items} />
-                           </div>
-                        )}
+                    </div>
                 </div>
 
-                <div className="bg-gray-200 rounded-xl">
-                    <div onClick={() => setIsPlacesSectionExpanded(p => !p)} className="flex justify-between items-center p-4 cursor-pointer group">
-                        <h2 className="text-base font-bold text-gray-700 uppercase group-hover:text-blue-700">Места на складах</h2>
-                        {isPlacesSectionExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
-                    </div>
-                    {isPlacesSectionExpanded && (
-                        <div className="p-2 md:p-4 space-y-4">
-                            {warehousesToDisplay.map(warehouse => (
-                                <WarehousePlacesBlock
-                                    key={warehouse.id}
-                                    warehouse={warehouse}
-                                    items={items}
-                                    itemTypes={itemTypes}
-                                    isExpanded={expandedWarehouses.includes(warehouse.id)}
-                                    onToggleExpand={() => toggleWarehouseExpansion(warehouse.id)}
-                                    onPlaceSelect={(placeInfo) => setViewingPlaceInfo(placeInfo)}
-                                    onEditPlaces={(warehouseId) => {
-                                        setSelectedWarehouseId(warehouseId);
-                                        setPlacesEditorOpen(true);
-                                    }}
-                                    userRole={userRole}
-                                />
-                            ))}
-                        </div>
-                    )}
-                </div>
 
                 <div className="space-y-4">
                      <button onClick={() => setScenariosModalOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-purple-600 text-white font-semibold hover:bg-purple-700 transition shadow-md">
@@ -2309,7 +2334,7 @@ export default function App() {
                             </div>
                         ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
                         
-                        {sortedUnassignedFilteredItems.length > 0 && selectedWarehouseId === null && (
+                        {sortedUnassignedFilteredItems.length > 0 && (
                             <div className="mt-6 pt-4 border-t">
                                 <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
                                 <div className="space-y-3">
@@ -2348,9 +2373,8 @@ export default function App() {
       
       {/* Модальные окна */}
       {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} />}
-      {isWarehouseListOpen && <WarehouseListModal userRole={userRole} warehouses={warehouses} selectedId={selectedWarehouseId} onSelect={handleSelectWarehouse} onEdit={handleStartEditWarehouse} onAdd={handleStartAddNewWarehouse} onDelete={handleDeleteWarehouse} onClose={() => setWarehouseListOpen(false)} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
-      {isPlacesEditorOpen && warehouses.find(w => w.id === selectedWarehouseId) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === selectedWarehouseId).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(selectedWarehouseId)} />}
+      {isPlacesEditorOpen && warehouses.find(w => w.id === warehouseIdForEditor) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === warehouseIdForEditor).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(warehouseIdForEditor)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
