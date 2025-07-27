@@ -2136,7 +2136,7 @@ export default function App() {
     return { activeIndex, setActiveIndex, handleTouchStart, handleTouchMove, handleTouchEnd };
   };
   
-  const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
+  const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
 
@@ -2160,7 +2160,8 @@ export default function App() {
 
   const userRole = currentUser.role;
   
-  const itemsToDisplay = items;
+  const selectedWarehouseId = activeIndex === 0 ? null : sortedWarehouses[activeIndex].id;
+  const itemsToDisplay = selectedWarehouseId ? items.filter(item => item.warehouseId === selectedWarehouseId) : items;
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
@@ -2179,7 +2180,7 @@ export default function App() {
   };
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned'));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && !selectedWarehouseId));
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
@@ -2236,14 +2237,24 @@ export default function App() {
                             <div className="p-4" {...swipeHandlers}>
                                 <div className="overflow-hidden">
                                     <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-                                        {sortedWarehouses.map(w => (
+                                        {sortedWarehouses.map((w, index) => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
-                                                <WarehouseInfoBlock 
-                                                    warehouse={w}
-                                                    items={items}
-                                                    onEdit={handleStartEditWarehouse}
-                                                    userRole={userRole}
-                                                />
+                                                {index === 0 ? (
+                                                    <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col justify-center items-center">
+                                                        <h3 className="text-xl font-bold text-gray-800">Все склады</h3>
+                                                        <p className="text-sm text-gray-500">Общая статистика</p>
+                                                        <div className="mt-4 pt-4 border-t w-full">
+                                                            <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <WarehouseInfoBlock 
+                                                        warehouse={w}
+                                                        items={items}
+                                                        onEdit={handleStartEditWarehouse}
+                                                        userRole={userRole}
+                                                    />
+                                                )}
                                             </div>
                                         ))}
                                     </div>
@@ -2269,16 +2280,38 @@ export default function App() {
                              <div className="p-4" {...swipeHandlers}>
                                 <div className="overflow-hidden">
                                     <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-                                        {sortedWarehouses.map(w => (
+                                        {sortedWarehouses.map((w, index) => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
-                                                <WarehousePlacesBlock 
-                                                    warehouse={w}
-                                                    items={items}
-                                                    itemTypes={itemTypes}
-                                                    onPlaceSelect={setViewingPlaceInfo}
-                                                    onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
-                                                    userRole={userRole}
-                                                />
+                                                {index === 0 ? (
+                                                     <div className="bg-gray-50 rounded-xl p-4 h-full">
+                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Все места</h3>
+                                                        <div className="flex overflow-x-auto space-x-6 pb-2">
+                                                            {sortedWarehouses.slice(1).map(wh => (
+                                                                (wh.places && wh.places.length > 0) && (
+                                                                    <div key={wh.id} className="flex-shrink-0">
+                                                                        <h3 className="font-bold mb-2 text-gray-700">{wh.name}</h3>
+                                                                        <CompactPlacesGrid 
+                                                                            places={wh.places}
+                                                                            items={items.filter(i => i.warehouseId === wh.id)}
+                                                                            itemTypes={itemTypes}
+                                                                            onPlaceSelect={setViewingPlaceInfo}
+                                                                            warehouseId={wh.id}
+                                                                        />
+                                                                    </div>
+                                                                )
+                                                            ))}
+                                                        </div>
+                                                    </div>
+                                                ) : (
+                                                    <WarehousePlacesBlock 
+                                                        warehouse={w}
+                                                        items={items}
+                                                        itemTypes={itemTypes}
+                                                        onPlaceSelect={setViewingPlaceInfo}
+                                                        onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
+                                                        userRole={userRole}
+                                                    />
+                                                )}
                                             </div>
                                         ))}
                                     </div>
