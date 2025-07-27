@@ -1644,12 +1644,13 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 </table>
             </main>
             
-            <footer style={{ 
-                position: 'absolute', 
-                bottom: '2cm', 
-                left: '2cm', 
-                right: '2cm', 
-                fontSize: '14px' 
+            <footer style={{
+                position: 'absolute',
+                top: '50%',
+                left: '2cm',
+                right: '2cm',
+                transform: 'translateY(-50%)',
+                fontSize: '14px'
             }}>
                 <div style={{ marginBottom: '1em' }}>
                     <div style={signatureLineStyle}>
