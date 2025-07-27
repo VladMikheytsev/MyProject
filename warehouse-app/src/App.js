@@ -2099,7 +2099,7 @@ export default function App() {
   };
 
   // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
-  const useSwipeNavigation = (itemCount) => {
+  const useSwipeNavigation = (itemCount, onIndexChange) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
     const touchEndX = useRef(0);
@@ -2127,6 +2127,7 @@ export default function App() {
         
         if (newIndex !== activeIndex) {
             setActiveIndex(newIndex);
+            if(onIndexChange) onIndexChange(newIndex);
         }
 
         touchStartX.current = 0;
@@ -2137,7 +2138,7 @@ export default function App() {
   };
   
   const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
-  const { activeIndex: activeWarehouseIndex, setActiveIndex: setActiveWarehouseIndex, ...warehouseSwipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
+  const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
 
   // --- Рендеринг ---
@@ -2233,9 +2234,9 @@ export default function App() {
                     {/* Контейнер для контента вкладок */}
                     <div className="overflow-hidden">
                         {mainViewTab === 'warehouses' && (
-                            <div className="p-4" {...warehouseSwipeHandlers}>
+                            <div className="p-4" {...swipeHandlers}>
                                 <div className="overflow-hidden">
-                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeWarehouseIndex * 100}%)` }}>
+                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                                         {sortedWarehouses.map(w => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 <WarehouseInfoBlock 
@@ -2250,7 +2251,7 @@ export default function App() {
                                 </div>
                                 <div className="flex justify-center items-center mt-4 space-x-2">
                                     {sortedWarehouses.map((_, index) => (
-                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeWarehouseIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                                     ))}
                                 </div>
                                 {userRole === 'Администратор' && (
@@ -2262,20 +2263,28 @@ export default function App() {
                         )}
 
                         {mainViewTab === 'places' && (
-                             <div className="p-4" {...warehouseSwipeHandlers}>
-                                {(() => {
-                                    const selectedWarehouse = sortedWarehouses[activeWarehouseIndex];
-                                    return selectedWarehouse ? (
-                                        <WarehousePlacesBlock 
-                                            warehouse={selectedWarehouse}
-                                            items={items}
-                                            itemTypes={itemTypes}
-                                            onPlaceSelect={setViewingPlaceInfo}
-                                            onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
-                                            userRole={userRole}
-                                        />
-                                    ) : <p className="text-center text-gray-500 py-4">Склад не найден.</p>;
-                                })()}
+                             <div className="p-4" {...swipeHandlers}>
+                                <div className="overflow-hidden">
+                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+                                        {sortedWarehouses.map(w => (
+                                            <div key={w.id} className="w-full flex-shrink-0 px-1">
+                                                <WarehousePlacesBlock 
+                                                    warehouse={w}
+                                                    items={items}
+                                                    itemTypes={itemTypes}
+                                                    onPlaceSelect={setViewingPlaceInfo}
+                                                    onEditPlaces={(id) => { setWarehouseIdForEditor(id); setPlacesEditorOpen(true); }}
+                                                    userRole={userRole}
+                                                />
+                                            </div>
+                                        ))}
+                                    </div>
+                                </div>
+                                 <div className="flex justify-center items-center mt-4 space-x-2">
+                                    {sortedWarehouses.map((_, index) => (
+                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                    ))}
+                                </div>
                             </div>
                         )}
                     </div>
