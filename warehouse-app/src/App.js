@@ -2137,7 +2137,7 @@ export default function App() {
   };
   
   const sortedWarehouses = [...warehouses].sort((a, b) => a.name.localeCompare(b.name));
-  const { activeIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
+  const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
 
   // --- Рендеринг ---
@@ -2248,10 +2248,14 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="flex justify-center items-center mt-4 space-x-2">
-                                    {sortedWarehouses.map((_, index) => (
-                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                    ))}
+                                <div className="flex justify-center items-center mt-4 space-x-4">
+                                    <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
+                                    <div className="flex space-x-2">
+                                        {sortedWarehouses.map((_, index) => (
+                                            <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
                                 </div>
                                 {userRole === 'Администратор' && (
                                     <button onClick={() => setEditingWarehouse({})} className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition">
@@ -2279,10 +2283,14 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                 <div className="flex justify-center items-center mt-4 space-x-2">
-                                    {sortedWarehouses.map((_, index) => (
-                                        <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                    ))}
+                                 <div className="flex justify-center items-center mt-4 space-x-4">
+                                     <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
+                                     <div className="flex space-x-2">
+                                        {sortedWarehouses.map((_, index) => (
+                                            <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                        ))}
+                                    </div>
+                                    <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
                                 </div>
                             </div>
                         )}
