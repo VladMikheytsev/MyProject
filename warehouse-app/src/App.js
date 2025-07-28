@@ -1227,7 +1227,7 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 )}
                                 <div className="ml-auto flex items-center gap-2">
                                   {currentUser.role === 'Администратор' && (
-                                      <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full">
+                                      <button onClick={(e) => { e.stopPropagation(); onDelete(s.id); }} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full">
                                           <TrashIcon width="20" height="20" />
                                       </button>
                                   )}
@@ -1592,6 +1592,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
 };
 
 
+// --- [ИЗМЕНЕНИЕ] Блок с подписями теперь закреплен внизу ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1631,7 +1632,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             padding: '2cm', 
             fontFamily: 'sans-serif', 
             position: 'relative', 
-            minHeight: '90vh' 
+            minHeight: '25cm' // Задаем минимальную высоту, чтобы футер не наезжал на контент
         }}>
             <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
@@ -1641,7 +1642,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 <p><strong>To Warehouse:</strong> {getWarehouseName(scenario.toWarehouseId)}</p>
             </header>
 
-            <main style={{ flexGrow: 1 }}>
+            <main style={{ flexGrow: 1, paddingBottom: '150px' }}>
                 <div style={{ textAlign: 'center', margin: '40px 0' }}>
                     <h2 style={{ fontWeight: 'bold', fontStyle: 'italic' }}>Transferred Products/Materials:</h2>
                 </div>
@@ -1678,10 +1679,9 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             
             <footer style={{
                 position: 'absolute',
-                top: '50%',
+                bottom: '2cm',
                 left: '2cm',
                 right: '2cm',
-                transform: 'translateY(-50%)',
                 fontSize: '14px'
             }}>
                 <div style={{ marginBottom: '1em' }}>
@@ -2100,8 +2100,9 @@ export default function App() {
     });
   }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
 
+    // --- [ИЗМЕНЕНИЕ] Добавлена isScenariosModalOpen в проверку, чтобы остановить фоновое обновление ---
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2110,7 +2111,7 @@ export default function App() {
 
         const intervalId = setInterval(async () => {
             const currentState = stateRef.current;
-            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem;
+            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
 
             if (isEditing) {
                 return;
@@ -2507,7 +2508,6 @@ export default function App() {
                         </span>
                     )}
                 </button>
-                 {/* --- [НОВАЯ] Кнопка и меню действий (шторка) --- */}
                 <button 
                     onClick={() => setActionsMenuOpen(prev => !prev)}
                     className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition"
@@ -2731,7 +2731,7 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="sticky bottom-0 z-30 bg-gray-100/80 backdrop-blur-sm py-3 -mx-4 px-4 border-t border-gray-200/50 mt-4 flex justify-center items-center space-x-4">
+                                <div className="sticky bottom-0 z-30 bg-gray-100/80 backdrop-blur-sm py-3 -mx-4 -mb-4 border-t border-gray-200/50 mt-4 flex justify-center items-center space-x-4">
                                      <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                      <div className="flex space-x-2">
                                         {sortedWarehouses.map((_, index) => (
