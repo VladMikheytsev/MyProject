@@ -1832,6 +1832,7 @@ export default function App() {
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
   const [pendingWriteOff, setPendingWriteOff] = useState(null);
+  const [pendingMove, setPendingMove] = useState(null);
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
   
@@ -2181,12 +2182,17 @@ export default function App() {
   };
   
   const handleItemActionMove = ({ destination, quantity, unit }) => {
+    if (currentUser.role === 'Водитель') {
+        setPendingMove({ item: itemForAction, destination, quantity, unit });
+        setItemForAction(null);
+        return;
+    }
+
     const originalItem = items.find(item => item.id === itemForAction.id);
     setItems(prevItems => {
         if (!originalItem) return prevItems;
 
         if (quantity >= originalItem.quantity) {
-            // Full move
             return prevItems.map(item =>
                 item.id === itemForAction.id
                     ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit }
@@ -2194,7 +2200,6 @@ export default function App() {
             );
         }
 
-        // Partial move (split)
         const updatedOriginalItem = { ...originalItem, quantity: originalItem.quantity - quantity };
         const newItem = { ...originalItem, id: crypto.randomUUID(), quantity: quantity, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit };
 
@@ -2208,6 +2213,41 @@ export default function App() {
     setItemForAction(null);
   };
 
+  const handleConfirmMove = (signatureData) => {
+    if (!pendingMove) return;
+
+    const { item, destination, quantity, unit } = pendingMove;
+    const signatureId = `sig_${crypto.randomUUID()}`;
+
+    setSignatures(prev => ({...prev, [signatureId]: signatureData }));
+
+    const originalItem = items.find(i => i.id === item.id);
+    setItems(prevItems => {
+        if (!originalItem) return prevItems;
+
+        if (quantity >= originalItem.quantity) {
+            return prevItems.map(i =>
+                i.id === item.id
+                    ? { ...i, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit }
+                    : i
+            );
+        }
+
+        const updatedOriginalItem = { ...originalItem, quantity: originalItem.quantity - quantity };
+        const newItem = { ...originalItem, id: crypto.randomUUID(), quantity: quantity, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit };
+
+        return prevItems.map(i =>
+            i.id === item.id ? updatedOriginalItem : i
+        ).concat(newItem);
+    });
+
+    const fromWarehouseName = warehouses.find(w => w.id === originalItem.warehouseId)?.name || 'Нераспределенные';
+    const toWarehouseName = warehouses.find(w => w.id === destination.warehouseId)?.name;
+    addLogEntry(`Водитель переместил ${quantity} ${unit} '${originalItem.name}' из '${fromWarehouseName}' в '${toWarehouseName}' (подписано)`);
+
+    setPendingMove(null);
+  };
+
   const handleItemActionWriteOff = (item) => {
       setItemForAction(null);
       setPendingWriteOff({ item: item });
@@ -2219,10 +2259,8 @@ export default function App() {
       const itemToOff = pendingWriteOff.item;
       const signatureId = `sig_${crypto.randomUUID()}`;
       
-      // Save signature
       setSignatures(prev => ({...prev, [signatureId]: signatureData }));
       
-      // Create write-off log entry
       const writeOffEntry = {
           id: crypto.randomUUID(),
           timestamp: new Date().toISOString(),
@@ -2234,13 +2272,10 @@ export default function App() {
       };
       setWriteOffLog(prev => [writeOffEntry, ...prev]);
       
-      // Remove item from main list
       setItems(prevItems => prevItems.filter(item => item.id !== itemToOff.id));
       
-      // Add to general log
       addLogEntry(`Списал позицию: ${itemToOff.name} (Кол-во: ${itemToOff.quantity})`);
       
-      // Close modal
       setPendingWriteOff(null);
   }
 
@@ -2340,8 +2375,6 @@ export default function App() {
       setVerifyingItem(null);
       if (qrScanPurpose === 'action') {
           setItemForAction(verifiedItem);
-      } else if (qrScanPurpose === 'global_writeoff') {
-          handleItemActionWriteOff(verifiedItem);
       }
   };
   
@@ -2502,7 +2535,7 @@ export default function App() {
                 </button>
                  <button 
                     onClick={() => { 
-                        setQrScanPurpose('global_writeoff'); 
+                        setQrScanPurpose('action'); 
                         setVerifyingItem({ id: 'any', name: 'любой товар' });
                     }} 
                     className="flex items-center justify-center p-2 rounded-lg text-white bg-red-500 hover:bg-red-600 font-semibold transition"
@@ -2766,6 +2799,7 @@ export default function App() {
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
       {pendingWriteOff && <ActionConfirmationModal title="Подтверждение списания" onConfirm={handleConfirmWriteOff} onCancel={() => setPendingWriteOff(null)} />}
+      {pendingMove && <ActionConfirmationModal title="Подтверждение перемещения" onConfirm={handleConfirmMove} onCancel={() => setPendingMove(null)} />}
       
       {/* --- Print Documents (Hidden) --- */}
       <div style={{ display: 'none' }}>
