@@ -1551,7 +1551,6 @@ const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleE
     );
 };
 
-// --- [ИЗМЕНЕНИЕ] Динамическая высота, статистика перенесена под заголовок ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
     const warehouseItems = items.filter(i => i.warehouseId === warehouse.id);
     return (
@@ -2645,25 +2644,9 @@ export default function App() {
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 {index === 0 ? (
                                                      <div className="bg-gray-50 rounded-xl p-4">
-                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Все схемы</h3>
-                                                        <div className="flex flex-wrap justify-center gap-6 pb-2">
-                                                            {sortedWarehouses.slice(1).map(wh => (
-                                                                (wh.places && wh.places.length > 0) && (
-                                                                    <div key={wh.id} className="flex-shrink-0">
-                                                                        <h3 className="font-bold mb-2 text-gray-700">{wh.name}</h3>
-                                                                        <CompactPlacesGrid 
-                                                                            places={wh.places}
-                                                                            items={items.filter(i => i.warehouseId === wh.id)}
-                                                                            itemTypes={itemTypes}
-                                                                            onPlaceSelect={setViewingPlaceInfo}
-                                                                            warehouseId={wh.id}
-                                                                        />
-                                                                    </div>
-                                                                )
-                                                            ))}
-                                                        </div>
+                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Все схемы</h3>
+                                                        <p className="text-center text-sm text-gray-500 mb-4">Общая статистика по всем складам</p>
                                                         <div className="mt-4 pt-4 border-t w-full">
-                                                          <h3 className="text-lg font-bold text-gray-800 mb-2">Общая статистика</h3>
                                                           <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
                                                         </div>
                                                     </div>
@@ -2681,7 +2664,7 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="sticky bottom-0 z-30 bg-gray-100/80 backdrop-blur-sm py-3 -mx-4 px-4 shadow-[0_-8px_16px_-16px_rgba(0,0,0,0.1)] mt-4 flex justify-center items-center space-x-4">
+                                <div className="sticky bottom-0 z-30 bg-gray-100/80 backdrop-blur-sm py-3 -mx-4 px-4 border-t border-gray-200/50 mt-4 flex justify-center items-center space-x-4">
                                      <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                      <div className="flex space-x-2">
                                         {sortedWarehouses.map((_, index) => (
