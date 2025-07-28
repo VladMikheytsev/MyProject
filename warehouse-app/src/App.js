@@ -1551,6 +1551,7 @@ const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleE
     );
 };
 
+// --- [ИЗМЕНЕНИЕ] Динамическая высота, статистика перенесена под заголовок ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
     const warehouseItems = items.filter(i => i.warehouseId === warehouse.id);
     return (
@@ -2353,7 +2354,6 @@ export default function App() {
     );
   };
 
-  // --- [ИЗМЕНЕНИЕ] Логика свайпов теперь "бесконечная" ---
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
@@ -2537,7 +2537,7 @@ export default function App() {
                                         <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                         <div className="flex space-x-2">
                                             {sortedWarehouses.map((_, index) => (
-                                                <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                                <div key={index} onClick={() => setActiveIndex(index)} className={`w-2 h-2 rounded-full cursor-pointer ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-400'}`}></div>
                                             ))}
                                         </div>
                                         <button onClick={() => setActiveIndex(prev => (prev + 1) % sortedWarehouses.length)} className="p-2"><ArrowRightIcon /></button>
@@ -2638,7 +2638,7 @@ export default function App() {
                         )}
 
                         {mainViewTab === 'places' && (
-                             <div className="p-4 pb-20" {...swipeHandlers}>
+                             <div className="p-4" {...swipeHandlers}>
                                 <div className="overflow-hidden">
                                     <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                                         {sortedWarehouses.map((w, index) => (
@@ -2681,7 +2681,7 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                <div className="sticky bottom-4 z-30 bg-gray-100/80 backdrop-blur-sm p-4 -mx-4 -mb-4 rounded-t-xl mt-4 flex justify-center items-center space-x-4">
+                                <div className="sticky bottom-0 z-30 bg-gray-100/80 backdrop-blur-sm py-3 -mx-4 px-4 shadow-[0_-8px_16px_-16px_rgba(0,0,0,0.1)] mt-4 flex justify-center items-center space-x-4">
                                      <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                      <div className="flex space-x-2">
                                         {sortedWarehouses.map((_, index) => (
