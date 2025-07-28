@@ -1949,16 +1949,65 @@ export default function App() {
       }
   }, [scenarioToPrint, handlePrintScenario]);
 
-  const addLogEntry = (action) => {
+  // --- [ИЗМЕНЕНИЕ] Улучшенная функция логирования ---
+  const addLogEntry = (action, details = null) => {
     if (!currentUser) return;
+
+    let fullAction = action;
+
+    if (details && details.before && details.after) {
+        const { before, after } = details;
+        const changes = [];
+
+        const fieldNames = {
+            name: 'Наименование', address: 'Адрес', hours: 'Часы работы',
+            gate_code: 'Код ворот', lock_code: 'Код замка', type: 'Тип',
+            size: 'Размер', quantity: 'Количество', firstName: 'Имя',
+            lastName: 'Фамилия', position: 'Должность', phone: 'Телефон',
+            role: 'Роль', assignedWarehouseId: 'Склад', warehouseId: 'Склад',
+            placeId: 'Место'
+        };
+
+        const getWarehouseName = (id) => {
+             if (id === 'office' || !id) return 'Офис';
+             if (id === 'unassigned') return 'Не привязан';
+             return warehouses.find(w => w.id === id)?.name || id;
+        };
+        
+        for (const key in after) {
+            if (Object.prototype.hasOwnProperty.call(before, key) && before[key] !== after[key]) {
+                const fieldName = fieldNames[key] || key;
+                let beforeValue = before[key] ?? 'пусто';
+                let afterValue = after[key] ?? 'пусто';
+
+                if (key === 'assignedWarehouseId' || key === 'warehouseId') {
+                    beforeValue = getWarehouseName(beforeValue);
+                    afterValue = getWarehouseName(afterValue);
+                }
+                
+                if (key === 'placeId') {
+                    beforeValue = beforeValue === null ? 'нет' : `#${beforeValue + 1}`;
+                    afterValue = afterValue === null ? 'нет' : `#${afterValue + 1}`;
+                }
+
+                changes.push(`${fieldName}: '${beforeValue}' -> '${afterValue}'`);
+            }
+        }
+
+        if (changes.length > 0) {
+            fullAction += `: ${changes.join('; ')}`;
+        }
+    }
+
     const newLogEntry = {
       id: crypto.randomUUID(),
       timestamp: new Date().toISOString(),
       userId: currentUser.id,
-      action,
+      action: fullAction,
     };
     setLog(prevLog => [newLogEntry, ...prevLog]);
   };
+
 
   // --- Обработчики аутентификации и модерации ---
   const handleLogin = async (credentials) => {
@@ -1992,9 +2041,11 @@ export default function App() {
 
   const handleUpdateUser = async (updatedUser) => {
     try {
+        const originalUser = users.find(u => u.id === updatedUser.id);
         const savedUser = await api.updateUser(updatedUser);
         setUsers(users.map(u => u.id === savedUser.id ? savedUser : u));
-        addLogEntry(`Обновил данные пользователя: ${savedUser.username}`);
+        
+        addLogEntry(`Обновил данные пользователя ${savedUser.username}`, { before: originalUser, after: savedUser });
 
         if (currentUser && savedUser.id === currentUser.id) {
             setCurrentUser(savedUser);
@@ -2109,7 +2160,7 @@ export default function App() {
 
   // --- Эффект для автоматического обновления данных (Polling) ---
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2118,7 +2169,7 @@ export default function App() {
 
         const intervalId = setInterval(async () => {
             const currentState = stateRef.current;
-            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem;
+            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem;
 
             if (isEditing) {
                 return;
@@ -2153,14 +2204,24 @@ export default function App() {
   const handleSaveWarehouse = (data) => {
     const isNew = !data.id;
     const savedData = { ...data, id: data.id || crypto.randomUUID() };
+    const originalWarehouse = warehouses.find(w => w.id === savedData.id);
+
     setWarehouses(prev => {
         const exists = prev.some(w => w.id === savedData.id);
-        if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
+        if (exists) return prev.map(w => w.id === savedData.id ? { ...w, ...savedData } : w);
         return [...prev, { ...savedData, places: [] }];
     });
-    addLogEntry(isNew ? `Создал склад: ${savedData.name}` : `Отредактировал склад: ${savedData.name}`);
+    
+    if(isNew) {
+        addLogEntry(`Создал склад: ${savedData.name}`);
+    } else {
+        const beforeData = { name: originalWarehouse.name, address: originalWarehouse.address, hours: originalWarehouse.hours, gate_code: originalWarehouse.gate_code, lock_code: originalWarehouse.lock_code };
+        addLogEntry(`Отредактировал склад ${savedData.name}`, { before: beforeData, after: savedData });
+    }
+    
     setEditingWarehouse(null);
   };
+
   const handleSavePlaces = (placesData) => {
     setWarehouses(prev => prev.map(w => w.id === warehouseIdForEditor ? { ...w, places: placesData } : w));
     const warehouseName = warehouses.find(w => w.id === warehouseIdForEditor)?.name;
@@ -2180,8 +2241,9 @@ export default function App() {
 
   // --- [НОВЫЙ ОБРАБОТЧИК] Сохранение изменений после редактирования ---
   const handleSaveEditedItem = (updatedItem) => {
+    const originalItem = items.find(item => item.id === updatedItem.id);
     setItems(prev => prev.map(item => (item.id === updatedItem.id ? updatedItem : item)));
-    addLogEntry(`Отредактировал позицию: ${updatedItem.name}`);
+    addLogEntry(`Отредактировал позицию '${updatedItem.name}'`, { before: originalItem, after: updatedItem });
     setEditingItem(null); // Закрываем модальное окно
   };
 
@@ -2191,7 +2253,6 @@ export default function App() {
     setItems(prevItems => {
         if (!originalItem) return prevItems;
 
-        // Если перемещается всё количество, просто обновляем позицию
         if (quantity >= originalItem.quantity) {
             return prevItems.map(item =>
                 item.id === movingItem.id
@@ -2200,39 +2261,30 @@ export default function App() {
             );
         }
 
-        // Если количество меньше, разделяем позицию
-        // 1. Уменьшаем количество у оригинальной позиции
-        const updatedOriginalItem = {
-            ...originalItem,
-            quantity: originalItem.quantity - quantity
-        };
+        const updatedOriginalItem = { ...originalItem, quantity: originalItem.quantity - quantity };
+        const newItem = { ...originalItem, id: crypto.randomUUID(), quantity: quantity, warehouseId: destination.warehouseId, placeId: destination.placeId };
 
-        // 2. Создаем новую позицию с перемещаемым количеством
-        const newItem = {
-            ...originalItem, // Копируем все свойства
-            id: crypto.randomUUID(), // Генерируем новый уникальный ID
-            quantity: quantity,
-            warehouseId: destination.warehouseId,
-            placeId: destination.placeId
-            // Свойство 'unit' можно добавить сюда, если нужно его хранить
-        };
-
-        // 3. Обновляем массив позиций
         return prevItems.map(item =>
             item.id === movingItem.id ? updatedOriginalItem : item
         ).concat(newItem);
     });
-    addLogEntry(`Переместил ${quantity} ${unit} '${originalItem.name}'`);
+    const fromWarehouseName = warehouses.find(w => w.id === originalItem.warehouseId)?.name || 'Нераспределенные';
+    const toWarehouseName = warehouses.find(w => w.id === destination.warehouseId)?.name;
+    addLogEntry(`Разделил и переместил ${quantity} ${unit} '${originalItem.name}' из '${fromWarehouseName}' в '${toWarehouseName}'`);
     setMovingItem(null);
   };
 
   const handleMoveItem = (destination) => {
+    const originalItem = items.find(item => item.id === itemToAction.id);
+    if (!originalItem) return;
+
+    const updatedItem = { ...originalItem, warehouseId: destination.warehouseId, placeId: destination.placeId };
+    
     setItems(prevItems => prevItems.map(item =>
-        item.id === itemToAction.id
-            ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
-            : item
+        item.id === itemToAction.id ? updatedItem : item
     ));
-    addLogEntry(`Переместил позицию: ${itemToAction.name}`);
+    
+    addLogEntry(`Переместил позицию '${itemToAction.name}'`, { before: originalItem, after: updatedItem });
     setItemToAction(null);
   };
 
@@ -2240,7 +2292,7 @@ export default function App() {
     if (window.confirm('Вы уверены, что хотите списать эту позицию? Это действие необратимо.')) {
         const itemToOff = items.find(item => item.id === itemId);
         setItems(prevItems => prevItems.filter(item => item.id !== itemId));
-        addLogEntry(`Списал позицию: ${itemToOff.name}`);
+        addLogEntry(`Списал позицию: ${itemToOff.name} (Кол-во: ${itemToOff.quantity})`);
         setItemToAction(null);
     }
   };
@@ -2332,7 +2384,8 @@ export default function App() {
   const handleDeleteScenario = (scenarioId) => {
     if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
         setScenarios(prevScenarios => prevScenarios.filter(s => s.id !== scenarioId));
-        addLogEntry(`Удалил задачу #${scenarioId}`);
+        const scenarioNumber = scenarios.find(s => s.id === scenarioId)?.number;
+        addLogEntry(`Удалил задачу #${scenarioNumber}`);
     }
   };
 
@@ -2343,8 +2396,7 @@ export default function App() {
   };
   
   const handleStartEditWarehouse = (warehouse) => { 
-    setEditingWarehouse(warehouse); 
-    addLogEntry(`Начал редактирование склада: ${warehouse.name}`);
+    setEditingWarehouse(warehouse);
   };
   
   const handleDeleteWarehouse = (warehouseIdToDelete) => {
@@ -2780,7 +2832,6 @@ export default function App() {
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
       
-      {/* --- [ИЗМЕНЕНО] Используем новое модальное окно --- */}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
       
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
