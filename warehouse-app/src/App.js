@@ -1762,6 +1762,44 @@ const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
     );
 };
 
+const LogModal = ({ log, users, onClose }) => {
+    const getUserName = (userId) => {
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : 'Неизвестный пользователь';
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">Журнал действий</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto">
+                    <table className="w-full text-left">
+                        <thead className="border-b text-sm text-gray-500">
+                            <tr>
+                                <th className="p-2">Дата/Время</th>
+                                <th className="p-2">Пользователь</th>
+                                <th className="p-2">Действие</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {log.map(entry => (
+                                <tr key={entry.id} className="border-b">
+                                    <td className="p-2 text-sm text-gray-500">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
+                                    <td className="p-2 font-semibold">{getUserName(entry.userId)}</td>
+                                    <td className="p-2">{entry.action}</td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -2618,6 +2656,7 @@ export default function App() {
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
+      {isLogModalOpen && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
       
       {/* --- [ИЗМЕНЕНО] Используем новое модальное окно --- */}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
