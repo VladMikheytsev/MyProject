@@ -556,6 +556,97 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         </div>
     );
 };
+
+// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для редактирования позиции ---
+const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
+    const [editedItem, setEditedItem] = useState({ ...itemToEdit });
+
+    const handleChange = (e) => {
+        const { name, value } = e.target;
+        // Для поля quantity преобразуем значение в число
+        const processedValue = name === 'quantity' ? parseInt(value, 10) || 0 : value;
+        setEditedItem(prev => ({ ...prev, [name]: processedValue }));
+    };
+
+    const handleSave = () => {
+        if (!editedItem.name || !editedItem.type || !editedItem.size || editedItem.quantity <= 0) {
+            alert('Пожалуйста, заполните все поля корректно.');
+            return;
+        }
+        onSave(editedItem);
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
+                <h2 className="text-2xl font-bold mb-6 text-gray-800">Редактировать позицию</h2>
+                <div className="space-y-4">
+                    {/* Поле для наименования */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Наименование:</label>
+                        <input
+                            type="text"
+                            name="name"
+                            value={editedItem.name}
+                            onChange={handleChange}
+                            placeholder="Наименование"
+                            className="w-full p-3 border rounded-lg"
+                        />
+                    </div>
+
+                    {/* Выбор типа */}
+                    <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Тип позиции:</label>
+                        <select
+                            name="type"
+                            value={editedItem.type}
+                            onChange={handleChange}
+                            className="w-full p-3 border rounded-lg bg-white"
+                        >
+                            {itemTypes.map(t => (
+                                <option key={t.id} value={t.name}>{t.name}</option>
+                            ))}
+                        </select>
+                    </div>
+
+                    {/* Поля для размера и количества */}
+                    <div className="grid grid-cols-2 gap-4">
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Размер:</label>
+                            <select
+                                name="size"
+                                value={editedItem.size}
+                                onChange={handleChange}
+                                className="w-full p-3 border rounded-lg bg-white"
+                            >
+                                <option>Паллета</option>
+                                <option>Коробка</option>
+                                <option>Шт</option>
+                            </select>
+                        </div>
+                        <div>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Количество:</label>
+                            <input
+                                type="number"
+                                name="quantity"
+                                value={editedItem.quantity}
+                                onChange={handleChange}
+                                placeholder="Количество"
+                                min="1"
+                                className="w-full p-3 border rounded-lg"
+                            />
+                        </div>
+                    </div>
+                </div>
+                <div className="flex justify-end space-x-4 mt-8">
+                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                    <button onClick={handleSave} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold">Сохранить изменения</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 const ItemTypesManager = ({ types, onSave, onCancel }) => {
     const [currentTypes, setCurrentTypes] = useState([...types]);
     const [newType, setNewType] = useState({ name: '', color: '#aabbcc' });
@@ -2087,6 +2178,13 @@ export default function App() {
     setItemTypesManagerOpen(false);
   };
 
+  // --- [НОВЫЙ ОБРАБОТЧИК] Сохранение изменений после редактирования ---
+  const handleSaveEditedItem = (updatedItem) => {
+    setItems(prev => prev.map(item => (item.id === updatedItem.id ? updatedItem : item)));
+    addLogEntry(`Отредактировал позицию: ${updatedItem.name}`);
+    setEditingItem(null); // Закрываем модальное окно
+  };
+
   // --- [ОБНОВЛЕННАЯ ФУНКЦИЯ] Обработка перемещения с разделением ---
   const handleSaveItemMove = ({ destination, quantity, unit }) => {
     const originalItem = items.find(item => item.id === movingItem.id);
@@ -2667,6 +2765,15 @@ export default function App() {
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === warehouseIdForEditor) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === warehouseIdForEditor).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(warehouseIdForEditor)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
+      
+      {/* --- [ИЗМЕНЕНИЕ] Условный рендеринг нового модального окна --- */}
+      {editingItem && <ItemEditModal 
+            itemToEdit={editingItem} 
+            itemTypes={itemTypes} 
+            onSave={handleSaveEditedItem} 
+            onCancel={() => setEditingItem(null)} 
+      />}
+
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
