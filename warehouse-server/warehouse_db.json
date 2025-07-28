@@ -1498,6 +1498,15 @@
             "warehouseId": "00221057-de86-4922-99c4-9c39ba32cbb4",
             "placeId": 1,
             "id": "0dc31e6c-a6b2-487d-9a9e-f5d68d38cdad"
+        },
+        {
+            "name": "Hdhdhdh",
+            "type": "FF-NJ",
+            "size": "Паллета",
+            "quantity": 1,
+            "warehouseId": "c4fe7c52-6b73-493a-8f67-0725ffd4afcf",
+            "placeId": 2,
+            "id": "c070d03d-7d31-4353-8247-2495e8c33330"
         }
     ],
     "itemTypes": [

@@ -2,7 +2,7 @@
 
 from fastapi import FastAPI, HTTPException, Request
 from fastapi.middleware.cors import CORSMiddleware
-from fastapi.staticfiles import StaticFiles  # <-- [ДОБАВЛЕНО] Импорт для статических файлов
+from fastapi.staticfiles import StaticFiles
 from pydantic import BaseModel
 import json
 import uuid
@@ -23,8 +23,6 @@ app.add_middleware(
     allow_headers=["*"],
 )
 
-# <-- [ДОБАВЛЕНО] Подключение папки static для раздачи файлов
-# Все запросы к /static/... будут искать файлы в папке "static"
 app.mount("/static", StaticFiles(directory="static"), name="static")
 
 # --- Глобальная переменная для хранения данных ---
@@ -34,7 +32,8 @@ db = {
     "itemTypes": [],
     "users": [],
     "scenarios": [],
-    "signatures": {}
+    "signatures": {},
+    "log": []  # <-- [ДОБАВЛЕНО] Поле для журнала
 }
 
 # --- Модели данных (Pydantic) ---
@@ -57,14 +56,21 @@ class AppData(BaseModel):
     itemTypes: list
     scenarios: list
     signatures: dict
+    log: list  # <-- [ДОБАВЛЕНО] Поле для журнала
 
 def load_data():
     global db
     if os.path.exists(DB_FILE):
         with open(DB_FILE, 'r', encoding='utf-8') as f:
             loaded_db = json.load(f)
-            for key in db.keys():
-                db[key] = loaded_db.get(key, [] if key != 'signatures' else {})
+            # Убедимся, что все ключи присутствуют
+            db["warehouses"] = loaded_db.get("warehouses", [])
+            db["items"] = loaded_db.get("items", [])
+            db["itemTypes"] = loaded_db.get("itemTypes", [])
+            db["users"] = loaded_db.get("users", [])
+            db["scenarios"] = loaded_db.get("scenarios", [])
+            db["signatures"] = loaded_db.get("signatures", {})
+            db["log"] = loaded_db.get("log", []) # <-- [ДОБАВЛЕНО] Загрузка журнала
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         db["users"] = [
@@ -101,7 +107,8 @@ async def get_app_data():
         "items": db.get("items", []),
         "itemTypes": db.get("itemTypes", []),
         "scenarios": db.get("scenarios", []),
-        "signatures": db.get("signatures", {})
+        "signatures": db.get("signatures", {}),
+        "log": db.get("log", []) # <-- [ДОБАВЛЕНО] Отправка журнала на фронтенд
     }
 
 @app.post("/data")
@@ -112,6 +119,7 @@ async def save_app_data(data: AppData):
     db["itemTypes"] = data.itemTypes
     db["scenarios"] = data.scenarios
     db["signatures"] = data.signatures
+    db["log"] = data.log # <-- [ДОБАВЛЕНО] Сохранение журнала с фронтенда
     save_data()
     return {"message": "Данные успешно сохранены"}
 
