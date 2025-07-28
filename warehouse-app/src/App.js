@@ -365,7 +365,6 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
     );
 };
 
-// --- [ИЗМЕНЕНИЕ] Уменьшены размеры в 1.5 раза ---
 const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInfo, disabledPlaces = [], itemTypes, warehouseId }) => {
     const activeRows = new Set();
     const activeCols = new Set();
@@ -1514,10 +1513,9 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [ИЗМЕНЕНИЕ] Компонент для отображения информации о складе во вкладке ---
 const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleExpansion }) => {
     return (
-        <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col">
+        <div className="bg-gray-50 rounded-xl p-4 flex flex-col">
             <div className="flex justify-between items-start">
                 <div 
                     className="flex-grow cursor-pointer" 
@@ -1553,12 +1551,11 @@ const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleE
     );
 };
 
-// --- [ИЗМЕНЕНИЕ] Добавлена статистика в блок со схемой склада ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
     const warehouseItems = items.filter(i => i.warehouseId === warehouse.id);
     return (
-        <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col relative">
-            <div className="flex justify-between items-center mb-2">
+        <div className="bg-gray-50 rounded-xl p-4 flex flex-col relative">
+            <div className="flex justify-between items-center">
                  <h3 className="text-xl font-bold text-gray-800">{warehouse.name}</h3>
                  {userRole === 'Администратор' && (
                     <button
@@ -1569,6 +1566,9 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
                         <EditIcon />
                     </button>
                 )}
+            </div>
+            <div className="mb-4 border-b pb-2">
+                <PalletStats places={warehouse.places || []} items={warehouseItems} />
             </div>
             <div className="flex-grow overflow-auto">
                 {(warehouse.places && warehouse.places.length > 0) ? (
@@ -1586,9 +1586,6 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
                         <span>Места не сконфигурированы.</span>
                     </div>
                 )}
-            </div>
-            <div className="mt-4 pt-4 border-t">
-                <PalletStats places={warehouse.places || []} items={warehouseItems} />
             </div>
         </div>
     );
@@ -2356,6 +2353,7 @@ export default function App() {
     );
   };
 
+  // --- [ИЗМЕНЕНИЕ] Логика свайпов теперь "бесконечная" ---
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
@@ -2371,15 +2369,15 @@ export default function App() {
     };
 
     const handleTouchEnd = () => {
-        if (touchStartX.current === 0 || touchEndX.current === 0) return;
+        if (touchStartX.current === 0 || touchEndX.current === 0 || itemCount === 0) return;
         const swipeDistance = touchStartX.current - touchEndX.current;
         const swipeThreshold = 50;
         
         let newIndex = activeIndex;
         if (swipeDistance > swipeThreshold) {
-            newIndex = Math.min(itemCount - 1, activeIndex + 1);
+             newIndex = (activeIndex + 1) % itemCount;
         } else if (swipeDistance < -swipeThreshold) {
-            newIndex = Math.max(0, activeIndex - 1);
+             newIndex = (activeIndex - 1 + itemCount) % itemCount;
         }
         
         if (newIndex !== activeIndex) {
@@ -2536,13 +2534,13 @@ export default function App() {
                                         </div>
                                     </div>
                                     <div className="flex justify-center items-center mt-4 space-x-4">
-                                        <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
+                                        <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                         <div className="flex space-x-2">
                                             {sortedWarehouses.map((_, index) => (
                                                 <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
                                             ))}
                                         </div>
-                                        <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
+                                        <button onClick={() => setActiveIndex(prev => (prev + 1) % sortedWarehouses.length)} className="p-2"><ArrowRightIcon /></button>
                                     </div>
                                 </div>
                                 {userRole === 'Администратор' && (
@@ -2640,13 +2638,13 @@ export default function App() {
                         )}
 
                         {mainViewTab === 'places' && (
-                             <div className="p-4" {...swipeHandlers}>
+                             <div className="p-4 pb-20" {...swipeHandlers}>
                                 <div className="overflow-hidden">
                                     <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                                         {sortedWarehouses.map((w, index) => (
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 {index === 0 ? (
-                                                     <div className="bg-gray-50 rounded-xl p-4 h-full">
+                                                     <div className="bg-gray-50 rounded-xl p-4">
                                                         <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Все схемы</h3>
                                                         <div className="flex flex-wrap justify-center gap-6 pb-2">
                                                             {sortedWarehouses.slice(1).map(wh => (
@@ -2683,14 +2681,14 @@ export default function App() {
                                         ))}
                                     </div>
                                 </div>
-                                 <div className="flex justify-center items-center mt-4 space-x-4">
-                                     <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
+                                <div className="sticky bottom-4 z-30 bg-gray-100/80 backdrop-blur-sm p-4 -mx-4 -mb-4 rounded-t-xl mt-4 flex justify-center items-center space-x-4">
+                                     <button onClick={() => setActiveIndex(prev => (prev - 1 + sortedWarehouses.length) % sortedWarehouses.length)} className="p-2"><ArrowLeftIcon /></button>
                                      <div className="flex space-x-2">
                                         {sortedWarehouses.map((_, index) => (
-                                            <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                            <div key={index} onClick={() => setActiveIndex(index)} className={`w-2 h-2 rounded-full cursor-pointer ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-400'}`}></div>
                                         ))}
                                     </div>
-                                    <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
+                                    <button onClick={() => setActiveIndex(prev => (prev + 1) % sortedWarehouses.length)} className="p-2"><ArrowRightIcon /></button>
                                 </div>
                             </div>
                         )}
