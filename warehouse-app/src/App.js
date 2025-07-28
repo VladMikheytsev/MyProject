@@ -25,6 +25,7 @@ const ClockIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" heigh
 const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M14 2H6a2 2 0 0 0-2 2v16a2 2 0 0 0 2 2h12a2 2 0 0 0 2-2V8z"></path><polyline points="14 2 14 8 20 8"></polyline><line x1="12" y1="18" x2="12" y2="12"></line><line x1="9" y1="15" x2="15" y2="15"></line></svg>;
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 const PrintIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
+const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
 
 
 // --- API Configuration ---
@@ -1777,6 +1778,7 @@ export default function App() {
   const [itemTypes, setItemTypes] = useState([]);
   const [scenarios, setScenarios] = useState([]);
   const [signatures, setSignatures] = useState({}); // --- [НОВОЕ] Хранилище подписей ---
+  const [log, setLog] = useState([]);
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null); // [ИЗМЕНЕНО]
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
@@ -1794,6 +1796,7 @@ export default function App() {
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null); // --- [НОВОЕ] Для подтверждения действий с подписью ---
+  const [isLogModalOpen, setLogModalOpen] = useState(false);
   
   // --- [ИЗМЕНЕНО] Состояния для вкладок и свайпов ---
   const [mainViewTab, setMainViewTab] = useState('positions'); // 'warehouses', 'places', или 'positions'
@@ -1816,11 +1819,23 @@ export default function App() {
       }
   }, [scenarioToPrint, handlePrintScenario]);
 
+  const addLogEntry = (action) => {
+    if (!currentUser) return;
+    const newLogEntry = {
+      id: crypto.randomUUID(),
+      timestamp: new Date().toISOString(),
+      userId: currentUser.id,
+      action,
+    };
+    setLog(prevLog => [newLogEntry, ...prevLog]);
+  };
+
   // --- Обработчики аутентификации и модерации ---
   const handleLogin = async (credentials) => {
       const user = await api.loginUser(credentials);
       const now = new Date().getTime();
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
+      addLogEntry('Вход в приложение');
       window.location.reload();
   };
 
@@ -1828,10 +1843,12 @@ export default function App() {
       const newUser = await api.registerUser(formData);
       const now = new Date().getTime();
       localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: newUser, loginTime: now }));
+      addLogEntry('Регистрация нового пользователя');
       window.location.reload();
   };
   
   const handleLogout = () => {
+      addLogEntry('Выход из приложения');
       setCurrentUser(null);
       localStorage.removeItem(SESSION_STORAGE_KEY);
       hasLoadedData.current = false;
@@ -1839,6 +1856,7 @@ export default function App() {
       setItems([]);
       setScenarios([]);
       setSignatures({});
+      setLog([]);
       setWarehouseIdForEditor(null);
   };
 
@@ -1846,6 +1864,7 @@ export default function App() {
     try {
         const savedUser = await api.updateUser(updatedUser);
         setUsers(users.map(u => u.id === savedUser.id ? savedUser : u));
+        addLogEntry(`Обновил данные пользователя: ${savedUser.username}`);
 
         if (currentUser && savedUser.id === currentUser.id) {
             setCurrentUser(savedUser);
@@ -1860,7 +1879,9 @@ export default function App() {
   const handleDeleteUser = async (userId) => {
     try {
         await api.deleteUser(userId);
+        const deletedUser = users.find(u => u.id === userId);
         setUsers(users.filter(u => u.id !== userId));
+        addLogEntry(`Удалил пользователя: ${deletedUser?.username || `ID: ${userId}`}`);
     } catch (error) {
         console.error("Не удалось удалить пользователя:", error);
     }
@@ -1934,6 +1955,7 @@ export default function App() {
                   setItemTypes(appData.itemTypes || []);
                   setScenarios(appData.scenarios || []);
                   setSignatures(appData.signatures || {});
+                  setLog(appData.log || []);
                   setUsers(usersData || []);
                   hasLoadedData.current = true;
               } catch (error) {
@@ -1949,15 +1971,15 @@ export default function App() {
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures };
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log };
     api.saveAppData(fullState).catch(error => {
       console.error("Ошибка при автоматическом сохранении данных:", error);
     });
-  }, [warehouses, items, itemTypes, scenarios, signatures, currentUser, loading]);
+  }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
 
   // --- Эффект для автоматического обновления данных (Polling) ---
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -1975,13 +1997,14 @@ export default function App() {
             try {
                 const [newData, newUsers] = await Promise.all([api.fetchAppData(), api.fetchUsers()]);
 
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures };
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
                     setItemTypes(newData.itemTypes || []);
                     setScenarios(newData.scenarios || []);
                     setSignatures(newData.signatures || {});
+                    setLog(newData.log || []);
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
@@ -1998,31 +2021,37 @@ export default function App() {
 
   // --- Обработчики действий в приложении ----
   const handleSaveWarehouse = (data) => {
+    const isNew = !data.id;
     const savedData = { ...data, id: data.id || crypto.randomUUID() };
     setWarehouses(prev => {
         const exists = prev.some(w => w.id === savedData.id);
         if (exists) return prev.map(w => w.id === savedData.id ? { ...savedData, places: w.places } : w);
         return [...prev, { ...savedData, places: [] }];
     });
+    addLogEntry(isNew ? `Создал склад: ${savedData.name}` : `Отредактировал склад: ${savedData.name}`);
     setEditingWarehouse(null);
   };
   const handleSavePlaces = (placesData) => {
     setWarehouses(prev => prev.map(w => w.id === warehouseIdForEditor ? { ...w, places: placesData } : w));
+    const warehouseName = warehouses.find(w => w.id === warehouseIdForEditor)?.name;
+    addLogEntry(`Отредактировал места на складе: ${warehouseName}`);
     setPlacesEditorOpen(false);
   };
   const handleSaveItem = (itemData) => {
     setItems(prev => [...prev, itemData]);
+    addLogEntry(`Создал позицию: ${itemData.name}`);
     setItemEditorOpen(false);
   };
   const handleSaveItemTypes = (types) => {
     setItemTypes(types);
+    addLogEntry('Отредактировал типы позиций');
     setItemTypesManagerOpen(false);
   };
 
   // --- [ОБНОВЛЕННАЯ ФУНКЦИЯ] Обработка перемещения с разделением ---
   const handleSaveItemMove = ({ destination, quantity, unit }) => {
+    const originalItem = items.find(item => item.id === movingItem.id);
     setItems(prevItems => {
-        const originalItem = prevItems.find(item => item.id === movingItem.id);
         if (!originalItem) return prevItems;
 
         // Если перемещается всё количество, просто обновляем позицию
@@ -2056,6 +2085,7 @@ export default function App() {
             item.id === movingItem.id ? updatedOriginalItem : item
         ).concat(newItem);
     });
+    addLogEntry(`Переместил ${quantity} ${unit} '${originalItem.name}'`);
     setMovingItem(null);
   };
 
@@ -2065,12 +2095,15 @@ export default function App() {
             ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
             : item
     ));
+    addLogEntry(`Переместил позицию: ${itemToAction.name}`);
     setItemToAction(null);
   };
 
   const handleWriteOffItem = (itemId) => {
     if (window.confirm('Вы уверены, что хотите списать эту позицию? Это действие необратимо.')) {
+        const itemToOff = items.find(item => item.id === itemId);
         setItems(prevItems => prevItems.filter(item => item.id !== itemId));
+        addLogEntry(`Списал позицию: ${itemToOff.name}`);
         setItemToAction(null);
     }
   };
@@ -2090,6 +2123,7 @@ export default function App() {
       createdAt: new Date().toISOString(),
     };
     setScenarios(prev => [...prev, newScenario]);
+    addLogEntry(`Создал задачу #${newScenario.number}`);
     setCreateScenarioModalOpen(false);
   };
   
@@ -2154,12 +2188,14 @@ export default function App() {
             return s;
         })
     );
+    addLogEntry(`Обновил статус задачи #${scenario.number} на '${newStatus}'`);
     setPendingAction(null);
 };
   
   const handleDeleteScenario = (scenarioId) => {
     if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
         setScenarios(prevScenarios => prevScenarios.filter(s => s.id !== scenarioId));
+        addLogEntry(`Удалил задачу #${scenarioId}`);
     }
   };
 
@@ -2169,16 +2205,22 @@ export default function App() {
     setVerifyingItem(null);
   };
   
-  const handleStartEditWarehouse = (warehouse) => { setEditingWarehouse(warehouse); };
+  const handleStartEditWarehouse = (warehouse) => { 
+    setEditingWarehouse(warehouse); 
+    addLogEntry(`Начал редактирование склада: ${warehouse.name}`);
+  };
   
   const handleDeleteWarehouse = (warehouseIdToDelete) => {
     if (window.confirm('Вы уверены, что хотите удалить этот склад? Все связанные с ним товары станут нераспределенными.')) {
+      const warehouseName = warehouses.find(w => w.id === warehouseIdToDelete)?.name;
       setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
       setItems(prev => prev.map(i => i.warehouseId === warehouseIdToDelete ? { ...i, warehouseId: 'unassigned', placeId: null } : i));
+      addLogEntry(`Удалил склад: ${warehouseName}`);
     }
   };
   
   const handleResetPlaces = (warehouseId) => {
+    const warehouseName = warehouses.find(w => w.id === warehouseId)?.name;
     setItems(prevItems =>
         prevItems.map(item =>
             item.warehouseId === warehouseId ? { ...item, warehouseId: 'unassigned', placeId: null } : item
@@ -2189,6 +2231,7 @@ export default function App() {
             w.id === warehouseId ? { ...w, places: [] } : w
         )
     );
+    addLogEntry(`Сбросил места на складе: ${warehouseName}`);
     setPlacesEditorOpen(false);
   };
 
@@ -2306,7 +2349,7 @@ export default function App() {
             <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
                 <UserIcon />
             </button>
-            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-[160px]">
+            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-md">
                 {userRole === 'Администратор' && (
                     <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
                         <UsersIcon />
@@ -2314,6 +2357,9 @@ export default function App() {
                 )}
                 <button onClick={() => setContactsModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ContactsIcon />
+                </button>
+                <button onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); }} className="flex flex-1 items-center justify-center p-2 rounded-lg text-green-600 bg-green-100 hover:bg-green-200 font-semibold transition">
+                    <JournalIcon />
                 </button>
                  <button onClick={() => setScenariosModalOpen(true)} className="relative flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
                     <ScenariosIcon />
