@@ -1238,7 +1238,7 @@ const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUp
                                 )}
                                 <div className="ml-auto flex items-center gap-2">
                                   {currentUser.role === 'Администратор' && (
-                                      <button onClick={(e) => { e.stopPropagation(); onDelete(s.id); }} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full">
+                                      <button onClick={() => onDelete(s.id)} className="p-2 text-red-500 bg-red-100 hover:bg-red-200 rounded-full">
                                           <TrashIcon width="20" height="20" />
                                       </button>
                                   )}
@@ -1879,6 +1879,9 @@ export default function App() {
   const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
   const [qrScanPurpose, setQrScanPurpose] = useState('move');
   const actionsMenuRef = useRef(null);
+  const [isSaving, setIsSaving] = useState(false);
+  const headerRef = useRef(null);
+  const [headerHeight, setHeaderHeight] = useState(80);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -1897,6 +1900,12 @@ export default function App() {
             document.removeEventListener("mousedown", handleClickOutside);
         };
     }, [actionsMenuRef]);
+
+    useLayoutEffect(() => {
+      if (headerRef.current) {
+        setHeaderHeight(headerRef.current.offsetHeight);
+      }
+    }, []);
 
   const handlePrintScenario = useReactToPrint({
       content: () => scenarioPrintRef.current,
@@ -2103,15 +2112,20 @@ export default function App() {
 
   useEffect(() => {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
-    
+
+    setIsSaving(true);
     const fullState = { warehouses, items, itemTypes, scenarios, signatures, log };
-    api.saveAppData(currentUser.id, fullState).catch(error => {
-      console.error("Ошибка при автоматическом сохранении данных:", error);
-    });
+    api.saveAppData(currentUser.id, fullState)
+      .catch(error => {
+        console.error("Ошибка при автоматическом сохранении данных:", error);
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
   }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
 
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2120,9 +2134,9 @@ export default function App() {
 
         const intervalId = setInterval(async () => {
             const currentState = stateRef.current;
-            const isEditing = currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
+            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
 
-            if (isEditing) {
+            if (isBusy) {
                 return;
             }
 
@@ -2490,13 +2504,13 @@ export default function App() {
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto sticky top-0 z-40 bg-gray-100 pt-4 px-4">
+      <div ref={headerRef} className="max-w-7xl mx-auto sticky top-0 z-40 bg-gray-100 pt-4 px-4">
         <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
             <div className="flex items-center gap-2">
                  <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
                     <UserIcon />
                 </button>
-                <button onClick={() => setScenariosModalOpen(true)} className="relative flex items-center justify-center p-2 rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 font-semibold transition">
+                <button onClick={() => setScenariosModalOpen(true)} className="relative flex items-center justify-center p-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold transition">
                     <ScenariosIcon />
                     {notificationCount > 0 && (
                         <span className="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-red-100 bg-red-600 rounded-full">
@@ -2509,9 +2523,9 @@ export default function App() {
                         setQrScanPurpose('move'); 
                         setVerifyingItem({ id: 'any', name: 'любой товар' });
                     }} 
-                    className="flex items-center justify-center p-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition"
+                    className="flex items-center justify-center p-2 rounded-lg text-white bg-red-500 hover:bg-red-600 font-semibold transition"
                 >
-                    <QrIcon color="#ef4444" />
+                    <QrIcon color="white" />
                 </button>
             </div>
             <div className="flex items-center gap-2" ref={actionsMenuRef}>
@@ -2628,7 +2642,7 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
+                                     <div style={{ top: headerHeight }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
                                              <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
@@ -2671,7 +2685,6 @@ export default function App() {
                                                          </div>
                                                          <div className="flex items-center">
                                                              <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                             {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
                                                          </div>
                                                      </div>
                                              )})}
@@ -2703,7 +2716,6 @@ export default function App() {
                                                          </div>
                                                          <div className="flex items-center">
                                                              <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                             {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
                                                          </div>
                                                      </div>
                                                  )})}
@@ -2722,7 +2734,7 @@ export default function App() {
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 {index === 0 ? (
                                                      <div className="bg-gray-50 rounded-xl p-4">
-                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Все схемы</h3>
+                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-2">Все склады</h3>
                                                         <p className="text-center text-sm text-gray-500 mb-4">Общая статистика по всем складам</p>
                                                         <div className="mt-4 pt-4 border-t w-full">
                                                           <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
