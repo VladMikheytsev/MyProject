@@ -1819,6 +1819,7 @@ export default function App() {
   const [log, setLog] = useState([]);
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null); // [ИЗМЕНЕНО]
   const [editingWarehouse, setEditingWarehouse] = useState(null);
+  const [editingItem, setEditingItem] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
   const [isItemEditorOpen, setItemEditorOpen] = useState(false);
   const [isItemTypesManagerOpen, setItemTypesManagerOpen] = useState(false);
