@@ -7,6 +7,7 @@ from pydantic import BaseModel
 import json
 import uuid
 import os
+from typing import Optional
 
 # --- Конфигурация ---
 DB_FILE = "warehouse_db.json"
@@ -33,7 +34,7 @@ db = {
     "users": [],
     "scenarios": [],
     "signatures": {},
-    "log": []  # <-- [ДОБАВЛЕНО] Поле для журнала
+    "log": []
 }
 
 # --- Модели данных (Pydantic) ---
@@ -56,7 +57,7 @@ class AppData(BaseModel):
     itemTypes: list
     scenarios: list
     signatures: dict
-    log: list  # <-- [ДОБАВЛЕНО] Поле для журнала
+    log: Optional[list] = None # <-- [ИЗМЕНЕНО] Журнал теперь необязателен
 
 def load_data():
     global db
@@ -70,7 +71,7 @@ def load_data():
             db["users"] = loaded_db.get("users", [])
             db["scenarios"] = loaded_db.get("scenarios", [])
             db["signatures"] = loaded_db.get("signatures", {})
-            db["log"] = loaded_db.get("log", []) # <-- [ДОБАВЛЕНО] Загрузка журнала
+            db["log"] = loaded_db.get("log", [])
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         db["users"] = [
@@ -93,6 +94,13 @@ def save_data():
         json.dump(db, f, ensure_ascii=False, indent=4)
     print(f"💾 Данные сохранены в {DB_FILE}")
 
+# --- [ДОБАВЛЕНО] Вспомогательная функция для получения пользователя по ID ---
+def get_user_by_id(user_id: str):
+    for user in db["users"]:
+        if user["id"] == user_id:
+            return user
+    return None
+
 # --- События запуска и остановки приложения ---
 @app.on_event("startup")
 async def startup_event():
@@ -100,26 +108,46 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-@app.get("/data")
-async def get_app_data():
-    return {
+# <-- [ИЗМЕНЕНО] Эндпоинт теперь требует user_id и проверяет роль ---
+@app.get("/data/{user_id}")
+async def get_app_data(user_id: str):
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=403, detail="Неверный пользователь")
+
+    data_to_return = {
         "warehouses": db.get("warehouses", []),
         "items": db.get("items", []),
         "itemTypes": db.get("itemTypes", []),
         "scenarios": db.get("scenarios", []),
         "signatures": db.get("signatures", {}),
-        "log": db.get("log", []) # <-- [ДОБАВЛЕНО] Отправка журнала на фронтенд
     }
 
-@app.post("/data")
-async def save_app_data(data: AppData):
+    # Возвращаем журнал только если пользователь - администратор
+    if user.get("role") == "Администратор":
+        data_to_return["log"] = db.get("log", [])
+    
+    return data_to_return
+
+# <-- [ИЗМЕНЕНО] Эндпоинт теперь требует user_id и проверяет роль для сохранения журнала ---
+@app.post("/data/{user_id}")
+async def save_app_data(user_id: str, data: AppData):
     global db
+    user = get_user_by_id(user_id)
+    if not user:
+        raise HTTPException(status_code=403, detail="Неверный пользователь")
+
     db["warehouses"] = data.warehouses
     db["items"] = data.items
     db["itemTypes"] = data.itemTypes
     db["scenarios"] = data.scenarios
     db["signatures"] = data.signatures
-    db["log"] = data.log # <-- [ДОБАВЛЕНО] Сохранение журнала с фронтенда
+    
+    # Только администратор может обновлять журнал
+    if user.get("role") == "Администратор":
+        if data.log is not None:
+            db["log"] = data.log
+    
     save_data()
     return {"message": "Данные успешно сохранены"}
 

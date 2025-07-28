@@ -58,8 +58,8 @@ const api = {
   },
 
   // --- Методы для данных (склады, товары) ---
-  fetchAppData: () => api.request('/data'),
-  saveAppData: (data) => api.request('/data', 'POST', data),
+  fetchAppData: (userId) => api.request(`/data/${userId}`),
+  saveAppData: (userId, data) => api.request(`/data/${userId}`, 'POST', data),
 
   // --- Методы для пользователей ---
   fetchUsers: () => api.request('/users'),
@@ -1967,7 +1967,7 @@ export default function App() {
       } else {
         try {
             // Загружаем только склады для экрана регистрации
-            const appData = await api.fetchAppData();
+            const appData = await api.request('/data/for-registration'); // Используем новый эндпоинт
             setWarehouses(appData.warehouses || []);
         } catch(error) {
             console.error("Не удалось загрузить склады для регистрации:", error);
@@ -1985,7 +1985,7 @@ export default function App() {
               setLoading(true);
               try {
                   const [appData, usersData] = await Promise.all([
-                      api.fetchAppData(),
+                      api.fetchAppData(currentUser.id),
                       api.fetchUsers()
                   ]);
                   setWarehouses(appData.warehouses || []);
@@ -2010,7 +2010,7 @@ export default function App() {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
     
     const fullState = { warehouses, items, itemTypes, scenarios, signatures, log };
-    api.saveAppData(fullState).catch(error => {
+    api.saveAppData(currentUser.id, fullState).catch(error => {
       console.error("Ошибка при автоматическом сохранении данных:", error);
     });
   }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
@@ -2033,7 +2033,7 @@ export default function App() {
             }
 
             try {
-                const [newData, newUsers] = await Promise.all([api.fetchAppData(), api.fetchUsers()]);
+                const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
 
                 const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
@@ -2396,9 +2396,11 @@ export default function App() {
                 <button onClick={() => setContactsModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ContactsIcon />
                 </button>
-                <button onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); }} className="flex flex-1 items-center justify-center p-2 rounded-lg text-green-600 bg-green-100 hover:bg-green-200 font-semibold transition">
-                    <JournalIcon />
-                </button>
+                {userRole === 'Администратор' && (
+                    <button onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); }} className="flex flex-1 items-center justify-center p-2 rounded-lg text-green-600 bg-green-100 hover:bg-green-200 font-semibold transition">
+                        <JournalIcon />
+                    </button>
+                )}
                  <button onClick={() => setScenariosModalOpen(true)} className="relative flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
                     <ScenariosIcon />
                     {notificationCount > 0 && (
@@ -2656,7 +2658,7 @@ export default function App() {
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
-      {isLogModalOpen && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
+      {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
       
       {/* --- [ИЗМЕНЕНО] Используем новое модальное окно --- */}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
