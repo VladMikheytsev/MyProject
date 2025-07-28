@@ -26,6 +26,7 @@ const FilePlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" he
 const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M1 12s4-8 11-8 11 8 11 8-4 8-11 8-11-8-11-8z"></path><circle cx="12" cy="12" r="3"></circle></svg>;
 const PrintIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
+const QrIcon = ({ color = "currentColor", width="18", height="18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14.01" y2="14"></line><line x1="21" y1="14" x2="21.01" y2="14"></line><line x1="14" y1="21" x2="14.01" y2="21"></line><line x1="21" y1="21" x2="21.01" y2="21"></line></svg>;
 
 
 // --- API Configuration ---
@@ -657,7 +658,7 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
     )
 };
 
-const ContactsModal = ({ users, warehouses, onClose }) => {
+const ContactsModal = ({ users, warehouses, onClose, onOpenModeration, userRole }) => {
     const displayedRoles = ['Администратор', 'Сотрудник склада', 'Водитель'];
     const relevantUsers = users.filter(user => displayedRoles.includes(user.role));
 
@@ -684,7 +685,17 @@ const ContactsModal = ({ users, warehouses, onClose }) => {
                     <h2 className="text-2xl font-bold text-gray-800">Контакты сотрудников</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
-                <div className="space-y-6 max-h-[70vh] overflow-y-auto">
+                
+                {userRole === 'Администратор' && (
+                    <button 
+                        onClick={onOpenModeration} 
+                        className="w-full flex items-center justify-center gap-2 p-3 mb-4 rounded-xl bg-purple-100 text-purple-700 font-semibold hover:bg-purple-200 transition"
+                    >
+                        <UsersIcon /> Модерация пользователей
+                    </button>
+                )}
+
+                <div className="space-y-6 max-h-[60vh] overflow-y-auto">
                     {!hasWarehouseContacts && !hasOfficeContacts ? (
                         <p className="text-gray-500 text-center py-8">Нет сотрудников для отображения.</p>
                     ) : (
@@ -1592,7 +1603,6 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
 };
 
 
-// --- [ИЗМЕНЕНИЕ] Блок с подписями теперь закреплен внизу ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1632,7 +1642,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             padding: '2cm', 
             fontFamily: 'sans-serif', 
             position: 'relative', 
-            minHeight: '25cm' // Задаем минимальную высоту, чтобы футер не наезжал на контент
+            minHeight: '25cm' 
         }}>
             <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
@@ -2100,7 +2110,6 @@ export default function App() {
     });
   }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
 
-    // --- [ИЗМЕНЕНИЕ] Добавлена isScenariosModalOpen в проверку, чтобы остановить фоновое обновление ---
     const stateRef = useRef();
     stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen };
 
@@ -2482,25 +2491,12 @@ export default function App() {
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto sticky top-0 z-40 bg-gray-100 pt-4 px-4">
-        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap relative">
-            <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
-                <UserIcon />
-            </button>
-            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-md" ref={actionsMenuRef}>
-                {userRole === 'Администратор' && (
-                    <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
-                        <UsersIcon />
-                    </button>
-                )}
-                <button onClick={() => setContactsModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition">
-                    <ContactsIcon />
+        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
+            <div className="flex items-center gap-2">
+                 <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
+                    <UserIcon />
                 </button>
-                {userRole === 'Администратор' && (
-                    <button onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); }} className="flex flex-1 items-center justify-center p-2 rounded-lg text-green-600 bg-green-100 hover:bg-green-200 font-semibold transition">
-                        <JournalIcon />
-                    </button>
-                )}
-                 <button onClick={() => setScenariosModalOpen(true)} className="relative flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
+                <button onClick={() => setScenariosModalOpen(true)} className="relative flex items-center justify-center p-2 rounded-lg text-blue-700 bg-blue-100 hover:bg-blue-200 font-semibold transition">
                     <ScenariosIcon />
                     {notificationCount > 0 && (
                         <span className="absolute -bottom-1 -right-1 inline-flex items-center justify-center w-4 h-4 text-xs font-bold text-red-100 bg-red-600 rounded-full">
@@ -2508,26 +2504,30 @@ export default function App() {
                         </span>
                     )}
                 </button>
-                <button 
-                    onClick={() => setActionsMenuOpen(prev => !prev)}
-                    className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition"
+                 <button 
+                    onClick={() => { 
+                        setQrScanPurpose('move'); 
+                        setVerifyingItem({ id: 'any', name: 'любой товар' });
+                    }} 
+                    className="flex items-center justify-center p-2 rounded-lg text-red-600 bg-red-100 hover:bg-red-200 font-semibold transition"
                 >
-                    <PlusIcon/>
+                    <QrIcon color="#ef4444" />
                 </button>
-                {isActionsMenuOpen && (
-                    <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border z-50 p-2">
+            </div>
+            <div className="flex items-center gap-2" ref={actionsMenuRef}>
+                <button onClick={() => setContactsModalOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
+                    <ContactsIcon />
+                </button>
+                {userRole === 'Администратор' && (
+                    <div className="relative">
                         <button 
-                            onClick={() => {
-                                setQrScanPurpose('move');
-                                setVerifyingItem({ id: 'any', name: 'любой товар' });
-                                setActionsMenuOpen(false);
-                            }}
-                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                            onClick={() => setActionsMenuOpen(prev => !prev)}
+                            className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition"
                         >
-                           <TruckIcon /> Переместить позицию
+                            <PlusIcon/>
                         </button>
-                        {userRole === 'Администратор' && (
-                           <>
+                        {isActionsMenuOpen && (
+                            <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border z-50 p-2">
                                 <button 
                                     onClick={() => {
                                         setItemEditorOpen(true);
@@ -2545,9 +2545,16 @@ export default function App() {
                                     }}
                                     className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
                                 >
-                                    <TrashIcon width="20" height="20" /> Списать позицию
+                                    <TrashIcon width="18" height="18" /> Списать позицию
                                 </button>
-                           </>
+                                <div className="my-1 h-px bg-gray-200" />
+                                <button 
+                                    onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); setActionsMenuOpen(false); }} 
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                                >
+                                    <JournalIcon /> Журнал событий
+                                </button>
+                            </div>
                         )}
                     </div>
                 )}
@@ -2579,12 +2586,21 @@ export default function App() {
                                 <div {...swipeHandlers}>
                                     <div className="overflow-hidden">
                                         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-                                            {sortedWarehouses.map((w) => (
+                                            {sortedWarehouses.map((w, index) => (
                                                 <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                     {w.id === 'all' ? (
-                                                        <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col justify-center items-center">
-                                                            <h3 className="text-xl font-bold text-gray-800">Все склады</h3>
-                                                            <p className="text-sm text-gray-500">Обзор всех позиций</p>
+                                                        <div className="bg-gray-50 rounded-xl p-4 h-full">
+                                                            <div className="flex justify-between items-center">
+                                                                <div>
+                                                                    <h3 className="text-xl font-bold text-gray-800">Все склады</h3>
+                                                                    <p className="text-sm text-gray-500">Обзор всех позиций</p>
+                                                                </div>
+                                                                {userRole === 'Администратор' && activeIndex === 0 && (
+                                                                    <button onClick={() => setEditingWarehouse({})} className="p-2 text-blue-600 bg-blue-100 hover:bg-blue-200 rounded-full transition">
+                                                                        <PlusIcon />
+                                                                    </button>
+                                                                )}
+                                                            </div>
                                                         </div>
                                                     ) : (
                                                         <WarehouseInfoBlock 
@@ -2609,12 +2625,7 @@ export default function App() {
                                         <button onClick={() => setActiveIndex(prev => (prev + 1) % sortedWarehouses.length)} className="p-2"><ArrowRightIcon /></button>
                                     </div>
                                 </div>
-                                {userRole === 'Администратор' && (
-                                    <button onClick={() => setEditingWarehouse({})} className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition">
-                                        <PlusIcon /> Добавить склад
-                                    </button>
-                                )}
-
+                                
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
                                      <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
@@ -2765,7 +2776,7 @@ export default function App() {
       />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
-      {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
+      {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} userRole={userRole} onOpenModeration={() => { setContactsModalOpen(false); setUserModerationModalOpen(true); }} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
