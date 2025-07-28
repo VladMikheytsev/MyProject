@@ -136,6 +136,101 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
+// --- [НОВЫЙ КОМПОНЕНТ] Шкала заполненности паллетных мест ---
+const PalletCapacityScale = ({ places = [], items = [] }) => {
+    const palletPlaces = places.filter(p => p.type === 'pallet');
+    const totalPalletPlaces = palletPlaces.length;
+
+    if (totalPalletPlaces === 0) {
+        return null;
+    }
+
+    const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
+    const occupiedPalletPlaceIds = new Set();
+    items.forEach(item => {
+        if (item.placeId !== null && palletPlaceIds.has(item.placeId)) {
+            occupiedPalletPlaceIds.add(item.placeId);
+        }
+    });
+
+    const occupiedCount = occupiedPalletPlaceIds.size;
+
+    const dots = [];
+    for (let i = 0; i < totalPalletPlaces; i++) {
+        dots.push(
+            <div
+                key={i}
+                style={{
+                    width: '3px',
+                    height: '3px',
+                    borderRadius: '50%',
+                    backgroundColor: i < occupiedCount ? '#ef4444' : '#d1d5db', // red-500, gray-300
+                    margin: '1px',
+                }}
+            ></div>
+        );
+    }
+
+    return (
+        <div className="mt-2">
+            <p className="text-xs text-gray-500 mb-1">Заполненность паллетных мест:</p>
+            <div className="flex flex-wrap -m-px">{dots}</div>
+        </div>
+    );
+};
+
+// --- [НОВЫЙ КОМПОНЕНТ] Список свободных мест для всех складов ---
+const AllWarehousesFreeSpace = ({ warehouses = [], items = [] }) => {
+    const freeSpacesByWarehouse = warehouses
+        .map(warehouse => {
+            if (warehouse.id === 'all') return null;
+            
+            const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
+            const totalPalletPlaces = palletPlaces.length;
+
+            if (totalPalletPlaces === 0) {
+                return null;
+            }
+
+            const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
+            const occupiedPalletPlaceIds = new Set();
+            items.forEach(item => {
+                if (item.warehouseId === warehouse.id && item.placeId !== null && palletPlaceIds.has(item.placeId)) {
+                    occupiedPalletPlaceIds.add(item.placeId);
+                }
+            });
+            
+            const occupiedCount = occupiedPalletPlaceIds.size;
+            const freeCount = totalPalletPlaces - occupiedCount;
+
+            return {
+                id: warehouse.id,
+                name: warehouse.name,
+                free: freeCount
+            };
+        })
+        .filter(Boolean);
+
+    if (freeSpacesByWarehouse.length === 0) {
+        return null;
+    }
+
+    return (
+        <div className="mt-4 pt-4 border-t border-gray-200">
+            <h4 className="text-md font-semibold text-gray-700 mb-2">Свободные места</h4>
+            <div className="space-y-1 text-sm">
+                {freeSpacesByWarehouse.map(w => (
+                    <div key={w.id} className="flex justify-between">
+                        <span className="text-gray-600">{w.name}:</span>
+                        <span className="font-bold text-gray-800">{w.free}</span>
+                    </div>
+                ))}
+            </div>
+        </div>
+    );
+};
+
+
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const qrCodePrintRef = useRef();
@@ -1489,6 +1584,8 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
             </div>
             <div className="mb-4 border-b pb-2">
                 <PalletStats places={warehouse.places || []} items={warehouseItems} />
+                {/* [ИЗМЕНЕНИЕ] Добавлена шкала заполненности */}
+                <PalletCapacityScale places={warehouse.places || []} items={warehouseItems} />
             </div>
             <div className="flex-grow overflow-auto">
                 {(warehouse.places && warehouse.places.length > 0) ? (
@@ -2626,6 +2723,8 @@ export default function App() {
                                                                     </button>
                                                                 )}
                                                             </div>
+                                                            {/* [ИЗМЕНЕНИЕ] Добавлен список свободных мест */}
+                                                            <AllWarehousesFreeSpace warehouses={warehouses} items={items} />
                                                         </div>
                                                     ) : (
                                                         <WarehouseInfoBlock 
@@ -2653,6 +2752,7 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
+                                     {/* [ИЗМЕНЕНИЕ] Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
