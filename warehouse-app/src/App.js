@@ -1,7 +1,7 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
-import SignatureCanvas from 'react-signature-canvas'; // --- [НОВЫЙ] Импорт для подписи ---
+import SignatureCanvas from 'react-signature-canvas';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -29,7 +29,6 @@ const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" hei
 
 
 // --- API Configuration ---
-// !!! ВАЖНО: Вставьте сюда ваш актуальный URL от ngrok !!!
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
 
 const api = {
@@ -57,11 +56,8 @@ const api = {
     }
   },
 
-  // --- Методы для данных (склады, товары) ---
   fetchAppData: (userId) => api.request(`/data/${userId}`),
   saveAppData: (userId, data) => api.request(`/data/${userId}`, 'POST', data),
-
-  // --- Методы для пользователей ---
   fetchUsers: () => api.request('/users'),
   loginUser: (credentials) => api.request('/login', 'POST', credentials),
   registerUser: (userData) => api.request('/register', 'POST', userData),
@@ -69,45 +65,42 @@ const api = {
   deleteUser: (userId) => api.request(`/users/${userId}`, 'DELETE'),
 };
 
-
-// --- Компоненты дизайна паллет и стеллажей (без изменений) ---
 const PalletLines = ({ orientation = 'vertical' }) => {
     const longLineStyle = { position: 'absolute', backgroundColor: 'rgb(255, 249, 230)' };
     const transLineStyle = { position: 'absolute', backgroundColor: 'rgb(245, 191, 93)' };
     if (orientation === 'vertical') {
-        const long1 = { ...longLineStyle, width: '3px', height: '100%', left: '4px', top: '0' };
-        const long2 = { ...longLineStyle, width: '3px', height: '100%', left: '10px', top: '0' };
-        const long3 = { ...longLineStyle, width: '3px', height: '100%', left: '16px', top: '0' };
-        const long4 = { ...longLineStyle, width: '3px', height: '100%', left: '22px', top: '0' };
-        const trans1 = { ...transLineStyle, height: '5px', width: '100%', top: '0', left: '0' };
-        const trans2 = { ...transLineStyle, height: '5px', width: '100%', top: '50%', left: '0', transform: 'translateY(-50%)' };
-        const trans3 = { ...transLineStyle, height: '5px', width: '100%', bottom: '0', left: '0' };
+        const long1 = { ...longLineStyle, width: '2px', height: '100%', left: '3px', top: '0' };
+        const long2 = { ...longLineStyle, width: '2px', height: '100%', left: '7px', top: '0' };
+        const long3 = { ...longLineStyle, width: '2px', height: '100%', left: '11px', top: '0' };
+        const long4 = { ...longLineStyle, width: '2px', height: '100%', left: '15px', top: '0' };
+        const trans1 = { ...transLineStyle, height: '3px', width: '100%', top: '0', left: '0' };
+        const trans2 = { ...transLineStyle, height: '3px', width: '100%', top: '50%', left: '0', transform: 'translateY(-50%)' };
+        const trans3 = { ...transLineStyle, height: '3px', width: '100%', bottom: '0', left: '0' };
         return <><div style={long1}></div><div style={long2}></div><div style={long3}></div><div style={long4}></div><div style={trans1}></div><div style={trans2}></div><div style={trans3}></div></>;
     } else {
-        const long1 = { ...longLineStyle, height: '3px', width: '100%', top: '4px', left: '0' };
-        const long2 = { ...longLineStyle, height: '3px', width: '100%', top: '10px', left: '0' };
-        const long3 = { ...longLineStyle, height: '3px', width: '100%', top: '16px', left: '0' };
-        const long4 = { ...longLineStyle, height: '3px', width: '100%', top: '22px', left: '0' };
-        const trans1 = { ...transLineStyle, width: '5px', height: '100%', left: '0', top: '0' };
-        const trans2 = { ...transLineStyle, width: '5px', height: '100%', left: '50%', top: '0', transform: 'translateX(-50%)' };
-        const trans3 = { ...transLineStyle, width: '5px', height: '100%', right: '0', top: '0' };
+        const long1 = { ...longLineStyle, height: '2px', width: '100%', top: '3px', left: '0' };
+        const long2 = { ...longLineStyle, height: '2px', width: '100%', top: '7px', left: '0' };
+        const long3 = { ...longLineStyle, height: '2px', width: '100%', top: '11px', left: '0' };
+        const long4 = { ...longLineStyle, height: '2px', width: '100%', top: '15px', left: '0' };
+        const trans1 = { ...transLineStyle, width: '3px', height: '100%', left: '0', top: '0' };
+        const trans2 = { ...transLineStyle, width: '3px', height: '100%', left: '50%', top: '0', transform: 'translateX(-50%)' };
+        const trans3 = { ...transLineStyle, width: '3px', height: '100%', right: '0', top: '0' };
         return <><div style={long1}></div><div style={long2}></div><div style={long3}></div><div style={long4}></div><div style={trans1}></div><div style={trans2}></div><div style={trans3}></div></>;
     }
 };
 const ShelvingLines = ({ orientation = 'vertical' }) => {
     const lineStyle = { position: 'absolute', backgroundColor: 'rgb(20, 18, 16)' };
     if (orientation === 'vertical') {
-        const style1 = { ...lineStyle, height: '3px', width: '100%', top: '0', left: '0' };
-        const style2 = { ...lineStyle, height: '3px', width: '100%', bottom: '0', left: '0' };
+        const style1 = { ...lineStyle, height: '2px', width: '100%', top: '0', left: '0' };
+        const style2 = { ...lineStyle, height: '2px', width: '100%', bottom: '0', left: '0' };
         return <><div style={style1}></div><div style={style2}></div></>;
     } else {
-        const style1 = { ...lineStyle, width: '3px', height: '100%', left: '0', top: '0' };
-        const style2 = { ...lineStyle, width: '3px', height: '100%', right: '0', top: '0' };
+        const style1 = { ...lineStyle, width: '2px', height: '100%', left: '0', top: '0' };
+        const style2 = { ...lineStyle, width: '2px', height: '100%', right: '0', top: '0' };
         return <><div style={style1}></div><div style={style2}></div></>;
     }
 };
 
-// --- [ОБНОВЛЕННЫЙ] Компонент статистики паллет ---
 const PalletStats = ({ places = [], items = [] }) => {
     const palletPlaces = places.filter(p => p.type === 'pallet');
     const totalPalletPlaces = palletPlaces.length;
@@ -142,18 +135,16 @@ const PalletStats = ({ places = [], items = [] }) => {
     );
 };
 
-// --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для печати QR-кода ---
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const qrCodePrintRef = useRef();
-    const titleRef = useRef(null); // Ref для заголовка
+    const titleRef = useRef(null);
 
     const handlePrintQRCode = useReactToPrint({
         content: () => qrCodePrintRef.current,
         documentTitle: `QR-Code-${item.name}`,
     });
     
-    // Эффект для генерации QR-кода
     useEffect(() => {
         const generateQr = async () => {
             const qrString = item.id;
@@ -170,7 +161,6 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
         generateQr();
     }, [item]);
 
-    // Эффект для динамического изменения размера шрифта
     useLayoutEffect(() => {
         const element = titleRef.current;
         if (!element || !qrCodeUrl) return;
@@ -183,10 +173,8 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
         element.style.fontSize = `${currentFontSize}px`;
         element.style.wordWrap = 'break-word';
 
-        // Эвристика для проверки высоты (не более 2 строк)
         const isTooTall = () => element.scrollHeight > currentFontSize * 2.4;
         
-        // Уменьшаем шрифт, пока он не влезет по ширине или высоте
         while ((element.scrollWidth > MAX_WIDTH || isTooTall()) && currentFontSize > MIN_FONT_SIZE) {
             currentFontSize--;
             element.style.fontSize = `${currentFontSize}px`;
@@ -230,7 +218,6 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
 
 // --- Модальные окна ---
 
-// --- [НОВОЕ МОДАЛЬНОЕ ОКНО] Редактор профиля пользователя ---
 const ProfileEditorModal = ({ user, warehouses, onSave, onClose, onLogout }) => {
     const [userData, setUserData] = useState({ ...user });
 
@@ -298,36 +285,7 @@ const WarehouseEditor = ({ initialData, onSave, onCancel }) => {
     </div>
   );
 };
-const WarehouseListModal = ({ warehouses, selectedId, onSelect, onEdit, onAdd, onDelete, onClose, userRole }) => {
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">Выберите склад</h2>
-                <div className="space-y-2 max-h-64 overflow-y-auto mb-4">
-                    <div onClick={() => onSelect(null)} className={`p-3 rounded-lg cursor-pointer transition ${selectedId === null ? 'bg-blue-100 border-blue-500 border' : 'bg-gray-50 hover:bg-gray-200'}`}>
-                        <span className={`font-semibold ${selectedId === null ? 'text-blue-800' : 'text-gray-800'}`}>Посмотреть все склады</span>
-                    </div>
-                    {warehouses.map(w => (
-                        <div key={w.id} onClick={() => onSelect(w.id)} className={`p-3 rounded-lg cursor-pointer transition flex justify-between items-center ${selectedId === w.id ? 'bg-blue-100 border-blue-500 border' : 'bg-gray-50 hover:bg-gray-200'}`}>
-                            <span className={`font-semibold ${selectedId === w.id ? 'text-blue-800' : 'text-gray-800'}`}>{w.name}</span>
-                            {userRole === 'Администратор' && (<button onClick={(e) => { e.stopPropagation(); onEdit(w); }} className="text-gray-500 hover:text-blue-600 p-1"><EditIcon /></button>)}
-                        </div>
-                    ))}
-                </div>
-                <div className="border-t border-gray-200 pt-2 space-y-2">
-                    {userRole === 'Администратор' && (<button onClick={onAdd} className="w-full flex items-center justify-center text-blue-600 hover:text-blue-800 transition py-3"><PlusIcon /><span className="ml-2 font-semibold">Добавить новый склад</span></button>)}
-                    
-                    {userRole === 'Администратор' && selectedId !== null && (
-                        <button onClick={() => onDelete(selectedId)} className="w-full flex items-center justify-center text-red-600 hover:text-red-800 transition py-3">
-                            <TrashIcon />
-                            <span className="ml-2 font-semibold">Удалить выбранный склад</span>
-                        </button>
-                    )}
-                </div>
-            </div>
-        </div>
-    );
-};
+
 const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
     const [placeStates, setPlaceStates] = useState(() => {
         const states = Array(49).fill(0);
@@ -406,6 +364,8 @@ const PlacesEditor = ({ initialPlaces, onSave, onCancel, onReset }) => {
         </div>
     );
 };
+
+// --- [ИЗМЕНЕНИЕ] Уменьшены размеры в 1.5 раза ---
 const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInfo, disabledPlaces = [], itemTypes, warehouseId }) => {
     const activeRows = new Set();
     const activeCols = new Set();
@@ -414,13 +374,13 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
     const sortedActiveCols = Array.from(activeCols).sort((a, b) => a - b);
 
     return (
-        <div className="flex flex-col p-2" style={{ width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '5px solid black', borderLeft: '5px solid black', borderRight: '5px solid black' }}>
+        <div className="flex flex-col p-1" style={{ width: 'fit-content', backgroundColor: '#f9fafb', borderTop: '3px solid black', borderLeft: '3px solid black', borderRight: '3px solid black' }}>
             {sortedActiveRows.map(row => (
                 <div key={row} className="flex">
                     {sortedActiveCols.map(col => {
                         const id = row * 7 + col;
                         const place = places.find(p => p.id === id);
-                        let style = { width: '30px', height: '36px', position: 'relative', overflow: 'hidden' };
+                        let style = { width: '20px', height: '24px', position: 'relative', overflow: 'hidden' };
                         let backgroundColor = 'transparent';
                         let isDisabled = disabledPlaces.includes(id);
                         let isSelected = selectedPlaceInfo?.placeId === id && selectedPlaceInfo?.warehouseId === warehouseId;
@@ -430,34 +390,31 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
                         if (place) {
                             itemsOnThisPlace = items.filter(item => item.placeId === id);
                             isClickable = onPlaceSelect && !isDisabled;
-                            if (onPlaceSelect) { // In selection mode
-                                // Keep it clickable
-                            } else { // In view mode
+                            if (!onPlaceSelect) {
                                 isClickable = itemsOnThisPlace.length > 0;
                             }
 
-
                             if (place.type === 'pallet') {
                                 backgroundColor = 'rgb(245, 192, 93)';
-                                style.width = place.orientation === '30*36' ? '30px' : '36px';
-                                style.height = place.orientation === '30*36' ? '36px' : '30px';
+                                style.width = place.orientation === '30*36' ? '20px' : '24px';
+                                style.height = place.orientation === '30*36' ? '24px' : '20px';
                             } else if (place.type === 'shelving') {
                                 backgroundColor = 'rgb(84, 73, 61)';
-                                style.width = place.orientation === '40*15' ? '40px' : '15px';
-                                style.height = place.orientation === '40*15' ? '15px' : '40px';
+                                style.width = place.orientation === '40*15' ? '27px' : '10px';
+                                style.height = place.orientation === '40*15' ? '10px' : '27px';
                             }
                         }
                         
-                        const margin = place?.type === 'pallet' ? '3px' : '1.5px';
+                        const margin = '1.5px';
 
                         return (
-                            <div key={col} className="flex items-center justify-center" style={{ width: '45px', height: '45px', margin: margin }}>
-                                <div onClick={() => isClickable && onPlaceSelect({placeId: id, warehouseId: warehouseId})} className={`rounded-sm flex items-center justify-center gap-1 ${isClickable ? 'cursor-pointer' : ''} ${isDisabled ? 'opacity-30' : ''} ${isSelected ? 'ring-4 ring-offset-2 ring-red-500' : ''}`} style={{...style, backgroundColor}}>
+                            <div key={col} className="flex items-center justify-center" style={{ width: '30px', height: '30px', margin: margin }}>
+                                <div onClick={() => isClickable && onPlaceSelect({placeId: id, warehouseId: warehouseId})} className={`rounded-sm flex items-center justify-center gap-1 ${isClickable ? 'cursor-pointer' : ''} ${isDisabled ? 'opacity-30' : ''} ${isSelected ? 'ring-2 ring-offset-1 ring-red-500' : ''}`} style={{...style, backgroundColor}}>
                                   {place && place.type === 'pallet' && itemsOnThisPlace.length === 0 && <PalletLines orientation={place.orientation === '30*36' ? 'vertical' : 'horizontal'} />}
                                   {place && place.type === 'shelving' && <ShelvingLines orientation={place.orientation === '15*40' ? 'vertical' : 'horizontal'} />}
                                   {place && place.type === 'pallet' && itemsOnThisPlace.map(item => {
                                       const itemType = itemTypes.find(it => it.name === item.type);
-                                      return <div key={item.id} style={{ width: '25px', height: '25px', backgroundColor: itemType?.color || '#ccc', flexShrink: 0 }} className="rounded-sm"></div>
+                                      return <div key={item.id} style={{ width: '16px', height: '16px', backgroundColor: itemType?.color || '#ccc', flexShrink: 0 }} className="rounded-sm"></div>
                                   })}
                                 </div>
                             </div>
@@ -468,6 +425,7 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
         </div>
     );
 };
+
 const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, items, userRole }) => {
     const [newItem, setNewItem] = useState({ name: '', type: itemTypes[0]?.name || '', size: 'Паллета', quantity: 1, warehouseId: warehouses[0]?.id || null, placeId: null });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
@@ -1106,7 +1064,7 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
 };
 
 const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
-    const [scanStatus, setScanStatus] = useState('idle'); // idle, scanning, error
+    const [scanStatus, setScanStatus] = useState('idle');
     const [scanError, setScanError] = useState('');
 
     const startScan = () => {
@@ -1595,7 +1553,9 @@ const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleE
     );
 };
 
+// --- [ИЗМЕНЕНИЕ] Добавлена статистика в блок со схемой склада ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
+    const warehouseItems = items.filter(i => i.warehouseId === warehouse.id);
     return (
         <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col relative">
             <div className="flex justify-between items-center mb-2">
@@ -1615,7 +1575,7 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
                     <div className="flex justify-center">
                          <CompactPlacesGrid
                             places={warehouse.places}
-                            items={items.filter(i => i.warehouseId === warehouse.id)}
+                            items={warehouseItems}
                             itemTypes={itemTypes}
                             onPlaceSelect={onPlaceSelect}
                             warehouseId={warehouse.id}
@@ -1626,6 +1586,9 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
                         <span>Места не сконфигурированы.</span>
                     </div>
                 )}
+            </div>
+            <div className="mt-4 pt-4 border-t">
+                <PalletStats places={warehouse.places || []} items={warehouseItems} />
             </div>
         </div>
     );
@@ -1877,7 +1840,6 @@ export default function App() {
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('login'); 
   const [authChecked, setAuthChecked] = useState(false);
-
   const [loading, setLoading] = useState(true);
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
@@ -1905,9 +1867,8 @@ export default function App() {
   const [pendingAction, setPendingAction] = useState(null);
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   
-  // --- [ИЗМЕНЕНИЕ] Состояния для вкладок и свайпов ---
-  const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
-  const [expandedWarehouses, setExpandedWarehouses] = useState([]); // --- [НОВОЕ] Для сворачивания/разворачивания складов ---
+  const [mainViewTab, setMainViewTab] = useState('warehouses');
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -2387,7 +2348,6 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  // --- [НОВОЕ] Обработчик для сворачивания/разворачивания ---
   const toggleWarehouseExpansion = (warehouseId) => {
     setExpandedWarehouses(prev =>
         prev.includes(warehouseId)
@@ -2455,7 +2415,6 @@ export default function App() {
 
   const userRole = currentUser.role;
   
-  // --- [ИЗМЕНЕНИЕ] Логика фильтрации позиций теперь зависит от активного слайда ---
   const activeWarehouseId = sortedWarehouses[activeIndex]?.id;
   const itemsToDisplay = activeWarehouseId === 'all' 
     ? items 
@@ -2500,8 +2459,8 @@ export default function App() {
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
 
   return (
-    <div className="p-4 bg-gray-100 min-h-screen font-sans">
-      <div className="max-w-7xl mx-auto mb-4">
+    <div className="bg-gray-100 min-h-screen font-sans">
+      <div className="max-w-7xl mx-auto sticky top-0 z-40 bg-gray-100 pt-4 px-4">
         <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
             <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
                 <UserIcon />
@@ -2531,7 +2490,7 @@ export default function App() {
             </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto">
+      <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
                  <div className="bg-white rounded-xl shadow-md overflow-hidden">
@@ -2540,13 +2499,13 @@ export default function App() {
                             onClick={() => setMainViewTab('warehouses')} 
                             className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'warehouses' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                         >
-                            Склады и Позиции
+                            Позиции
                         </button>
                         <button 
                             onClick={() => setMainViewTab('places')} 
                             className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'places' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                         >
-                            Места
+                            Схемы
                         </button>
                     </div>
 
@@ -2592,7 +2551,6 @@ export default function App() {
                                     </button>
                                 )}
 
-                                {/* --- [ПЕРЕМЕЩЕНО] Список позиций --- */}
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
                                      <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
@@ -2689,8 +2647,8 @@ export default function App() {
                                             <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                 {index === 0 ? (
                                                      <div className="bg-gray-50 rounded-xl p-4 h-full">
-                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Все места</h3>
-                                                        <div className="flex overflow-x-auto space-x-6 pb-2">
+                                                        <h3 className="text-xl font-bold text-gray-800 text-center mb-4">Все схемы</h3>
+                                                        <div className="flex flex-wrap justify-center gap-6 pb-2">
                                                             {sortedWarehouses.slice(1).map(wh => (
                                                                 (wh.places && wh.places.length > 0) && (
                                                                     <div key={wh.id} className="flex-shrink-0">
@@ -2706,7 +2664,6 @@ export default function App() {
                                                                 )
                                                             ))}
                                                         </div>
-                                                        {/* --- [ПЕРЕМЕЩЕНО] Статистика паллет --- */}
                                                         <div className="mt-4 pt-4 border-t w-full">
                                                           <h3 className="text-lg font-bold text-gray-800 mb-2">Общая статистика</h3>
                                                           <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
