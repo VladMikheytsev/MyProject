@@ -1765,6 +1765,12 @@
     },
     "log": [
         {
+            "id": "00507df1-9f35-44eb-92e3-b79d5b74b453",
+            "timestamp": "2025-07-28T06:21:40.113Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Открыл журнал действий"
+        },
+        {
             "id": "e2ec26a0-25bd-4244-8b2c-3715ee8de88f",
             "timestamp": "2025-07-28T06:12:00.419Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
