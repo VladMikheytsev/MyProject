@@ -10,7 +10,7 @@ const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20"
 const ChevronUpIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
 const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
 const XIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><line x1="18" y1="6" x2="6" y2="18"></line><line x1="6" y1="6" x2="18" y2="18"></line></svg>;
-const TruckIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
+const TruckIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="1" y="3" width="15" height="13"></rect><polygon points="16 8 20 8 23 11 23 16 16 16 16 8"></polygon><circle cx="5.5" cy="18.5" r="2.5"></circle><circle cx="18.5" cy="18.5" r="2.5"></circle></svg>;
 const SaveIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h11l5 5v11a2 2 0 0 1-2 2z"></path><polyline points="17 21 17 13 7 13 7 21"></polyline><polyline points="7 3 7 8 15 8"></polyline></svg>;
 const ResetIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="24" height="24" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="23 4 23 10 17 10"></polyline><polyline points="1 20 1 14 7 14"></polyline><path d="M3.51 9a9 9 0 0 1 14.85-3.36L23 10M1 14l4.64 4.36A9 9 0 0 0 20.49 15"></path></svg>;
 const LogOutIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M9 21H5a2 2 0 0 1-2-2V5a2 2 0 0 1 2-2h4"></path><polyline points="16 17 21 12 16 7"></polyline><line x1="21" y1="12" x2="9" y2="12"></line></svg>;
@@ -27,7 +27,7 @@ const EyeIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height=
 const PrintIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 6 2 18 2 18 9"></polyline><path d="M6 18H4a2 2 0 0 1-2-2v-5a2 2 0 0 1 2-2h16a2 2 0 0 1 2 2v5a2 2 0 0 1-2 2h-2"></path><rect x="6" y="14" width="12" height="8"></rect></svg>;
 const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M2 3h6a4 4 0 0 1 4 4v14a3 3 0 0 0-3-3H2z"></path><path d="M22 3h-6a4 4 0 0 0-4 4v14a3 3 0 0 1 3-3h7z"></path></svg>;
 const QrIcon = ({ color = "currentColor", width="18", height="18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14.01" y2="14"></line><line x1="21" y1="14" x2="21.01" y2="14"></line><line x1="14" y1="21" x2="14.01" y2="21"></line><line x1="21" y1="21" x2="21.01" y2="21"></line></svg>;
-
+const SignatureIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8.5"/><path d="m21.1 12.5-6.6 6.6"/><path d="M11 13h3a2 2 0 0 1 2 2v3"/><path d="m15 13 6 6"/><path d="M12.5 21.1 22 11.6"/></svg>;
 
 // --- API Configuration ---
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
@@ -836,11 +836,11 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
     );
 };
 
-const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCancel }) => {
-    const [moveQuantity, setMoveQuantity] = useState(itemToMove.quantity);
-    const [unit, setUnit] = useState('шт.');
+const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, onWriteOff, onCancel }) => {
+    const [moveQuantity, setMoveQuantity] = useState(itemToAction.quantity);
+    const [unit, setUnit] = useState(itemToAction.size);
     const [destination, setDestination] = useState({
-        warehouseId: itemToMove.warehouseId,
+        warehouseId: itemToAction.warehouseId !== 'unassigned' ? itemToAction.warehouseId : warehouses[0]?.id,
         placeId: null
     });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
@@ -850,34 +850,42 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
         const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
         if (!selectedWarehouse) return;
 
-        const otherItems = items.filter(i => i.id !== itemToMove.id);
+        const otherItems = items.filter(i => i.id !== itemToAction.id);
         const newDisabledPlaces = [];
         (selectedWarehouse.places || []).forEach(place => {
             const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
-            if (itemToMove.size === 'Паллета') {
-                if (place.type === 'shelving') newDisabledPlaces.push(place.id);
-                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) newDisabledPlaces.push(place.id);
+            // Logic to disable places based on the item being moved
+            if (unit === 'Паллета') {
+                if (place.type === 'shelving') {
+                    newDisabledPlaces.push(place.id);
+                }
+                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) {
+                    newDisabledPlaces.push(place.id);
+                }
             }
         });
         setDisabledPlaces(newDisabledPlaces);
-        setDestination(prev => ({...prev, placeId: null}));
-    }, [destination.warehouseId, itemToMove, warehouses, items]);
+        // Reset place selection if warehouse changes
+        if (destination.warehouseId !== itemToAction.warehouseId) {
+             setDestination(prev => ({...prev, placeId: null}));
+        }
+    }, [destination.warehouseId, unit, itemToAction, warehouses, items]);
 
-    const handleSave = () => {
+    const handleMove = () => {
         const quantity = parseInt(moveQuantity, 10);
         if (isNaN(quantity) || quantity <= 0) {
             alert('Пожалуйста, введите корректное количество.');
             return;
         }
-        if (quantity > itemToMove.quantity) {
-            alert(`Нельзя переместить больше, чем есть в наличии (${itemToMove.quantity}).`);
+        if (quantity > itemToAction.quantity) {
+            alert(`Нельзя переместить больше, чем есть в наличии (${itemToAction.quantity}).`);
             return;
         }
         if (destination.placeId === null) {
             alert('Пожалуйста, выберите новое место.');
             return;
         }
-        onSave({ destination, quantity, unit });
+        onMove({ destination, quantity, unit });
     };
 
     const handleWarehouseChange = (e) => {
@@ -888,18 +896,18 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     const handlePlaceSelect = (placeInfo) => {
         setDestination(prev => ({ ...prev, placeId: placeInfo.placeId }));
     };
-
-    const handleQuantityFocus = (e) => {
-        e.target.value = '';
-    };
+    
+    const handleWriteOffClick = () => {
+        onWriteOff(itemToAction);
+    }
 
     const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
-                <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение позиции</h2>
-                <p className="mb-6 text-gray-600">"{itemToMove.name}" (Доступно: {itemToMove.quantity})</p>
+                <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение / Списание</h2>
+                <p className="mb-6 text-gray-600">"{itemToAction.name}" (Доступно: {itemToAction.quantity})</p>
 
                 <div className="space-y-4">
                     <div className="grid grid-cols-2 gap-4">
@@ -908,17 +916,17 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                             <input
                                 ref={quantityInputRef}
                                 type="number"
-                                defaultValue={itemToMove.quantity}
-                                onFocus={handleQuantityFocus}
+                                value={moveQuantity}
+                                onFocus={(e) => e.target.select()}
                                 onChange={(e) => setMoveQuantity(e.target.value)}
                                 placeholder="Количество"
                                 min="1"
-                                max={itemToMove.quantity}
+                                max={itemToAction.quantity}
                                 className="w-full p-3 border rounded-lg"
                             />
                         </div>
                         <div>
-                            <label className="block text-sm font-medium text-gray-700 mb-1">Единица:</label>
+                            <label className="block text-sm font-medium text-gray-700 mb-1">Тип места:</label>
                             <select
                                 value={unit}
                                 onChange={(e) => setUnit(e.target.value)}
@@ -926,7 +934,7 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                             >
                                 <option>Паллета</option>
                                 <option>Коробка</option>
-                                <option>шт.</option>
+                                <option>Шт</option>
                             </select>
                         </div>
                     </div>
@@ -937,92 +945,6 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                             {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
                         </select>
                     </div>
-
-                    {selectedWarehouse && (
-                        <div>
-                            <h3 className="font-semibold mb-2">Выберите новое место на складе "{selectedWarehouse.name}"</h3>
-                            <div className="max-h-64 overflow-auto p-2 bg-gray-100 rounded-lg">
-                                <CompactPlacesGrid
-                                    places={selectedWarehouse.places || []}
-                                    items={items.filter(i => i.warehouseId === selectedWarehouse.id && i.id !== itemToMove.id)}
-                                    itemTypes={itemTypes}
-                                    onPlaceSelect={handlePlaceSelect}
-                                    selectedPlaceInfo={destination}
-                                    disabledPlaces={disabledPlaces}
-                                    warehouseId={selectedWarehouse.id}
-                                />
-                            </div>
-                        </div>
-                    )}
-                </div>
-
-                <div className="flex justify-end space-x-4 mt-8">
-                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
-                    <button onClick={handleSave} disabled={destination.placeId === null} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
-const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, onWriteOff, onCancel }) => {
-    const [destination, setDestination] = useState({
-        warehouseId: itemToAction.warehouseId !== 'unassigned' ? itemToAction.warehouseId : warehouses[0]?.id,
-        placeId: null
-    });
-    const [disabledPlaces, setDisabledPlaces] = useState([]);
-
-    useEffect(() => {
-        const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
-        if (!selectedWarehouse) return;
-
-        const otherItems = items.filter(i => i.id !== itemToAction.id);
-        const newDisabledPlaces = [];
-        
-        (selectedWarehouse.places || []).forEach(place => {
-            const itemsOnPlace = otherItems.filter(i => i.placeId === place.id && i.warehouseId === destination.warehouseId);
-            if (itemToAction.size === 'Паллета') {
-                if (place.type === 'shelving') newDisabledPlaces.push(place.id);
-                if (place.type === 'pallet' && itemsOnPlace.filter(i => i.size === 'Паллета').length >= 2) newDisabledPlaces.push(place.id);
-            }
-        });
-        setDisabledPlaces(newDisabledPlaces);
-        if (destination.warehouseId !== itemToAction.warehouseId) {
-            setDestination(prev => ({...prev, placeId: null}));
-        }
-
-    }, [destination.warehouseId, itemToAction, warehouses, items]);
-
-    const handleMove = () => {
-        if (destination.placeId === null) {
-            alert('Пожалуйста, выберите новое место для перемещения.');
-            return;
-        }
-        onMove(destination);
-    };
-
-    const handleWarehouseChange = (e) => {
-        const newWarehouseId = e.target.value;
-        setDestination({ warehouseId: newWarehouseId, placeId: null });
-    };
-
-    const handlePlaceSelect = (placeInfo) => {
-        setDestination(prev => ({ ...prev, placeId: placeInfo.placeId }));
-    };
-
-    const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
-
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
-                <h2 className="text-2xl font-bold mb-2 text-gray-800">Действия с позицией</h2>
-                <p className="mb-6 text-gray-600">"{itemToAction.name}"</p>
-
-                <div className="space-y-4">
-                    <label className="block text-sm font-medium text-gray-700">Переместить на склад:</label>
-                    <select name="warehouseId" value={destination.warehouseId || ''} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
-                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
-                    </select>
 
                     {selectedWarehouse && (
                         <div>
@@ -1041,32 +963,19 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                         </div>
                     )}
                 </div>
+                
+                <div className="border-t mt-8 pt-6">
+                     <button 
+                        onClick={handleWriteOffClick} 
+                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-red-700 bg-red-100 hover:bg-red-200 font-semibold"
+                    >
+                        <TrashIcon width="20" height="20" /> Списать позицию
+                    </button>
+                </div>
 
-                <div className="flex justify-center items-center gap-x-6 mt-8 w-full">
-                    <button 
-                        onClick={onCancel} 
-                        className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
-                        aria-label="Отмена"
-                    >
-                        <XIcon />
-                    </button>
-                    
-                    <button 
-                        onClick={() => onWriteOff(itemToAction.id)} 
-                        className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-red-600 hover:bg-red-700 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
-                        aria-label="Списать"
-                    >
-                        <TrashIcon />
-                    </button>
-
-                    <button 
-                        onClick={handleMove} 
-                        disabled={destination.placeId === null} 
-                        className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400 disabled:shadow-none transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500"
-                        aria-label="Переместить"
-                    >
-                        <TruckIcon />
-                    </button>
+                <div className="flex justify-end space-x-4 mt-6">
+                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                    <button onClick={handleMove} disabled={destination.placeId === null} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
                 </div>
             </div>
         </div>
@@ -1128,7 +1037,7 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
                 <h2 className="text-2xl font-bold mb-4 text-gray-800">Проверка позиции</h2>
                 <p className="mb-6 text-gray-600">
                     {itemToVerify.id === 'any'
-                        ? 'Нажмите кнопку, чтобы отсканировать QR-код любой позиции для перемещения.'
+                        ? 'Нажмите кнопку, чтобы отсканировать QR-код любой позиции для выполнения действия.'
                         : `Нажмите кнопку, чтобы отсканировать QR-код для позиции: `
                     }
                     {itemToVerify.id !== 'any' && <span className="font-bold">"{itemToVerify.name}"</span>}
@@ -1840,9 +1749,58 @@ const LogModal = ({ log, users, onClose }) => {
     );
 };
 
+const WriteOffLogModal = ({ log, users, signatures, onClose }) => {
+    const getUserName = (userId) => {
+        const user = users.find(u => u.id === userId);
+        return user ? `${user.firstName} ${user.lastName}` : 'Неизвестный пользователь';
+    };
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-4xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">Журнал списаний</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="max-h-[70vh] overflow-y-auto">
+                    <table className="w-full text-left">
+                        <thead className="border-b text-sm text-gray-500">
+                            <tr>
+                                <th className="p-2">Дата/Время</th>
+                                <th className="p-2">Пользователь</th>
+                                <th className="p-2">Наименование</th>
+                                <th className="p-2">Кол-во было/стало</th>
+                                <th className="p-2">Подпись</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {log.map(entry => (
+                                <tr key={entry.id} className="border-b">
+                                    <td className="p-2 text-sm text-gray-500 align-top">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
+                                    <td className="p-2 font-semibold align-top">{getUserName(entry.userId)}</td>
+                                    <td className="p-2 align-top">{entry.itemName}</td>
+                                    <td className="p-2 align-top">{entry.quantityBefore} → {entry.quantityAfter}</td>
+                                    <td className="p-2">
+                                        {signatures[entry.signatureId] ? (
+                                            <img src={signatures[entry.signatureId]} alt="Подпись" className="h-10 bg-gray-100 rounded" />
+                                        ) : (
+                                            <span className="text-xs text-gray-400">Нет</span>
+                                        )}
+                                    </td>
+                                </tr>
+                            ))}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
+  // --- State ---
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('login'); 
@@ -1854,6 +1812,9 @@ export default function App() {
   const [scenarios, setScenarios] = useState([]);
   const [signatures, setSignatures] = useState({});
   const [log, setLog] = useState([]);
+  const [writeOffLog, setWriteOffLog] = useState([]);
+  
+  // Modals and editors state
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
@@ -1861,31 +1822,33 @@ export default function App() {
   const [isItemEditorOpen, setItemEditorOpen] = useState(false);
   const [isItemTypesManagerOpen, setItemTypesManagerOpen] = useState(false);
   const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
-  const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
   const [isProfileEditorOpen, setProfileEditorOpen] = useState(false);
-  const [movingItem, setMovingItem] = useState(null); 
+  const [itemForAction, setItemForAction] = useState(null);
   const [verifyingItem, setVerifyingItem] = useState(null);
-  const [itemToAction, setItemToAction] = useState(null); 
   const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
   const [pendingAction, setPendingAction] = useState(null);
+  const [pendingWriteOff, setPendingWriteOff] = useState(null);
   const [isLogModalOpen, setLogModalOpen] = useState(false);
+  const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
   
+  // UI State
   const [mainViewTab, setMainViewTab] = useState('warehouses');
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
-  const [qrScanPurpose, setQrScanPurpose] = useState('move');
-  const actionsMenuRef = useRef(null);
+  const [qrScanPurpose, setQrScanPurpose] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
+  const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
+  
+  // Refs
+  const actionsMenuRef = useRef(null);
   const headerRef = useRef(null);
   const [headerHeight, setHeaderHeight] = useState(80);
-  
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
-  
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
@@ -1902,9 +1865,14 @@ export default function App() {
     }, [actionsMenuRef]);
 
     useLayoutEffect(() => {
-      if (headerRef.current) {
-        setHeaderHeight(headerRef.current.offsetHeight);
+      const updateHeaderHeight = () => {
+        if (headerRef.current) {
+          setHeaderHeight(headerRef.current.offsetHeight);
+        }
       }
+      updateHeaderHeight();
+      window.addEventListener('resize', updateHeaderHeight);
+      return () => window.removeEventListener('resize', updateHeaderHeight);
     }, []);
 
   const handlePrintScenario = useReactToPrint({
@@ -2002,6 +1970,7 @@ export default function App() {
       setScenarios([]);
       setSignatures({});
       setLog([]);
+      setWriteOffLog([]);
       setWarehouseIdForEditor(null);
   };
 
@@ -2098,6 +2067,7 @@ export default function App() {
                   setScenarios(appData.scenarios || []);
                   setSignatures(appData.signatures || {});
                   setLog(appData.log || []);
+                  setWriteOffLog(appData.writeOffLog || []);
                   setUsers(usersData || []);
                   hasLoadedData.current = true;
               } catch (error) {
@@ -2114,7 +2084,7 @@ export default function App() {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
 
     setIsSaving(true);
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log };
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
     api.saveAppData(currentUser.id, fullState)
       .catch(error => {
         console.error("Ошибка при автоматическом сохранении данных:", error);
@@ -2122,10 +2092,10 @@ export default function App() {
       .finally(() => {
         setIsSaving(false);
       });
-  }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
+  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
 
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2134,7 +2104,7 @@ export default function App() {
 
         const intervalId = setInterval(async () => {
             const currentState = stateRef.current;
-            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.movingItem || currentState.itemToAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
+            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.itemForAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
 
             if (isBusy) {
                 return;
@@ -2143,7 +2113,7 @@ export default function App() {
             try {
                 const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
 
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log };
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
@@ -2151,6 +2121,7 @@ export default function App() {
                     setScenarios(newData.scenarios || []);
                     setSignatures(newData.signatures || {});
                     setLog(newData.log || []);
+                    setWriteOffLog(newData.writeOffLog || []);
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
@@ -2208,56 +2179,71 @@ export default function App() {
     addLogEntry(`Отредактировал позицию '${updatedItem.name}'`, { before: originalItem, after: updatedItem });
     setEditingItem(null);
   };
-
-  const handleSaveItemMove = ({ destination, quantity, unit }) => {
-    const originalItem = items.find(item => item.id === movingItem.id);
+  
+  const handleItemActionMove = ({ destination, quantity, unit }) => {
+    const originalItem = items.find(item => item.id === itemForAction.id);
     setItems(prevItems => {
         if (!originalItem) return prevItems;
 
         if (quantity >= originalItem.quantity) {
+            // Full move
             return prevItems.map(item =>
-                item.id === movingItem.id
-                    ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId }
+                item.id === itemForAction.id
+                    ? { ...item, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit }
                     : item
             );
         }
 
+        // Partial move (split)
         const updatedOriginalItem = { ...originalItem, quantity: originalItem.quantity - quantity };
-        const newItem = { ...originalItem, id: crypto.randomUUID(), quantity: quantity, warehouseId: destination.warehouseId, placeId: destination.placeId };
+        const newItem = { ...originalItem, id: crypto.randomUUID(), quantity: quantity, warehouseId: destination.warehouseId, placeId: destination.placeId, size: unit };
 
         return prevItems.map(item =>
-            item.id === movingItem.id ? updatedOriginalItem : item
+            item.id === itemForAction.id ? updatedOriginalItem : item
         ).concat(newItem);
     });
     const fromWarehouseName = warehouses.find(w => w.id === originalItem.warehouseId)?.name || 'Нераспределенные';
     const toWarehouseName = warehouses.find(w => w.id === destination.warehouseId)?.name;
     addLogEntry(`Разделил и переместил ${quantity} ${unit} '${originalItem.name}' из '${fromWarehouseName}' в '${toWarehouseName}'`);
-    setMovingItem(null);
+    setItemForAction(null);
   };
 
-  const handleMoveItem = (destination) => {
-    const originalItem = items.find(item => item.id === itemToAction.id);
-    if (!originalItem) return;
-
-    const updatedItem = { ...originalItem, warehouseId: destination.warehouseId, placeId: destination.placeId };
-    
-    setItems(prevItems => prevItems.map(item =>
-        item.id === itemToAction.id ? updatedItem : item
-    ));
-    
-    addLogEntry(`Переместил позицию '${itemToAction.name}'`, { before: originalItem, after: updatedItem });
-    setItemToAction(null);
-  };
-
-  const handleWriteOffItem = (itemId) => {
-    if (window.confirm('Вы уверены, что хотите списать эту позицию? Это действие необратимо.')) {
-        const itemToOff = items.find(item => item.id === itemId);
-        setItems(prevItems => prevItems.filter(item => item.id !== itemId));
-        addLogEntry(`Списал позицию: ${itemToOff.name} (Кол-во: ${itemToOff.quantity})`);
-        setItemToAction(null);
-    }
+  const handleItemActionWriteOff = (item) => {
+      setItemForAction(null);
+      setPendingWriteOff({ item: item });
   };
   
+  const handleConfirmWriteOff = (signatureData) => {
+      if (!pendingWriteOff) return;
+      
+      const itemToOff = pendingWriteOff.item;
+      const signatureId = `sig_${crypto.randomUUID()}`;
+      
+      // Save signature
+      setSignatures(prev => ({...prev, [signatureId]: signatureData }));
+      
+      // Create write-off log entry
+      const writeOffEntry = {
+          id: crypto.randomUUID(),
+          timestamp: new Date().toISOString(),
+          userId: currentUser.id,
+          itemName: itemToOff.name,
+          quantityBefore: itemToOff.quantity,
+          quantityAfter: 0,
+          signatureId: signatureId,
+      };
+      setWriteOffLog(prev => [writeOffEntry, ...prev]);
+      
+      // Remove item from main list
+      setItems(prevItems => prevItems.filter(item => item.id !== itemToOff.id));
+      
+      // Add to general log
+      addLogEntry(`Списал позицию: ${itemToOff.name} (Кол-во: ${itemToOff.quantity})`);
+      
+      // Close modal
+      setPendingWriteOff(null);
+  }
+
   const handleCreateScenario = (scenarioData) => {
     const { signatureData, ...restOfData } = scenarioData;
     const signatureId = `sig_${crypto.randomUUID()}`;
@@ -2352,14 +2338,10 @@ export default function App() {
 
   const handleVerificationSuccess = (verifiedItem) => {
       setVerifyingItem(null);
-      if (qrScanPurpose === 'move') {
-          setMovingItem(verifiedItem);
-      } else if (qrScanPurpose === 'writeoff') {
-          if (currentUser.role === 'Администратор') {
-              setItemToAction(verifiedItem);
-          } else {
-              alert('У вас нет прав для списания позиции.');
-          }
+      if (qrScanPurpose === 'action') {
+          setItemForAction(verifiedItem);
+      } else if (qrScanPurpose === 'global_writeoff') {
+          handleItemActionWriteOff(verifiedItem);
       }
   };
   
@@ -2520,7 +2502,7 @@ export default function App() {
                 </button>
                  <button 
                     onClick={() => { 
-                        setQrScanPurpose('move'); 
+                        setQrScanPurpose('global_writeoff'); 
                         setVerifyingItem({ id: 'any', name: 'любой товар' });
                     }} 
                     className="flex items-center justify-center p-2 rounded-lg text-white bg-red-500 hover:bg-red-600 font-semibold transition"
@@ -2551,22 +2533,18 @@ export default function App() {
                                 >
                                     <FilePlusIcon /> Создать позицию
                                 </button>
-                                <button 
-                                     onClick={() => {
-                                        setQrScanPurpose('writeoff');
-                                        setVerifyingItem({ id: 'any', name: 'любой товар' });
-                                        setActionsMenuOpen(false);
-                                    }}
-                                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
-                                >
-                                    <TrashIcon width="18" height="18" /> Списать позицию
-                                </button>
                                 <div className="my-1 h-px bg-gray-200" />
                                 <button 
                                     onClick={() => { setLogModalOpen(true); addLogEntry('Открыл журнал действий'); setActionsMenuOpen(false); }} 
                                     className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
                                 >
                                     <JournalIcon /> Журнал событий
+                                </button>
+                                <button 
+                                    onClick={() => { setWriteOffLogOpen(true); addLogEntry('Открыл журнал списаний'); setActionsMenuOpen(false); }} 
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                                >
+                                    <SignatureIcon /> Журнал списаний
                                 </button>
                             </div>
                         )}
@@ -2642,7 +2620,7 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     <div style={{ top: headerHeight }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
+                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
                                              <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
@@ -2662,16 +2640,9 @@ export default function App() {
                                                  return (
                                                      <div 
                                                          key={item.id} 
-                                                         onClick={() => {
-                                                           if (userRole === 'Администратор' && !isLocked) {
-                                                             setEditingItem(item);
-                                                           } else if (isActionableUser && !isLocked) {
-                                                             setItemToAction(item);
-                                                           }
-                                                         }}
-                                                         className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
+                                                         className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
                                                      >
-                                                         <div className="flex items-start gap-3">
+                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
@@ -2683,8 +2654,11 @@ export default function App() {
                                                                  )}
                                                              </div>
                                                          </div>
-                                                         <div className="flex items-center">
-                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                         <div className="flex items-center flex-shrink-0 ml-2">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                             {!isLocked && isActionableUser && (
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                             )}
                                                          </div>
                                                      </div>
                                              )})}
@@ -2699,14 +2673,8 @@ export default function App() {
                                                      const itemType = itemTypes.find(it => it.name === item.type);
                                                      const isLocked = lockedItemIds.has(item.id);
                                                      return (
-                                                     <div key={item.id} onClick={() => {
-                                                         if (userRole === 'Администратор' && !isLocked) {
-                                                           setEditingItem(item);
-                                                         } else if (isActionableUser && !isLocked) {
-                                                           setItemToAction(item);
-                                                         }
-                                                       }} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
-                                                         <div className="flex items-start gap-3">
+                                                     <div key={item.id} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}>
+                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
@@ -2714,8 +2682,11 @@ export default function App() {
                                                                  <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
                                                              </div>
                                                          </div>
-                                                         <div className="flex items-center">
-                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                         <div className="flex items-center flex-shrink-0 ml-2">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                              {!isLocked && isActionableUser && (
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                             )}
                                                          </div>
                                                      </div>
                                                  )})}
@@ -2776,45 +2747,27 @@ export default function App() {
         )}
       </div>
       
+      {/* --- Modals --- */}
       {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} onLogout={handleLogout} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === warehouseIdForEditor) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === warehouseIdForEditor).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(warehouseIdForEditor)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
-      {editingItem && <ItemEditModal 
-            itemToEdit={editingItem} 
-            itemTypes={itemTypes} 
-            onSave={handleSaveEditedItem} 
-            onCancel={() => setEditingItem(null)} 
-      />}
+      {editingItem && <ItemEditModal itemToEdit={editingItem} itemTypes={itemTypes} onSave={handleSaveEditedItem} onCancel={() => setEditingItem(null)} />}
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} userRole={userRole} onOpenModeration={() => { setContactsModalOpen(false); setUserModerationModalOpen(true); }} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
-      {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
+      {isWriteOffLogOpen && userRole === 'Администратор' && <WriteOffLogModal log={writeOffLog} users={users} signatures={signatures} onClose={() => setWriteOffLogOpen(false)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
-      {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
+      {itemForAction && <ItemActionModal itemToAction={itemForAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleItemActionMove} onWriteOff={handleItemActionWriteOff} onCancel={() => setItemForAction(null)} />}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
-      {isScenariosModalOpen && <ScenariosModal 
-            scenarios={scenarios} 
-            warehouses={warehouses} 
-            items={items} 
-            users={users} 
-            currentUser={currentUser} 
-            onUpdateStatus={(scenario, newStatus) => setPendingAction({ scenario, newStatus })}
-            onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} 
-            onDelete={handleDeleteScenario}
-            onClose={() => setScenariosModalOpen(false)}
-            onPrint={(scenario) => setScenarioToPrint(scenario)}
-        />}
+      {isScenariosModalOpen && <ScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={(scenario, newStatus) => setPendingAction({ scenario, newStatus })} onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onDelete={handleDeleteScenario} onClose={() => setScenariosModalOpen(false)} onPrint={(scenario) => setScenarioToPrint(scenario)} />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
-      {pendingAction && (
-          <ActionConfirmationModal 
-              title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'}
-              onConfirm={handleConfirmActionWithSignature}
-              onCancel={() => setPendingAction(null)}
-          />
-      )}
+      {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
+      {pendingWriteOff && <ActionConfirmationModal title="Подтверждение списания" onConfirm={handleConfirmWriteOff} onCancel={() => setPendingWriteOff(null)} />}
+      
+      {/* --- Print Documents (Hidden) --- */}
       <div style={{ display: 'none' }}>
           {scenarioToPrint && (
               <ScenarioPrintDocument
