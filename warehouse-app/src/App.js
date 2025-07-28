@@ -557,13 +557,11 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
     );
 };
 
-// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно для редактирования позиции ---
 const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
     const [editedItem, setEditedItem] = useState({ ...itemToEdit });
 
     const handleChange = (e) => {
         const { name, value } = e.target;
-        // Для поля quantity преобразуем значение в число
         const processedValue = name === 'quantity' ? parseInt(value, 10) || 0 : value;
         setEditedItem(prev => ({ ...prev, [name]: processedValue }));
     };
@@ -581,7 +579,6 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-6 text-gray-800">Редактировать позицию</h2>
                 <div className="space-y-4">
-                    {/* Поле для наименования */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Наименование:</label>
                         <input
@@ -593,8 +590,6 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
                             className="w-full p-3 border rounded-lg"
                         />
                     </div>
-
-                    {/* Выбор типа */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Тип позиции:</label>
                         <select
@@ -608,8 +603,6 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
                             ))}
                         </select>
                     </div>
-
-                    {/* Поля для размера и количества */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Размер:</label>
@@ -875,7 +868,6 @@ const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, cur
     );
 };
 
-// --- [НОВЫЙ КОМПОНЕНТ] Модальное окно перемещения с разделением ---
 const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCancel }) => {
     const [moveQuantity, setMoveQuantity] = useState(itemToMove.quantity);
     const [unit, setUnit] = useState('шт.');
@@ -942,7 +934,6 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                 <p className="mb-6 text-gray-600">"{itemToMove.name}" (Доступно: {itemToMove.quantity})</p>
 
                 <div className="space-y-4">
-                    {/* Поля для количества и единиц */}
                     <div className="grid grid-cols-2 gap-4">
                         <div>
                             <label className="block text-sm font-medium text-gray-700 mb-1">Количество:</label>
@@ -972,7 +963,6 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                         </div>
                     </div>
 
-                    {/* Выбор склада */}
                     <div>
                         <label className="block text-sm font-medium text-gray-700 mb-1">Целевой склад:</label>
                         <select value={destination.warehouseId || ''} onChange={handleWarehouseChange} className="w-full p-3 border rounded-lg bg-white">
@@ -980,7 +970,6 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
                         </select>
                     </div>
 
-                    {/* Выбор места */}
                     {selectedWarehouse && (
                         <div>
                             <h3 className="font-semibold mb-2">Выберите новое место на складе "{selectedWarehouse.name}"</h3>
@@ -1008,22 +997,17 @@ const ItemMoveModal = ({ itemToMove, warehouses, items, itemTypes, onSave, onCan
     );
 };
 
-
-// --- Модальное окно для действий с позицией (ОБНОВЛЕННЫЙ ДИЗАЙН) ---
 const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, onWriteOff, onCancel }) => {
-    // Состояние для выбора нового места
     const [destination, setDestination] = useState({
         warehouseId: itemToAction.warehouseId !== 'unassigned' ? itemToAction.warehouseId : warehouses[0]?.id,
         placeId: null
     });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
 
-    // Эффект для определения доступных/недоступных мест
     useEffect(() => {
         const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
         if (!selectedWarehouse) return;
 
-        // Все товары, кроме текущего
         const otherItems = items.filter(i => i.id !== itemToAction.id);
         const newDisabledPlaces = [];
         
@@ -1035,7 +1019,6 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
             }
         });
         setDisabledPlaces(newDisabledPlaces);
-        // Сбрасываем выбранное место при смене склада
         if (destination.warehouseId !== itemToAction.warehouseId) {
             setDestination(prev => ({...prev, placeId: null}));
         }
@@ -1092,7 +1075,6 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                 </div>
 
                 <div className="flex justify-center items-center gap-x-6 mt-8 w-full">
-                    {/* Кнопка Отмена (иконка выхода) */}
                     <button 
                         onClick={onCancel} 
                         className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
@@ -1101,7 +1083,6 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                         <XIcon />
                     </button>
                     
-                    {/* Кнопка Списать (иконка корзины) */}
                     <button 
                         onClick={() => onWriteOff(itemToAction.id)} 
                         className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-red-600 hover:bg-red-700 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-500"
@@ -1110,7 +1091,6 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                         <TrashIcon />
                     </button>
 
-                    {/* Кнопка Переместить (иконка перемещения) */}
                     <button 
                         onClick={handleMove} 
                         disabled={destination.placeId === null} 
@@ -1204,7 +1184,6 @@ const QRScannerModal = ({ itemToVerify, allItems, onSuccess, onCancel }) => {
     );
 };
 
-// --- [ОБНОВЛЕННЫЙ КОМПОНЕНТ] Модальное окно для сценариев ---
 const ScenariosModal = ({ scenarios, warehouses, items, users, currentUser, onUpdateStatus, onOpenCreate, onClose, onDelete, onPrint }) => {
     const getUserNameById = (userId) => {
         if (!userId) return 'Неизвестно';
@@ -1577,13 +1556,19 @@ const PendingModerationView = ({ onLogout }) => {
     );
 };
 
-// --- [НОВЫЙ] Компонент для отображения информации о складе во вкладке ---
-const WarehouseInfoBlock = ({ warehouse, items, onEdit, userRole }) => {
+// --- [ИЗМЕНЕНИЕ] Компонент для отображения информации о складе во вкладке ---
+const WarehouseInfoBlock = ({ warehouse, onEdit, userRole, isExpanded, onToggleExpansion }) => {
     return (
         <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col">
             <div className="flex justify-between items-start">
-                <div>
-                    <h3 className="text-xl font-bold text-gray-800">{warehouse.name}</h3>
+                <div 
+                    className="flex-grow cursor-pointer" 
+                    onClick={() => onToggleExpansion(warehouse.id)}
+                >
+                    <div className="flex items-center justify-between">
+                        <h3 className="text-xl font-bold text-gray-800">{warehouse.name}</h3>
+                        {isExpanded ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                    </div>
                     <p className="text-sm text-gray-500">{warehouse.address}</p>
                 </div>
                 {userRole === 'Администратор' && (
@@ -1592,26 +1577,24 @@ const WarehouseInfoBlock = ({ warehouse, items, onEdit, userRole }) => {
                             e.stopPropagation();
                             onEdit(warehouse);
                         }}
-                        className="text-gray-400 hover:text-blue-600 transition p-1 z-10"
+                        className="text-gray-400 hover:text-blue-600 transition p-1 z-10 ml-2"
                         aria-label={`Редактировать склад ${warehouse.name}`}
                     >
                         <EditIcon />
                     </button>
                 )}
             </div>
-             <div className="mt-4 pt-4 border-t border-gray-200">
-                <p className="text-sm text-gray-600">{warehouse.hours}</p>
-                <p className="text-sm text-gray-600 mt-1">Ворота: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.gate_code}</span></p>
-                <p className="text-sm text-gray-600">Замок: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.lock_code}</span></p>
-            </div>
-            <div className="mt-4 pt-4 border-t border-gray-200 flex-grow">
-                <PalletStats places={warehouse.places || []} items={items.filter(i => i.warehouseId === warehouse.id)} />
-            </div>
+             {isExpanded && (
+                <div className="mt-4 pt-4 border-t border-gray-200 animate-fade-in-up">
+                    <p className="text-sm text-gray-600">{warehouse.hours}</p>
+                    <p className="text-sm text-gray-600 mt-1">Ворота: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.gate_code}</span></p>
+                    <p className="text-sm text-gray-600">Замок: <span className="font-mono bg-gray-200 px-1.5 py-0.5 rounded">{warehouse.lock_code}</span></p>
+                </div>
+             )}
         </div>
     );
 };
 
-// --- [НОВЫЙ] Компонент для отображения мест на складе во вкладке ---
 const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEditPlaces, userRole }) => {
     return (
         <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col relative">
@@ -1649,7 +1632,6 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
 };
 
 
-// --- [ИЗМЕНЕНО] Компонент для печатной формы с загрузкой логотипа с бэкенда ---
 const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, users, signatures }, ref) => {
     const getUserNameById = (userId) => {
         if (!userId) return '';
@@ -1661,7 +1643,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     const getFullItemDetails = (itemId) => items.find(i => i.id === itemId);
     const currentDate = new Date().toLocaleDateString('ru-RU');
     
-    // [ИЗМЕНЕНО] Формируем URL к логотипу на нашем бэкенде
     const logoUrl = `${API_BASE_URL}/static/logo.png`;
 
     const signatureLineStyle = {
@@ -1692,7 +1673,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             position: 'relative', 
             minHeight: '90vh' 
         }}>
-            {/* ... (header and main content remain the same) ... */}
             <header style={{ textAlign: 'left', marginBottom: '40px' }}>
                 <p><strong>Company:</strong> Diva Fam Inc.</p>
                 <p><strong>Document number:</strong> {scenario.number}</p>
@@ -1791,7 +1771,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     );
 });
 
-// --- [НОВЫЙ] Модальное окно для подтверждения действия с подписью ---
 const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
     const signatureRef = useRef(null);
     const signatureContainerRef = useRef(null);
@@ -1894,21 +1873,19 @@ const LogModal = ({ log, users, onClose }) => {
 
 // --- Основной компонент приложения ---
 export default function App() {
-  // --- Состояние аутентификации ---
   const [users, setUsers] = useState([]);
   const [currentUser, setCurrentUser] = useState(null);
   const [authView, setAuthView] = useState('login'); 
   const [authChecked, setAuthChecked] = useState(false);
 
-  // --- Состояние приложения ---
   const [loading, setLoading] = useState(true);
   const [warehouses, setWarehouses] = useState([]);
   const [items, setItems] = useState([]);
   const [itemTypes, setItemTypes] = useState([]);
   const [scenarios, setScenarios] = useState([]);
-  const [signatures, setSignatures] = useState({}); // --- [НОВОЕ] Хранилище подписей ---
+  const [signatures, setSignatures] = useState({});
   const [log, setLog] = useState([]);
-  const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null); // [ИЗМЕНЕНО]
+  const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null);
   const [editingWarehouse, setEditingWarehouse] = useState(null);
   const [editingItem, setEditingItem] = useState(null);
   const [isPlacesEditorOpen, setPlacesEditorOpen] = useState(false);
@@ -1925,12 +1902,12 @@ export default function App() {
   const [itemToPrint, setItemToPrint] = useState(null);
   const [isScenariosModalOpen, setScenariosModalOpen] = useState(false);
   const [isCreateScenarioModalOpen, setCreateScenarioModalOpen] = useState(false);
-  const [pendingAction, setPendingAction] = useState(null); // --- [НОВОЕ] Для подтверждения действий с подписью ---
+  const [pendingAction, setPendingAction] = useState(null);
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   
-  // --- [ИЗМЕНЕНО] Состояния для вкладок и свайпов ---
-  const [mainViewTab, setMainViewTab] = useState('positions'); // 'warehouses', 'places', или 'positions'
-  const [positionsTabWarehouseId, setPositionsTabWarehouseId] = useState('all');
+  // --- [ИЗМЕНЕНИЕ] Состояния для вкладок и свайпов ---
+  const [mainViewTab, setMainViewTab] = useState('warehouses'); // 'warehouses' или 'places'
+  const [expandedWarehouses, setExpandedWarehouses] = useState([]); // --- [НОВОЕ] Для сворачивания/разворачивания складов ---
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -1949,7 +1926,6 @@ export default function App() {
       }
   }, [scenarioToPrint, handlePrintScenario]);
 
-  // --- [ИЗМЕНЕНИЕ] Улучшенная функция логирования ---
   const addLogEntry = (action, details = null) => {
     if (!currentUser) return;
 
@@ -2008,8 +1984,6 @@ export default function App() {
     setLog(prevLog => [newLogEntry, ...prevLog]);
   };
 
-
-  // --- Обработчики аутентификации и модерации ---
   const handleLogin = async (credentials) => {
       const user = await api.loginUser(credentials);
       const now = new Date().getTime();
@@ -2068,9 +2042,6 @@ export default function App() {
     }
   };
 
-
-  // --- Эффекты ---
-  
   useEffect(() => {
     const script = document.createElement('script');
     script.src = 'https://telegram.org/js/telegram-web-app.js';
@@ -2109,8 +2080,7 @@ export default function App() {
         setCurrentUser(sessionUser);
       } else {
         try {
-            // Загружаем только склады для экрана регистрации
-            const appData = await api.request('/data/for-registration'); // Используем новый эндпоинт
+            const appData = await api.request('/data/for-registration');
             setWarehouses(appData.warehouses || []);
         } catch(error) {
             console.error("Не удалось загрузить склады для регистрации:", error);
@@ -2121,7 +2091,6 @@ export default function App() {
     initializeApp();
   }, []);
   
-  // Эффект для загрузки данных после входа или восстановления сессии
   useEffect(() => {
       const loadDataForUser = async () => {
           if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
@@ -2158,7 +2127,6 @@ export default function App() {
     });
   }, [warehouses, items, itemTypes, scenarios, signatures, log, currentUser, loading]);
 
-  // --- Эффект для автоматического обновления данных (Polling) ---
     const stateRef = useRef();
     stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, movingItem, itemToAction, isCreateScenarioModalOpen, verifyingItem, editingItem };
 
@@ -2194,13 +2162,11 @@ export default function App() {
             } catch (error) {
                 console.error("Ошибка при фоновом обновлении данных:", error);
             }
-        }, 5000); // Опрос каждые 5 секунд
+        }, 5000);
 
-        return () => clearInterval(intervalId); // Очистка интервала
+        return () => clearInterval(intervalId);
     }, [currentUser]);
 
-
-  // --- Обработчики действий в приложении ----
   const handleSaveWarehouse = (data) => {
     const isNew = !data.id;
     const savedData = { ...data, id: data.id || crypto.randomUUID() };
@@ -2239,15 +2205,13 @@ export default function App() {
     setItemTypesManagerOpen(false);
   };
 
-  // --- [НОВЫЙ ОБРАБОТЧИК] Сохранение изменений после редактирования ---
   const handleSaveEditedItem = (updatedItem) => {
     const originalItem = items.find(item => item.id === updatedItem.id);
     setItems(prev => prev.map(item => (item.id === updatedItem.id ? updatedItem : item)));
     addLogEntry(`Отредактировал позицию '${updatedItem.name}'`, { before: originalItem, after: updatedItem });
-    setEditingItem(null); // Закрываем модальное окно
+    setEditingItem(null);
   };
 
-  // --- [ОБНОВЛЕННАЯ ФУНКЦИЯ] Обработка перемещения с разделением ---
   const handleSaveItemMove = ({ destination, quantity, unit }) => {
     const originalItem = items.find(item => item.id === movingItem.id);
     setItems(prevItems => {
@@ -2389,7 +2353,6 @@ export default function App() {
     }
   };
 
-
   const handleVerificationSuccess = (verifiedItem) => {
     setMovingItem(verifiedItem);
     setVerifyingItem(null);
@@ -2424,7 +2387,15 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
 
-  // --- [НОВОЕ] Обработчики свайпов для слайдеров (склады и места) ---
+  // --- [НОВОЕ] Обработчик для сворачивания/разворачивания ---
+  const toggleWarehouseExpansion = (warehouseId) => {
+    setExpandedWarehouses(prev =>
+        prev.includes(warehouseId)
+            ? prev.filter(id => id !== warehouseId)
+            : [...prev, warehouseId]
+    );
+  };
+
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
@@ -2465,7 +2436,6 @@ export default function App() {
   const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
-  // --- Рендеринг ---
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
   }
@@ -2485,9 +2455,11 @@ export default function App() {
 
   const userRole = currentUser.role;
   
-  const itemsToDisplay = positionsTabWarehouseId === 'all' 
+  // --- [ИЗМЕНЕНИЕ] Логика фильтрации позиций теперь зависит от активного слайда ---
+  const activeWarehouseId = sortedWarehouses[activeIndex]?.id;
+  const itemsToDisplay = activeWarehouseId === 'all' 
     ? items 
-    : items.filter(item => item.warehouseId === positionsTabWarehouseId);
+    : items.filter(item => item.warehouseId === activeWarehouseId);
   
   const itemCounts = itemsToDisplay.reduce((acc, item) => {
     acc[item.type] = (acc[item.type] || 0) + 1;
@@ -2519,17 +2491,13 @@ export default function App() {
   };
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && positionsTabWarehouseId === 'all'));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
-
-  const selectedWarehouseName = positionsTabWarehouseId === 'all'
-    ? 'Все склады'
-    : warehouses.find(w => w.id === positionsTabWarehouseId)?.name || '';
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
@@ -2566,15 +2534,13 @@ export default function App() {
       <div className="max-w-7xl mx-auto">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 {/* --- [ИЗМЕНЕНО] Компонент с вкладками --- */}
                  <div className="bg-white rounded-xl shadow-md overflow-hidden">
-                    {/* Заголовки вкладок */}
                     <div className="flex border-b">
                         <button 
                             onClick={() => setMainViewTab('warehouses')} 
                             className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'warehouses' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
                         >
-                            Склады
+                            Склады и Позиции
                         </button>
                         <button 
                             onClick={() => setMainViewTab('places')} 
@@ -2582,56 +2548,136 @@ export default function App() {
                         >
                             Места
                         </button>
-                        <button 
-                            onClick={() => setMainViewTab('positions')} 
-                            className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'positions' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
-                        >
-                            Позиции
-                        </button>
                     </div>
 
-                    {/* Контейнер для контента вкладок */}
                     <div className="overflow-hidden">
                         {mainViewTab === 'warehouses' && (
-                            <div className="p-4" {...swipeHandlers}>
-                                <div className="overflow-hidden">
-                                    <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
-                                        {sortedWarehouses.map((w, index) => (
-                                            <div key={w.id} className="w-full flex-shrink-0 px-1">
-                                                {index === 0 ? (
-                                                    <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col justify-center items-center">
-                                                        <h3 className="text-xl font-bold text-gray-800">Все склады</h3>
-                                                        <p className="text-sm text-gray-500">Общая статистика</p>
-                                                        <div className="mt-4 pt-4 border-t w-full">
-                                                            <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
+                            <div className="p-4">
+                                <div {...swipeHandlers}>
+                                    <div className="overflow-hidden">
+                                        <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
+                                            {sortedWarehouses.map((w) => (
+                                                <div key={w.id} className="w-full flex-shrink-0 px-1">
+                                                    {w.id === 'all' ? (
+                                                        <div className="bg-gray-50 rounded-xl p-4 h-full flex flex-col justify-center items-center">
+                                                            <h3 className="text-xl font-bold text-gray-800">Все склады</h3>
+                                                            <p className="text-sm text-gray-500">Обзор всех позиций</p>
                                                         </div>
-                                                    </div>
-                                                ) : (
-                                                    <WarehouseInfoBlock 
-                                                        warehouse={w}
-                                                        items={items}
-                                                        onEdit={handleStartEditWarehouse}
-                                                        userRole={userRole}
-                                                    />
-                                                )}
-                                            </div>
-                                        ))}
+                                                    ) : (
+                                                        <WarehouseInfoBlock 
+                                                            warehouse={w}
+                                                            onEdit={handleStartEditWarehouse}
+                                                            userRole={userRole}
+                                                            isExpanded={expandedWarehouses.includes(w.id)}
+                                                            onToggleExpansion={toggleWarehouseExpansion}
+                                                        />
+                                                    )}
+                                                </div>
+                                            ))}
+                                        </div>
                                     </div>
-                                </div>
-                                <div className="flex justify-center items-center mt-4 space-x-4">
-                                    <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
-                                    <div className="flex space-x-2">
-                                        {sortedWarehouses.map((_, index) => (
-                                            <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
-                                        ))}
+                                    <div className="flex justify-center items-center mt-4 space-x-4">
+                                        <button onClick={() => setActiveIndex(prev => Math.max(0, prev - 1))} disabled={activeIndex === 0} className="p-2 disabled:opacity-50"><ArrowLeftIcon /></button>
+                                        <div className="flex space-x-2">
+                                            {sortedWarehouses.map((_, index) => (
+                                                <div key={index} className={`w-2 h-2 rounded-full ${index === activeIndex ? 'bg-blue-600' : 'bg-gray-300'}`}></div>
+                                            ))}
+                                        </div>
+                                        <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
                                     </div>
-                                    <button onClick={() => setActiveIndex(prev => Math.min(sortedWarehouses.length - 1, prev + 1))} disabled={activeIndex === sortedWarehouses.length - 1} className="p-2 disabled:opacity-50"><ArrowRightIcon /></button>
                                 </div>
                                 {userRole === 'Администратор' && (
                                     <button onClick={() => setEditingWarehouse({})} className="w-full mt-4 flex items-center justify-center gap-2 p-3 rounded-xl bg-blue-100 text-blue-700 font-semibold hover:bg-blue-200 transition">
                                         <PlusIcon /> Добавить склад
                                     </button>
                                 )}
+
+                                {/* --- [ПЕРЕМЕЩЕНО] Список позиций --- */}
+                                <div className="mt-6 pt-4 border-t">
+                                     <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
+                                     <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
+                                         <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
+                                         {sortedAndFilteredItemTypes.map(type => (
+                                             <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
+                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                                                 {type.name}
+                                             </button>
+                                         ))}
+                                     </div>
+                                     {sortedAssignedFilteredItems.length > 0 ? (
+                                         <div className="space-y-3">
+                                             {sortedAssignedFilteredItems.map(item => {
+                                                 const itemType = itemTypes.find(it => it.name === item.type);
+                                                 const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
+                                                 const isUnplaced = item.placeId === null;
+                                                 const isLocked = lockedItemIds.has(item.id);
+
+                                                 return (
+                                                     <div 
+                                                         key={item.id} 
+                                                         onClick={() => {
+                                                           if (userRole === 'Администратор' && !isLocked) {
+                                                             setEditingItem(item);
+                                                           } else if (isActionableUser && !isLocked) {
+                                                             setItemToAction(item);
+                                                           }
+                                                         }}
+                                                         className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
+                                                     >
+                                                         <div className="flex items-start gap-3">
+                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                             <div>
+                                                                 <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                 {isUnplaced ? (
+                                                                     <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
+                                                                 ) : (
+                                                                     <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                                                 )}
+                                                             </div>
+                                                         </div>
+                                                         <div className="flex items-center">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                             {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
+                                                         </div>
+                                                     </div>
+                                             )})}
+                                         </div>
+                                     ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
+                                     
+                                     {sortedUnassignedFilteredItems.length > 0 && (
+                                         <div className="mt-6 pt-4 border-t">
+                                             <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
+                                             <div className="space-y-3">
+                                                 {sortedUnassignedFilteredItems.map(item => {
+                                                     const itemType = itemTypes.find(it => it.name === item.type);
+                                                     const isLocked = lockedItemIds.has(item.id);
+                                                     return (
+                                                     <div key={item.id} onClick={() => {
+                                                         if (userRole === 'Администратор' && !isLocked) {
+                                                           setEditingItem(item);
+                                                         } else if (isActionableUser && !isLocked) {
+                                                           setItemToAction(item);
+                                                         }
+                                                       }} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
+                                                         <div className="flex items-start gap-3">
+                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                             <div>
+                                                                 <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                 <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
+                                                             </div>
+                                                         </div>
+                                                         <div className="flex items-center">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
+                                                             {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
+                                                         </div>
+                                                     </div>
+                                                 )})}
+                                             </div>
+                                         </div>
+                                     )}
+                                </div>
                             </div>
                         )}
 
@@ -2660,6 +2706,11 @@ export default function App() {
                                                                 )
                                                             ))}
                                                         </div>
+                                                        {/* --- [ПЕРЕМЕЩЕНО] Статистика паллет --- */}
+                                                        <div className="mt-4 pt-4 border-t w-full">
+                                                          <h3 className="text-lg font-bold text-gray-800 mb-2">Общая статистика</h3>
+                                                          <PalletStats places={warehouses.flatMap(wh => wh.places || [])} items={items} />
+                                                        </div>
                                                     </div>
                                                 ) : (
                                                     <WarehousePlacesBlock 
@@ -2686,110 +2737,8 @@ export default function App() {
                                 </div>
                             </div>
                         )}
-                        
-                        {mainViewTab === 'positions' && (
-                             <div className="p-4">
-                                {(userRole === 'Администратор' || userRole === 'Сотрудник склада' || userRole === 'Водитель') && (
-                                    <div>
-                                        <div className="mb-4">
-                                            <h3 className="text-lg font-bold text-gray-800 mb-2">Склад: {selectedWarehouseName}</h3>
-                                            <div className="flex overflow-x-auto space-x-2 pb-2">
-                                                <button onClick={() => setPositionsTabWarehouseId('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${positionsTabWarehouseId === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Все склады</button>
-                                                {warehouses.map(w => (
-                                                    <button key={w.id} onClick={() => setPositionsTabWarehouseId(w.id)} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${positionsTabWarehouseId === w.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{w.name}</button>
-                                                ))}
-                                            </div>
-                                        </div>
-                                        <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                        <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
-                                            <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                                            {sortedAndFilteredItemTypes.map(type => (
-                                                <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                                                    <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                                                    {type.name}
-                                                </button>
-                                            ))}
-                                        </div>
-                                        {sortedAssignedFilteredItems.length > 0 ? (
-                                            <div className="space-y-3">
-                                                {sortedAssignedFilteredItems.map(item => {
-                                                    const itemType = itemTypes.find(it => it.name === item.type);
-                                                    const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                                    const isUnplaced = item.placeId === null;
-                                                    const isLocked = lockedItemIds.has(item.id);
-
-                                                    return (
-                                                        <div 
-                                                            key={item.id} 
-                                                            onClick={() => {
-                                                              if (userRole === 'Администратор' && !isLocked) {
-                                                                setEditingItem(item);
-                                                              } else if (isActionableUser && !isLocked) {
-                                                                setItemToAction(item);
-                                                              }
-                                                            }}
-                                                            className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
-                                                        >
-                                                            <div className="flex items-start gap-3">
-                                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                                <div>
-                                                                    <p className="font-bold text-gray-800">{item.name}</p>
-                                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                    {isUnplaced ? (
-                                                                        <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
-                                                                    ) : (
-                                                                        <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center">
-                                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
-                                                            </div>
-                                                        </div>
-                                                )})}
-                                            </div>
-                                        ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
-                                        
-                                        {sortedUnassignedFilteredItems.length > 0 && (
-                                            <div className="mt-6 pt-4 border-t">
-                                                <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
-                                                <div className="space-y-3">
-                                                    {sortedUnassignedFilteredItems.map(item => {
-                                                        const itemType = itemTypes.find(it => it.name === item.type);
-                                                        const isLocked = lockedItemIds.has(item.id);
-                                                        return (
-                                                        <div key={item.id} onClick={() => {
-                                                            if (userRole === 'Администратор' && !isLocked) {
-                                                              setEditingItem(item);
-                                                            } else if (isActionableUser && !isLocked) {
-                                                              setItemToAction(item);
-                                                            }
-                                                          }} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
-                                                            <div className="flex items-start gap-3">
-                                                                <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                                <div>
-                                                                    <p className="font-bold text-gray-800">{item.name}</p>
-                                                                    <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                    <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
-                                                                </div>
-                                                            </div>
-                                                            <div className="flex items-center">
-                                                                <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon/></button>
-                                                                {!isLocked && <button onClick={(e) => { e.stopPropagation(); setVerifyingItem(item); }} className="text-gray-400 hover:text-blue-600 p-2"><TruckIcon/></button>}
-                                                            </div>
-                                                        </div>
-                                                    )})}
-                                                </div>
-                                            </div>
-                                        )}
-                                    </div>
-                                )}
-                            </div>
-                        )}
                     </div>
                 </div>
-
 
                 <div className="space-y-4 mt-6">
                     <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
@@ -2812,34 +2761,25 @@ export default function App() {
         )}
       </div>
       
-      {/* Модальные окна */}
       {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} onLogout={handleLogout} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
       {isPlacesEditorOpen && warehouses.find(w => w.id === warehouseIdForEditor) && <PlacesEditor initialPlaces={warehouses.find(w => w.id === warehouseIdForEditor).places || []} onSave={handleSavePlaces} onCancel={() => setPlacesEditorOpen(false)} onReset={() => handleResetPlaces(warehouseIdForEditor)} />}
       {isItemEditorOpen && <ItemEditor warehouses={warehouses} itemTypes={itemTypes} onSave={handleSaveItem} onCancel={() => setItemEditorOpen(false)} onManageTypes={() => setItemTypesManagerOpen(true)} items={items} userRole={userRole} />}
-      
-      {/* --- [ИЗМЕНЕНИЕ] Условный рендеринг нового модального окна --- */}
       {editingItem && <ItemEditModal 
             itemToEdit={editingItem} 
             itemTypes={itemTypes} 
             onSave={handleSaveEditedItem} 
             onCancel={() => setEditingItem(null)} 
       />}
-
       {isItemTypesManagerOpen && <ItemTypesManager types={itemTypes} onSave={handleSaveItemTypes} onCancel={() => setItemTypesManagerOpen(false)} />}
       {viewingPlaceInfo && viewingPlace && <ItemsOnPlaceModal place={viewingPlace} items={itemsOnViewingPlace} itemTypes={itemTypes} onClose={() => setViewingPlaceInfo(null)} />}
       {isContactsModalOpen && <ContactsModal users={users} warehouses={warehouses} onClose={() => setContactsModalOpen(false)} />}
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
-      
       {movingItem && <ItemMoveModal itemToMove={movingItem} warehouses={warehouses} items={items} itemTypes={itemTypes} onSave={handleSaveItemMove} onCancel={() => setMovingItem(null)} />}
-      
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
-      
       {itemToAction && <ItemActionModal itemToAction={itemToAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleMoveItem} onWriteOff={handleWriteOffItem} onCancel={() => setItemToAction(null)} />}
-      
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
-
       {isScenariosModalOpen && <ScenariosModal 
             scenarios={scenarios} 
             warehouses={warehouses} 
@@ -2853,7 +2793,6 @@ export default function App() {
             onPrint={(scenario) => setScenarioToPrint(scenario)}
         />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
-      
       {pendingAction && (
           <ActionConfirmationModal 
               title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'}
@@ -2861,7 +2800,6 @@ export default function App() {
               onCancel={() => setPendingAction(null)}
           />
       )}
-
       <div style={{ display: 'none' }}>
           {scenarioToPrint && (
               <ScenarioPrintDocument
