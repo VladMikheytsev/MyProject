@@ -2570,7 +2570,13 @@ export default function App() {
                                                     return (
                                                         <div 
                                                             key={item.id} 
-                                                            onClick={() => isActionableUser && !isLocked && setItemToAction(item)}
+                                                            onClick={() => {
+                                                              if (userRole === 'Администратор' && !isLocked) {
+                                                                setEditingItem(item);
+                                                              } else if (isActionableUser && !isLocked) {
+                                                                setItemToAction(item);
+                                                              }
+                                                            }}
                                                             className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-gray-100 transition' : 'opacity-60'}`}
                                                         >
                                                             <div className="flex items-start gap-3">
@@ -2602,7 +2608,13 @@ export default function App() {
                                                         const itemType = itemTypes.find(it => it.name === item.type);
                                                         const isLocked = lockedItemIds.has(item.id);
                                                         return (
-                                                        <div key={item.id} onClick={() => isActionableUser && !isLocked && setItemToAction(item)} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
+                                                        <div key={item.id} onClick={() => {
+                                                            if (userRole === 'Администратор' && !isLocked) {
+                                                              setEditingItem(item);
+                                                            } else if (isActionableUser && !isLocked) {
+                                                              setItemToAction(item);
+                                                            }
+                                                          }} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isActionableUser && !isLocked ? 'cursor-pointer hover:bg-red-100 transition' : 'opacity-60'}`}>
                                                             <div className="flex items-start gap-3">
                                                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                                 <div>

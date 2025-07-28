@@ -1796,6 +1796,18 @@
     },
     "log": [
         {
+            "id": "3a9ee4d8-a2d9-474c-ab0f-8757f3cf54a8",
+            "timestamp": "2025-07-28T02:28:30.210Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Открыл журнал действий"
+        },
+        {
+            "id": "815c73c6-2f3e-4beb-a708-b71f517e0061",
+            "timestamp": "2025-07-28T02:28:20.220Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Открыл журнал действий"
+        },
+        {
             "id": "e687c194-f37c-4e89-a1fd-26fea413082d",
             "timestamp": "2025-07-28T02:15:05.860Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
