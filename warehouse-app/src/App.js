@@ -2257,6 +2257,19 @@ export default function App() {
     ? items 
     : items.filter(item => item.warehouseId === positionsTabWarehouseId);
   
+  const itemCounts = itemsToDisplay.reduce((acc, item) => {
+    acc[item.type] = (acc[item.type] || 0) + 1;
+    return acc;
+  }, {});
+
+  const sortedAndFilteredItemTypes = itemTypes
+    .map(type => ({
+        ...type,
+        count: itemCounts[type.name] || 0
+    }))
+    .filter(type => type.count > 0)
+    .sort((a, b) => b.count - a.count);
+
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
@@ -2453,7 +2466,7 @@ export default function App() {
                                         <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
                                         <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
                                             <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                                            {itemTypes.map(type => (
+                                            {sortedAndFilteredItemTypes.map(type => (
                                                 <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
                                                     <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
                                                     {type.name}
