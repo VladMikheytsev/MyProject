@@ -1866,12 +1866,27 @@ export default function App() {
   
   const [mainViewTab, setMainViewTab] = useState('warehouses');
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
+  const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
+  const [qrScanPurpose, setQrScanPurpose] = useState('move');
+  const actionsMenuRef = useRef(null);
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
   
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
+
+    useEffect(() => {
+        function handleClickOutside(event) {
+            if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
+                setActionsMenuOpen(false);
+            }
+        }
+        document.addEventListener("mousedown", handleClickOutside);
+        return () => {
+            document.removeEventListener("mousedown", handleClickOutside);
+        };
+    }, [actionsMenuRef]);
 
   const handlePrintScenario = useReactToPrint({
       content: () => scenarioPrintRef.current,
@@ -2312,8 +2327,16 @@ export default function App() {
   };
 
   const handleVerificationSuccess = (verifiedItem) => {
-    setMovingItem(verifiedItem);
-    setVerifyingItem(null);
+      setVerifyingItem(null);
+      if (qrScanPurpose === 'move') {
+          setMovingItem(verifiedItem);
+      } else if (qrScanPurpose === 'writeoff') {
+          if (currentUser.role === 'Администратор') {
+              setItemToAction(verifiedItem);
+          } else {
+              alert('У вас нет прав для списания позиции.');
+          }
+      }
   };
   
   const handleStartEditWarehouse = (warehouse) => { 
@@ -2458,11 +2481,11 @@ export default function App() {
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
       <div className="max-w-7xl mx-auto sticky top-0 z-40 bg-gray-100 pt-4 px-4">
-        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap">
+        <div className="bg-white p-3 rounded-xl shadow-md flex items-center justify-between gap-4 flex-wrap relative">
             <button onClick={() => setProfileEditorOpen(true)} className="flex items-center justify-center p-2 rounded-lg text-gray-600 bg-gray-100 hover:bg-gray-200 font-semibold transition">
                 <UserIcon />
             </button>
-            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-md">
+            <div className="flex items-center gap-2 flex-1 justify-end max-w-xs sm:max-w-md" ref={actionsMenuRef}>
                 {userRole === 'Администратор' && (
                     <button onClick={() => setUserModerationModalOpen(true)} className="flex flex-1 items-center justify-center p-2 rounded-lg text-purple-600 bg-purple-100 hover:bg-purple-200 font-semibold transition">
                         <UsersIcon />
@@ -2484,6 +2507,50 @@ export default function App() {
                         </span>
                     )}
                 </button>
+                 {/* --- [НОВАЯ] Кнопка и меню действий (шторка) --- */}
+                <button 
+                    onClick={() => setActionsMenuOpen(prev => !prev)}
+                    className="flex flex-1 items-center justify-center p-2 rounded-lg text-blue-600 bg-blue-100 hover:bg-blue-200 font-semibold transition"
+                >
+                    <PlusIcon/>
+                </button>
+                {isActionsMenuOpen && (
+                    <div className="absolute top-full right-0 mt-2 w-64 bg-white rounded-xl shadow-lg border z-50 p-2">
+                        <button 
+                            onClick={() => {
+                                setQrScanPurpose('move');
+                                setVerifyingItem({ id: 'any', name: 'любой товар' });
+                                setActionsMenuOpen(false);
+                            }}
+                            className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                        >
+                           <TruckIcon /> Переместить позицию
+                        </button>
+                        {userRole === 'Администратор' && (
+                           <>
+                                <button 
+                                    onClick={() => {
+                                        setItemEditorOpen(true);
+                                        setActionsMenuOpen(false);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-gray-700 hover:bg-gray-100 rounded-lg flex items-center gap-2"
+                                >
+                                    <FilePlusIcon /> Создать позицию
+                                </button>
+                                <button 
+                                     onClick={() => {
+                                        setQrScanPurpose('writeoff');
+                                        setVerifyingItem({ id: 'any', name: 'любой товар' });
+                                        setActionsMenuOpen(false);
+                                    }}
+                                    className="w-full text-left px-4 py-2 text-red-600 hover:bg-red-50 rounded-lg flex items-center gap-2"
+                                >
+                                    <TrashIcon width="20" height="20" /> Списать позицию
+                                </button>
+                           </>
+                        )}
+                    </div>
+                )}
             </div>
         </div>
       </div>
@@ -2676,19 +2743,6 @@ export default function App() {
                             </div>
                         )}
                     </div>
-                </div>
-
-                <div className="space-y-4 mt-6">
-                    <button onClick={() => setVerifyingItem({ id: 'any', name: 'любой товар' })} className="w-full flex items-center gap-2 p-4 rounded-xl bg-green-600 text-white font-semibold hover:bg-green-700 transition shadow-md">
-                        <TruckIcon />
-                        <span className="flex-1 text-left">Переместить позицию по QR</span>
-                    </button>
-                    {(userRole === 'Администратор' || userRole === 'Сотрудник склада') && (
-                        <button onClick={() => setItemEditorOpen(true)} className="w-full flex items-center gap-2 p-4 rounded-xl bg-blue-600 text-white font-semibold hover:bg-blue-700 transition shadow-md">
-                            <PlusIcon />
-                            <span className="flex-1 text-left">Создать позицию</span>
-                        </button>
-                    )}
                 </div>
             </div>
         ) : (
