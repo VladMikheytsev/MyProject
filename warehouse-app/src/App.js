@@ -1590,8 +1590,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         maxHeight: '100%',
         objectFit: 'contain',
         pointerEvents: 'none',
-        opacity: 0.8,
-        zIndex: -1
+        opacity: 0.8
     };
 
     return (
@@ -1647,12 +1646,13 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             
             <footer style={{
                 position: 'absolute',
-                bottom: '2cm',
+                top: '50%',
                 left: '2cm',
                 right: '2cm',
+                transform: 'translateY(-50%)',
                 fontSize: '14px'
             }}>
-                <div style={{ marginBottom: '0.75em' }}>
+                <div style={{ marginBottom: '1em' }}>
                     <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Transferred by:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.creatorId)}</span>
@@ -1666,7 +1666,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                         <span style={{ marginLeft: 'auto' }}>{currentDate}</span>
                     </div>
                 </div>
-                <div style={{ marginBottom: '0.75em' }}>
+                <div style={{ marginBottom: '1em' }}>
                     <div style={signatureLineStyle}>
                         <span style={{ width: '120px', flexShrink: 0 }}><strong>Driver:</strong></span>
                         <span style={{ marginLeft: '30px' }}>{getUserNameById(scenario.driverId)}</span>
@@ -1797,6 +1797,7 @@ export default function App() {
   
   // --- [ИЗМЕНЕНО] Состояния для вкладок и свайпов ---
   const [mainViewTab, setMainViewTab] = useState('positions'); // 'warehouses', 'places', или 'positions'
+  const [positionsTabWarehouseId, setPositionsTabWarehouseId] = useState('all');
   
   const [scenarioToPrint, setScenarioToPrint] = useState(null);
   const scenarioPrintRef = useRef();
@@ -2232,16 +2233,6 @@ export default function App() {
   const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
-  useEffect(() => {
-    if (currentUser && warehouses.length > 0) {
-        const userWarehouseIndex = sortedWarehouses.findIndex(w => w.id === currentUser.assignedWarehouseId);
-        if (userWarehouseIndex !== -1) {
-            setActiveIndex(userWarehouseIndex);
-        }
-    }
-  }, [currentUser, warehouses]);
-
-
   // --- Рендеринг ---
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
@@ -2262,8 +2253,9 @@ export default function App() {
 
   const userRole = currentUser.role;
   
-  const selectedWarehouseId = activeIndex === 0 ? null : sortedWarehouses[activeIndex].id;
-  const itemsToDisplay = selectedWarehouseId ? items.filter(item => item.warehouseId === selectedWarehouseId) : items;
+  const itemsToDisplay = positionsTabWarehouseId === 'all' 
+    ? items 
+    : items.filter(item => item.warehouseId === positionsTabWarehouseId);
   
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
@@ -2282,13 +2274,17 @@ export default function App() {
   };
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && !selectedWarehouseId));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && positionsTabWarehouseId === 'all'));
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
+
+  const selectedWarehouseName = positionsTabWarehouseId === 'all'
+    ? 'Все склады'
+    : warehouses.find(w => w.id === positionsTabWarehouseId)?.name || '';
 
   return (
     <div className="p-4 bg-gray-100 min-h-screen font-sans">
@@ -2445,7 +2441,16 @@ export default function App() {
                              <div className="p-4">
                                 {(userRole === 'Администратор' || userRole === 'Сотрудник склада' || userRole === 'Водитель') && (
                                     <div>
-                                        <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ НА СКЛАДЕ</h3>
+                                        <div className="mb-4">
+                                            <h3 className="text-lg font-bold text-gray-800 mb-2">Склад: {selectedWarehouseName}</h3>
+                                            <div className="flex overflow-x-auto space-x-2 pb-2">
+                                                <button onClick={() => setPositionsTabWarehouseId('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${positionsTabWarehouseId === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Все склады</button>
+                                                {warehouses.map(w => (
+                                                    <button key={w.id} onClick={() => setPositionsTabWarehouseId(w.id)} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${positionsTabWarehouseId === w.id ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>{w.name}</button>
+                                                ))}
+                                            </div>
+                                        </div>
+                                        <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
                                         <div className="flex overflow-x-auto space-x-2 mb-4 border-b pb-4">
                                             <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                             {itemTypes.map(type => (
