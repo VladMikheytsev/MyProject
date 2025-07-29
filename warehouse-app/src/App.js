@@ -1940,8 +1940,6 @@ export default function App() {
   const [qrScanPurpose, setQrScanPurpose] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
-  // [ИЗМЕНЕНИЕ] State для динамической высоты свайпера
-  const [swiperHeight, setSwiperHeight] = useState('auto');
   
   // Refs
   const actionsMenuRef = useRef(null);
@@ -1951,8 +1949,6 @@ export default function App() {
   const scenarioPrintRef = useRef();
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
-  // [ИЗМЕНЕНИЕ] Ref для слайдов свайпера
-  const slideRefs = useRef([]);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -1976,15 +1972,6 @@ export default function App() {
       window.addEventListener('resize', updateHeaderHeight);
       return () => window.removeEventListener('resize', updateHeaderHeight);
     }, []);
-
-    // [ИЗМЕНЕНИЕ] Эффект для обновления высоты свайпера
-    useLayoutEffect(() => {
-        const activeSlide = slideRefs.current[activeIndex];
-        if (activeSlide) {
-            setSwiperHeight(activeSlide.offsetHeight);
-        }
-    }, [activeIndex, warehouses, items, expandedWarehouses, activeItemTypeFilter]);
-
 
   const handlePrintScenario = useReactToPrint({
       content: () => scenarioPrintRef.current,
@@ -2699,7 +2686,7 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 <div className="bg-white rounded-xl shadow-md">
+                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
                     <div className="flex border-b">
                         <button 
                             onClick={() => setMainViewTab('warehouses')} 
@@ -2719,10 +2706,10 @@ export default function App() {
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
                                 <div {...swipeHandlers}>
-                                    <div className="overflow-hidden transition-all duration-300" style={{ height: swiperHeight }}>
+                                    <div className="overflow-hidden">
                                         <div className="flex transition-transform duration-300" style={{ transform: `translateX(-${activeIndex * 100}%)` }}>
                                             {sortedWarehouses.map((w, index) => (
-                                                <div key={w.id} className="w-full flex-shrink-0 px-1" ref={el => slideRefs.current[index] = el}>
+                                                <div key={w.id} className="w-full flex-shrink-0 px-1">
                                                     {w.id === 'all' ? (
                                                         <div className="bg-gray-50 rounded-xl p-4 h-full">
                                                             <div className="flex justify-between items-center">
@@ -2736,6 +2723,7 @@ export default function App() {
                                                                     </button>
                                                                 )}
                                                             </div>
+                                                            {/* [ИЗМЕНЕНИЕ] Добавлен список свободных мест */}
                                                             <AllWarehousesFreeSpace warehouses={warehouses} items={items} />
                                                         </div>
                                                     ) : (
@@ -2764,6 +2752,7 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
+                                     {/* [ИЗМЕНЕНИЕ] Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
@@ -2801,10 +2790,7 @@ export default function App() {
                                                          <div className="flex items-center flex-shrink-0 ml-2">
                                                              <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
                                                              {!isLocked && isActionableUser && (
-                                                                <>
-                                                                    <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleItemActionWriteOff(item); }} className="text-gray-400 hover:text-red-600 p-2"><TrashIcon width="20" height="20"/></button>
-                                                                </>
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
                                                              )}
                                                          </div>
                                                      </div>
@@ -2832,10 +2818,7 @@ export default function App() {
                                                          <div className="flex items-center flex-shrink-0 ml-2">
                                                              <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
                                                               {!isLocked && isActionableUser && (
-                                                                <>
-                                                                    <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                                    <button onClick={(e) => { e.stopPropagation(); handleItemActionWriteOff(item); }} className="text-gray-400 hover:text-red-600 p-2"><TrashIcon width="20" height="20"/></button>
-                                                                </>
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
                                                              )}
                                                          </div>
                                                      </div>
