@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react'; // Added useCallback
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
 const ChevronUpIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
 const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
@@ -1833,8 +1833,8 @@ const LogModal = ({ log, users, onClose }) => {
                         <tbody>
                             {log.map(entry => (
                                 <tr key={entry.id} className="border-b">
-                                    <td className="p-2 text-sm text-gray-500">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
-                                    <td className="p-2 font-semibold">{getUserName(entry.userId)}</td>
+                                    <td className="p-2 text-sm text-gray-500 align-top">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
+                                    <td className="p-2 font-semibold align-top">{getUserName(entry.userId)}</td>
                                     <td className="p-2">{entry.action}</td>
                                 </tr>
                             ))}
@@ -1940,6 +1940,11 @@ export default function App() {
   const [qrScanPurpose, setQrScanPurpose] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
+
+  // Refs for item type sections for Intersection Observer
+  const itemTypeSectionRefs = useRef({});
+  // Ref for the scrollable container
+  const itemsListRef = useRef(null);
   
   // Refs
   const actionsMenuRef = useRef(null);
@@ -1975,6 +1980,7 @@ export default function App() {
 
   const handlePrintScenario = useReactToPrint({
       content: () => scenarioPrintRef.current,
+      documentTitle: `Document-${scenarioToPrint?.number || 'undefined'}`, // Dynamic title
       onAfterPrint: () => setScenarioToPrint(null),
   });
 
@@ -2589,30 +2595,94 @@ export default function App() {
     .filter(type => type.count > 0)
     .sort((a, b) => b.count - a.count);
 
+  // Add 'Посмотреть все' option back to the front of the filter list
+  const filterOptions = [{ id: 'all', name: 'Посмотреть все', color: '#6b7280' }, ...sortedAndFilteredItemTypes];
+
+
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
-  const filteredAndSortedItems = (list) => {
-      const filtered = (activeItemTypeFilter === 'all'
-          ? list
-          : list.filter(item => item.type === activeItemTypeFilter)
-      );
-      return filtered.sort((a, b) => {
-          const aIsLocked = lockedItemIds.has(a.id);
-          const bIsLocked = lockedItemIds.has(b.id);
-          if (aIsLocked === bIsLocked) return 0;
-          return aIsLocked ? 1 : -1;
+  const filteredAndSortedItemsGrouped = useCallback((list) => {
+      const grouped = {};
+      const filtered = (list); // Filtering by type will happen when iterating through sortedAndFilteredItemTypes
+      
+      filterOptions.filter(f => f.id !== 'all').forEach(type => { // Exclude 'all' from initial grouping logic
+          grouped[type.name] = filtered
+              .filter(item => item.type === type.name)
+              .sort((a, b) => {
+                  const aIsLocked = lockedItemIds.has(a.id);
+                  const bIsLocked = lockedItemIds.has(b.id);
+                  if (aIsLocked === bIsLocked) return 0;
+                  return aIsLocked ? 1 : -1;
+              });
       });
-  };
+      return grouped;
+  }, [filterOptions, lockedItemIds]);
 
-  const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
+
+  const sortedAssignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
+  const sortedUnassignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
+
+  // Intersection Observer for filter scrolling
+  useEffect(() => {
+    if (!itemsListRef.current) return;
+
+    const observer = new IntersectionObserver(
+        (entries) => {
+            entries.forEach((entry) => {
+                if (entry.isIntersecting) {
+                    // This is a simple logic; for more complex layouts,
+                    // you might need to consider entry.intersectionRatio or multiple intersecting elements.
+                    setActiveItemTypeFilter(entry.target.id);
+                }
+            });
+        },
+        {
+            root: itemsListRef.current,
+            rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, // Adjust based on header height and desired trigger point
+            threshold: 0.1, // Trigger when 10% of the target is visible
+        }
+    );
+
+    // Observe each item type section
+    filterOptions.filter(f => f.id !== 'all').forEach(type => {
+      const ref = itemTypeSectionRefs.current[type.name];
+      if (ref) {
+        observer.observe(ref);
+      }
+    });
+
+    return () => {
+        // Disconnect observer on cleanup
+        filterOptions.filter(f => f.id !== 'all').forEach(type => {
+            const ref = itemTypeSectionRefs.current[type.name];
+            if (ref) {
+                observer.unobserve(ref);
+            }
+        });
+    };
+  }, [itemsListRef, filterOptions, headerHeight]);
+
+
+    const handleFilterButtonClick = (typeName) => {
+        setActiveItemTypeFilter(typeName);
+        if (typeName === 'all') {
+            itemsListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
+            return;
+        }
+
+        const targetElement = itemTypeSectionRefs.current[typeName];
+        if (targetElement && itemsListRef.current) {
+            const offsetTop = targetElement.offsetTop - (headerHeight + 10); // Adjust scroll position for fixed header
+            itemsListRef.current.scrollTo({ top: offsetTop, behavior: 'smooth' });
+        }
+    };
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
@@ -2755,78 +2825,103 @@ export default function App() {
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
                                      {/* Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
-                                         <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                                         {sortedAndFilteredItemTypes.map(type => (
-                                             <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                                                 {type.name}
+                                         {filterOptions.map(type => (
+                                             <button 
+                                                key={type.id || type.name} // Use id for 'all', name for others
+                                                onClick={() => handleFilterButtonClick(type.name)} 
+                                                className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full transition-all duration-200 ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} 
+                                                style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}
+                                            >
+                                                 {type.name === 'Посмотреть все' ? 'Посмотреть все' : <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>}
+                                                 {type.name !== 'Посмотреть все' && type.name}
                                              </button>
                                          ))}
                                      </div>
-                                     {sortedAssignedFilteredItems.length > 0 ? (
-                                         <div className="space-y-3">
-                                             {sortedAssignedFilteredItems.map(item => {
-                                                 const itemType = itemTypes.find(it => it.name === item.type);
-                                                 const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                                 const isUnplaced = item.placeId === null;
-                                                 const isLocked = lockedItemIds.has(item.id);
+                                     <div ref={itemsListRef} className="overflow-y-auto max-h-[calc(100vh-250px)]"> {/* Adjusted max-height */}
+                                        {filterOptions.filter(f => f.id !== 'all').map(type => {
+                                            const itemsOfType = sortedAssignedFilteredItemsGrouped[type.name];
+                                            if (itemsOfType && itemsOfType.length > 0) {
+                                                return (
+                                                    <div key={type.name} id={type.name} ref={el => itemTypeSectionRefs.current[type.name] = el} className="mb-6">
+                                                        <h4 className="text-md font-bold text-gray-700 mb-3 sticky top-[70px] bg-white pt-2 pb-2 -mx-4 px-4 z-20" style={{ top: `${headerHeight + 20}px` }}>
+                                                            {type.name}
+                                                        </h4>
+                                                        <div className="space-y-3">
+                                                            {itemsOfType.map(item => {
+                                                                const itemType = itemTypes.find(it => it.name === item.type);
+                                                                const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
+                                                                const isUnplaced = item.placeId === null;
+                                                                const isLocked = lockedItemIds.has(item.id);
 
-                                                 return (
-                                                     <div 
-                                                         key={item.id} 
-                                                         className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
-                                                     >
-                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
-                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                             <div>
-                                                                 <p className="font-bold text-gray-800">{item.name}</p>
-                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                 {isUnplaced ? (
-                                                                     <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
-                                                                 ) : (
-                                                                     <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
-                                                                 )}
-                                                             </div>
-                                                         </div>
-                                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
-                                                             {!isLocked && isActionableUser && (
-                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                             )}
-                                                         </div>
-                                                     </div>
-                                             )})}
-                                         </div>
-                                     ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
-                                     
-                                     {sortedUnassignedFilteredItems.length > 0 && (
-                                         <div className="mt-6 pt-4 border-t">
-                                             <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
-                                             <div className="space-y-3">
-                                                 {sortedUnassignedFilteredItems.map(item => {
-                                                     const itemType = itemTypes.find(it => it.name === item.type);
-                                                     const isLocked = lockedItemIds.has(item.id);
-                                                     return (
-                                                     <div key={item.id} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}>
-                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
-                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                             <div>
-                                                                 <p className="font-bold text-gray-800">{item.name}</p>
-                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                 <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
-                                                             </div>
-                                                         </div>
-                                                         <div className="flex items-center flex-shrink-0 ml-2">
-                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
-                                                              {!isLocked && isActionableUser && (
-                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                             )}
-                                                         </div>
-                                                     </div>
-                                                 )})}
-                                             </div>
-                                         </div>
-                                     )}
+                                                                return (
+                                                                    <div 
+                                                                        key={item.id} 
+                                                                        className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
+                                                                    >
+                                                                        <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
+                                                                            <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                                            <div>
+                                                                                <p className="font-bold text-gray-800">{item.name}</p>
+                                                                                <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                                {isUnplaced ? (
+                                                                                    <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
+                                                                                ) : (
+                                                                                    <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                                                                )}
+                                                                            </div>
+                                                                        </div>
+                                                                        <div className="flex items-center flex-shrink-0 ml-2">
+                                                                            <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                                            {!isLocked && isActionableUser && (
+                                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                                            )}
+                                                                        </div>
+                                                                    </div>
+                                                            )})}
+                                                        </div>
+                                                    </div>
+                                                );
+                                            }
+                                            return null;
+                                        })}
+                                        
+                                        {Object.values(sortedAssignedFilteredItemsGrouped).flat().length === 0 && (
+                                            <div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>
+                                        )}
+
+                                        {/* Unassigned items always at the bottom if activeWarehouseId is 'all' */}
+                                        {activeWarehouseId === 'all' && Object.values(sortedUnassignedFilteredItemsGrouped).flat().length > 0 && (
+                                            <div id="unassigned" ref={el => itemTypeSectionRefs.current['unassigned'] = el} className="mt-6 pt-4 border-t">
+                                                <h3 className="text-sm font-semibold text-gray-500 mb-3 sticky top-[70px] bg-white pt-2 pb-2 -mx-4 px-4 z-20" style={{ top: `${headerHeight + 20}px` }}>
+                                                    ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ
+                                                </h3>
+                                                <div className="space-y-3">
+                                                    {Object.values(sortedUnassignedFilteredItemsGrouped).flat().map(item => {
+                                                        const itemType = itemTypes.find(it => it.name === item.type);
+                                                        const isLocked = lockedItemIds.has(item.id);
+                                                        return (
+                                                            <div key={item.id} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}>
+                                                                <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
+                                                                    <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                                    <div>
+                                                                        <p className="font-bold text-gray-800">{item.name}</p>
+                                                                        <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                        <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
+                                                                    </div>
+                                                                </div>
+                                                                <div className="flex items-center flex-shrink-0 ml-2">
+                                                                    <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                                    {!isLocked && isActionableUser && (
+                                                                        <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                                    )}
+                                                                </div>
+                                                            </div>
+                                                        )
+                                                    })}
+                                                </div>
+                                            </div>
+                                        )}
+                                     </div>
                                 </div>
                             </div>
                         )}
@@ -2918,4 +3013,3 @@ export default function App() {
     </div>
   );
 }
-
