@@ -2723,7 +2723,6 @@ export default function App() {
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            {/* [ИЗМЕНЕНИЕ] Добавлен список свободных мест */}
                                                             <AllWarehousesFreeSpace warehouses={warehouses} items={items} />
                                                         </div>
                                                     ) : (
@@ -2752,16 +2751,22 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* [ИЗМЕНЕНИЕ] Фильтр сделан "прилипающим" */}
-                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
-                                         <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                                         {sortedAndFilteredItemTypes.map(type => (
-                                             <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                                                 {type.name}
-                                             </button>
-                                         ))}
+                                     {/* [ИЗМЕНЕНИЕ] Фильтр по типу сделан отдельным выпадающим списком */}
+                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-gray-100 -mx-4 px-4 py-2 mb-4 border-b">
+                                        <select 
+                                            value={activeItemTypeFilter} 
+                                            onChange={(e) => setActiveItemTypeFilter(e.target.value)}
+                                            className="w-full p-3 border border-gray-300 rounded-lg bg-white shadow-sm"
+                                        >
+                                            <option value="all">Фильтр по типу: Все</option>
+                                            {sortedAndFilteredItemTypes.map(type => (
+                                                <option key={type.id} value={type.name}>
+                                                    {type.name} ({type.count})
+                                                </option>
+                                            ))}
+                                        </select>
                                      </div>
+
                                      {sortedAssignedFilteredItems.length > 0 ? (
                                          <div className="space-y-3">
                                              {sortedAssignedFilteredItems.map(item => {
