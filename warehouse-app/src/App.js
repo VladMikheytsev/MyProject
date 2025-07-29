@@ -1909,6 +1909,11 @@ export default function App() {
   const scenarioPrintRef = useRef();
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
+  const itemsListRef = useRef(null);
+  const itemRefs = useRef({});
+  const filterBarRef = useRef(null);
+  const filterButtonRefs = useRef({});
+  const isScrolling = useRef(false);
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -2559,11 +2564,19 @@ export default function App() {
           ? list
           : list.filter(item => item.type === activeItemTypeFilter)
       );
+      
       return filtered.sort((a, b) => {
-          const aIsLocked = lockedItemIds.has(a.id);
-          const bIsLocked = lockedItemIds.has(b.id);
-          if (aIsLocked === bIsLocked) return 0;
-          return aIsLocked ? 1 : -1;
+        // Primary sort by type
+        const typeComparison = a.type.localeCompare(b.type);
+        if (typeComparison !== 0) {
+            return typeComparison;
+        }
+
+        // Secondary sort by locked status
+        const aIsLocked = lockedItemIds.has(a.id);
+        const bIsLocked = lockedItemIds.has(b.id);
+        if (aIsLocked === bIsLocked) return 0;
+        return aIsLocked ? 1 : -1;
       });
   };
 
@@ -2574,6 +2587,36 @@ export default function App() {
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
+  
+  const handleScroll = () => {
+    if (!itemsListRef.current || isScrolling.current) return;
+
+    const containerTop = itemsListRef.current.getBoundingClientRect().top;
+
+    for (const item of sortedAssignedFilteredItems) {
+        const itemElement = itemRefs.current[item.id];
+        if (itemElement) {
+            const itemTop = itemElement.getBoundingClientRect().top;
+            if (itemTop >= containerTop) {
+                if (activeItemTypeFilter !== item.type) {
+                    setActiveItemTypeFilter(item.type);
+                }
+                break;
+            }
+        }
+    }
+  };
+  
+  useEffect(() => {
+    if (activeItemTypeFilter && filterButtonRefs.current[activeItemTypeFilter]) {
+        filterButtonRefs.current[activeItemTypeFilter].scrollIntoView({
+            behavior: 'smooth',
+            block: 'nearest',
+            inline: 'center'
+        });
+    }
+  }, [activeItemTypeFilter]);
+
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
@@ -2650,7 +2693,7 @@ export default function App() {
             </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 pb-24 mt-4">
+      <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
                  <div className="bg-white rounded-xl shadow-md">
@@ -2727,10 +2770,19 @@ export default function App() {
                                             </button>
                                         )}
                                     </div>
-
+                                    <div ref={filterBarRef} className="flex overflow-x-auto space-x-2 mb-4 pb-2 border-b">
+                                         <button ref={el => filterButtonRefs.current['all'] = el} onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
+                                         {sortedAndFilteredItemTypes.map(type => (
+                                             <button key={type.id} ref={el => filterButtonRefs.current[type.name] = el} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
+                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                                                 {type.name}
+                                             </button>
+                                         ))}
+                                     </div>
+                                     <div ref={itemsListRef} onScroll={handleScroll} className="space-y-3 max-h-[50vh] overflow-y-auto">
                                      {sortedAssignedFilteredItems.length > 0 ? (
-                                         <div className="space-y-3">
-                                             {sortedAssignedFilteredItems.map(item => {
+                                         
+                                             sortedAssignedFilteredItems.map(item => {
                                                  const itemType = itemTypes.find(it => it.name === item.type);
                                                  const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
                                                  const isUnplaced = item.placeId === null;
@@ -2739,6 +2791,7 @@ export default function App() {
                                                  return (
                                                      <div 
                                                          key={item.id} 
+                                                         ref={el => itemRefs.current[item.id] = el}
                                                          className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
                                                      >
                                                          <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
@@ -2761,8 +2814,8 @@ export default function App() {
                                                              )}
                                                          </div>
                                                      </div>
-                                             )})}
-                                         </div>
+                                             )})
+                                         
                                      ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
                                      
                                      {sortedUnassignedFilteredItems.length > 0 && (
@@ -2794,6 +2847,7 @@ export default function App() {
                                              </div>
                                          </div>
                                      )}
+                                     </div>
                                 </div>
                             </div>
                         )}
@@ -2848,21 +2902,6 @@ export default function App() {
         )}
       </div>
       
-      {/* --- Filter --- */}
-       {mainViewTab === 'warehouses' && (
-        <div className="fixed bottom-0 left-0 right-0 z-30 max-w-7xl mx-auto px-4 pb-4 bg-gray-100">
-            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-2 flex overflow-x-auto space-x-2 border">
-                 <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                 {sortedAndFilteredItemTypes.map(type => (
-                     <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                         <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                         {type.name}
-                     </button>
-                 ))}
-             </div>
-        </div>
-      )}
-
       {/* --- Modals --- */}
       {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} onLogout={handleLogout} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
