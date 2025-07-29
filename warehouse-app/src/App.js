@@ -2686,7 +2686,8 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 <div className="bg-white rounded-xl shadow-md overflow-hidden">
+                 {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
+                 <div className="bg-white rounded-xl shadow-md">
                     <div className="flex border-b">
                         <button 
                             onClick={() => setMainViewTab('warehouses')} 
@@ -2702,7 +2703,8 @@ export default function App() {
                         </button>
                     </div>
 
-                    <div className="overflow-hidden">
+                    {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
+                    <div>
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
                                 <div {...swipeHandlers}>
@@ -2723,7 +2725,6 @@ export default function App() {
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            {/* [ИЗМЕНЕНИЕ] Добавлен список свободных мест */}
                                                             <AllWarehousesFreeSpace warehouses={warehouses} items={items} />
                                                         </div>
                                                     ) : (
@@ -2752,7 +2753,7 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* [ИЗМЕНЕНИЕ] Фильтр сделан "прилипающим" */}
+                                     {/* Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
@@ -2917,3 +2918,4 @@ export default function App() {
     </div>
   );
 }
+
