@@ -179,58 +179,6 @@ const PalletCapacityScale = ({ places = [], items = [] }) => {
     );
 };
 
-// --- [НОВЫЙ КОМПОНЕНТ] Список свободных мест для всех складов ---
-const AllWarehousesFreeSpace = ({ warehouses = [], items = [] }) => {
-    const freeSpacesByWarehouse = warehouses
-        .map(warehouse => {
-            if (warehouse.id === 'all') return null;
-            
-            const palletPlaces = (warehouse.places || []).filter(p => p.type === 'pallet');
-            const totalPalletPlaces = palletPlaces.length;
-
-            if (totalPalletPlaces === 0) {
-                return null;
-            }
-
-            const palletPlaceIds = new Set(palletPlaces.map(p => p.id));
-            const occupiedPalletPlaceIds = new Set();
-            items.forEach(item => {
-                if (item.warehouseId === warehouse.id && item.placeId !== null && palletPlaceIds.has(item.placeId)) {
-                    occupiedPalletPlaceIds.add(item.placeId);
-                }
-            });
-            
-            const occupiedCount = occupiedPalletPlaceIds.size;
-            const freeCount = totalPalletPlaces - occupiedCount;
-
-            return {
-                id: warehouse.id,
-                name: warehouse.name,
-                free: freeCount
-            };
-        })
-        .filter(Boolean);
-
-    if (freeSpacesByWarehouse.length === 0) {
-        return null;
-    }
-
-    return (
-        <div className="mt-4 pt-4 border-t border-gray-200">
-            <h4 className="text-md font-semibold text-gray-700 mb-2">Свободные места</h4>
-            <div className="space-y-1 text-sm">
-                {freeSpacesByWarehouse.map(w => (
-                    <div key={w.id} className="flex justify-between">
-                        <span className="text-gray-600">{w.name}:</span>
-                        <span className="font-bold text-gray-800">{w.free}</span>
-                    </div>
-                ))}
-            </div>
-        </div>
-    );
-};
-
-
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
     const qrCodePrintRef = useRef();
@@ -267,7 +215,9 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
 
         let currentFontSize = START_FONT_SIZE;
         element.style.fontSize = `${currentFontSize}px`;
-        element.style.wordWrap = 'break-word';
+        element.style.overflowWrap = 'break-word';
+        element.style.whiteSpace = 'normal';
+
 
         const isTooTall = () => element.scrollHeight > currentFontSize * 2.4;
         
@@ -284,11 +234,12 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
                 <div ref={qrCodePrintRef} className="text-center p-4 flex flex-col items-center">
                     <h2 
                         ref={titleRef} 
-                        className="font-bold text-gray-800" 
-                        style={{ maxWidth: '256px', lineHeight: 1.2 }}
+                        className="font-bold text-gray-800 whitespace-normal" 
+                        style={{ maxWidth: '256px', lineHeight: 1.2, overflowWrap: 'break-word' }}
                     >
                         {item.name}
                     </h2>
+                    <p className="text-lg text-gray-600 font-mono mb-2">#{item.code}</p>
                     <p className="text-xl text-gray-500 mb-4">Тип: {item.type}</p>
                     {qrCodeUrl ? (
                         <img src={qrCodeUrl} alt={`QR-код для ${item.name}`} className="mx-auto" />
@@ -522,7 +473,7 @@ const CompactPlacesGrid = ({ places, items = [], onPlaceSelect, selectedPlaceInf
 };
 
 const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, items, userRole }) => {
-    const [newItem, setNewItem] = useState({ name: '', type: itemTypes[0]?.name || '', size: 'Паллета', quantity: 1, warehouseId: warehouses[0]?.id || null, placeId: null });
+    const [newItem, setNewItem] = useState({ name: '', code: '', type: itemTypes[0]?.name || '', size: 'Паллета', quantity: 1, warehouseId: warehouses[0]?.id || null, placeId: null });
     const [disabledPlaces, setDisabledPlaces] = useState([]);
 
     useEffect(() => {
@@ -551,7 +502,7 @@ const ItemEditor = ({ warehouses, itemTypes, onSave, onCancel, onManageTypes, it
         const { name, value } = e.target;
         setNewItem(prev => ({ ...prev, [name]: value, placeId: name === 'warehouseId' ? null : prev.placeId })); 
     };
-    const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID() }); };
+    const handleSave = () => { if (!newItem.name || !newItem.type || !newItem.size || !newItem.quantity || !newItem.warehouseId || newItem.placeId === null) { alert('Пожалуйста, заполните все поля и выберите место.'); return; } onSave({ ...newItem, id: crypto.randomUUID(), code: Math.floor(10000000 + Math.random() * 90000000).toString() }); };
     const selectedWarehouse = warehouses.find(w => w.id === newItem.warehouseId);
 
     return (
@@ -641,6 +592,16 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
                             onChange={handleChange}
                             placeholder="Наименование"
                             className="w-full p-3 border rounded-lg"
+                        />
+                    </div>
+                     <div>
+                        <label className="block text-sm font-medium text-gray-700 mb-1">Код позиции:</label>
+                        <input
+                            type="text"
+                            name="code"
+                            value={editedItem.code}
+                            disabled
+                            className="w-full p-3 border rounded-lg bg-gray-100"
                         />
                     </div>
                     <div>
@@ -1584,7 +1545,6 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
             </div>
             <div className="mb-4 border-b pb-2">
                 <PalletStats places={warehouse.places || []} items={warehouseItems} />
-                {/* [ИЗМЕНЕНИЕ] Добавлена шкала заполненности */}
                 <PalletCapacityScale places={warehouse.places || []} items={warehouseItems} />
             </div>
             <div className="flex-grow overflow-auto">
@@ -2472,6 +2432,8 @@ export default function App() {
       setVerifyingItem(null);
       if (qrScanPurpose === 'action') {
           setItemForAction(verifiedItem);
+      } else if (qrScanPurpose === 'write-off') {
+          handleItemActionWriteOff(verifiedItem);
       }
   };
   
@@ -2605,6 +2567,11 @@ export default function App() {
       });
   };
 
+  const handleStartWriteOff = () => {
+    setQrScanPurpose('write-off');
+    setVerifyingItem({ id: 'any', name: 'любой товар для списания' });
+  };
+
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
@@ -2683,10 +2650,9 @@ export default function App() {
             </div>
         </div>
       </div>
-      <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
+      <div className="max-w-7xl mx-auto px-4 pb-24 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                  <div className="bg-white rounded-xl shadow-md">
                     <div className="flex border-b">
                         <button 
@@ -2703,7 +2669,6 @@ export default function App() {
                         </button>
                     </div>
 
-                    {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                     <div>
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
@@ -2725,7 +2690,6 @@ export default function App() {
                                                                     </button>
                                                                 )}
                                                             </div>
-                                                            <AllWarehousesFreeSpace warehouses={warehouses} items={items} />
                                                         </div>
                                                     ) : (
                                                         <WarehouseInfoBlock 
@@ -2753,16 +2717,17 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* Фильтр сделан "прилипающим" */}
-                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
-                                         <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
-                                         {sortedAndFilteredItemTypes.map(type => (
-                                             <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
-                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
-                                                 {type.name}
-                                             </button>
-                                         ))}
-                                     </div>
+                                     <div className="flex items-center gap-2 mb-4">
+                                        <button onClick={() => setItemEditorOpen(true)} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold transition">
+                                            <PlusIcon /> Создать
+                                        </button>
+                                        {userRole === 'Администратор' && (
+                                            <button onClick={handleStartWriteOff} className="flex-1 flex items-center justify-center gap-2 px-4 py-2 rounded-lg text-white bg-red-600 hover:bg-red-700 font-semibold transition">
+                                                <TrashIcon width="20" height="20" /> Списать
+                                            </button>
+                                        )}
+                                    </div>
+
                                      {sortedAssignedFilteredItems.length > 0 ? (
                                          <div className="space-y-3">
                                              {sortedAssignedFilteredItems.map(item => {
@@ -2780,6 +2745,7 @@ export default function App() {
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-xs text-gray-500 font-mono">#{item.code}</p>
                                                                  <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                                                  {isUnplaced ? (
                                                                      <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
@@ -2812,6 +2778,7 @@ export default function App() {
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-xs text-gray-500 font-mono">#{item.code}</p>
                                                                  <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                                                  <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
                                                              </div>
@@ -2881,6 +2848,21 @@ export default function App() {
         )}
       </div>
       
+      {/* --- Filter --- */}
+       {mainViewTab === 'warehouses' && (
+        <div className="fixed bottom-0 left-0 right-0 z-30 max-w-7xl mx-auto px-4 pb-4 bg-gray-100">
+            <div className="bg-white/80 backdrop-blur-sm rounded-xl shadow-lg p-2 flex overflow-x-auto space-x-2 border">
+                 <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
+                 {sortedAndFilteredItemTypes.map(type => (
+                     <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
+                         <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                         {type.name}
+                     </button>
+                 ))}
+             </div>
+        </div>
+      )}
+
       {/* --- Modals --- */}
       {isProfileEditorOpen && <ProfileEditorModal user={currentUser} warehouses={warehouses} onSave={handleUpdateUser} onClose={() => setProfileEditorOpen(false)} onLogout={handleLogout} />}
       {editingWarehouse && <WarehouseEditor initialData={editingWarehouse} onSave={handleSaveWarehouse} onCancel={() => setEditingWarehouse(null)} />}
@@ -2918,4 +2900,3 @@ export default function App() {
     </div>
   );
 }
-
