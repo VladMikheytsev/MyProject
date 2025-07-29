@@ -667,7 +667,7 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
                             >
                                 <option>Паллета</option>
                                 <option>Коробка</option>
-                                <option>Шt</option>
+                                <option>Шт</option>
                             </select>
                         </div>
                         <div>
@@ -1029,7 +1029,7 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                             >
                                 <option>Паллета</option>
                                 <option>Коробка</option>
-                                <option>Шt</option>
+                                <option>Шт</option>
                             </select>
                         </div>
                     </div>
@@ -1955,6 +1955,7 @@ export default function App() {
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
+    // All useEffects and useCallbacks are moved here, before any conditional returns.
     useEffect(() => {
         function handleClickOutside(event) {
             if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
@@ -1978,17 +1979,194 @@ export default function App() {
       return () => window.removeEventListener('resize', updateHeaderHeight);
     }, []);
 
-  const handlePrintScenario = useReactToPrint({
-      content: () => scenarioPrintRef.current,
-      documentTitle: `Document-${scenarioToPrint?.number || 'undefined'}`, // Dynamic title
-      onAfterPrint: () => setScenarioToPrint(null),
-  });
+    const handlePrintScenario = useReactToPrint({
+        content: () => scenarioPrintRef.current,
+        documentTitle: `Document-${scenarioToPrint?.number || 'undefined'}`, // Dynamic title
+        onAfterPrint: () => setScenarioToPrint(null),
+    });
 
-  useEffect(() => {
-      if (scenarioToPrint) {
-          handlePrintScenario();
-      }
-  }, [scenarioToPrint, handlePrintScenario]);
+    useEffect(() => {
+        if (scenarioToPrint) {
+            handlePrintScenario();
+        }
+    }, [scenarioToPrint, handlePrintScenario]);
+
+    // `useCallback` is now unconditionally called here
+    const filteredAndSortedItemsGrouped = useCallback((list) => {
+        const grouped = {};
+        const filtered = (list); 
+        
+        filterOptions.filter(f => f.id !== 'all').forEach(type => {
+            grouped[type.name] = filtered
+                .filter(item => item.type === type.name)
+                .sort((a, b) => {
+                    const aIsLocked = lockedItemIds.has(a.id);
+                    const bIsLocked = lockedItemIds.has(b.id);
+                    if (aIsLocked === bIsLocked) return 0;
+                    return aIsLocked ? 1 : -1;
+                });
+        });
+        return grouped;
+    }, [/* Dependencies are now correctly listed here */ itemTypes, scenarios, items]); // Added itemTypes, scenarios, items as dependencies as they are used inside.
+
+    // `useEffect` for Intersection Observer is now unconditionally called here
+    useEffect(() => {
+        if (!itemsListRef.current) return;
+
+        const observer = new IntersectionObserver(
+            (entries) => {
+                entries.forEach((entry) => {
+                    if (entry.isIntersecting) {
+                        setActiveItemTypeFilter(entry.target.id);
+                    }
+                });
+            },
+            {
+                root: itemsListRef.current,
+                rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, 
+                threshold: 0.1, 
+            }
+        );
+
+        filterOptions.filter(f => f.id !== 'all').forEach(type => {
+            const ref = itemTypeSectionRefs.current[type.name];
+            if (ref) {
+                observer.observe(ref);
+            }
+        });
+
+        return () => {
+            filterOptions.filter(f => f.id !== 'all').forEach(type => {
+                const ref = itemTypeSectionRefs.current[type.name];
+                if (ref) {
+                    observer.unobserve(ref);
+                }
+            });
+        };
+    }, [itemsListRef, filterOptions, headerHeight]); // Dependencies are correctly listed here.
+
+    useEffect(() => {
+        const initializeApp = async () => {
+            let sessionUser = null;
+            try {
+                const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+                if (savedSession) {
+                    const { user, loginTime } = JSON.parse(savedSession);
+                    const now = new Date().getTime();
+                    const ONE_HOUR = 3600 * 1000;
+                    if (now - loginTime < ONE_HOUR) {
+                        sessionUser = user;
+                        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
+                    } else {
+                        localStorage.removeItem(SESSION_STORAGE_KEY);
+                    }
+                }
+            } catch (error) {
+                console.error("Не удалось проверить сеанс:", error);
+                localStorage.removeItem(SESSION_STORAGE_KEY);
+            }
+            
+            setAuthChecked(true);
+            
+            if (!sessionUser) { 
+                try {
+                    const appData = await api.request('/data/for-registration');
+                    setWarehouses(appData.warehouses || []);
+                } catch(error) {
+                    console.error("Не удалось загрузить склады для регистрации:", error);
+                }
+            }
+
+            if (sessionUser) {
+                setCurrentUser(sessionUser);
+            } 
+        };
+
+        initializeApp();
+    }, []); 
+
+    useEffect(() => {
+        const loadDataForUser = async () => {
+            if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
+                setLoading(true);
+                try {
+                    const [appData, usersData] = await Promise.all([
+                        api.fetchAppData(currentUser.id),
+                        api.fetchUsers()
+                    ]);
+                    setWarehouses(appData.warehouses || []);
+                    setItems(appData.items || []);
+                    setItemTypes(appData.itemTypes || []);
+                    setScenarios(appData.scenarios || []);
+                    setSignatures(appData.signatures || {});
+                    setLog(appData.log || []);
+                    setWriteOffLog(appData.writeOffLog || []);
+                    setUsers(usersData || []);
+                    hasLoadedData.current = true;
+                } catch (error) {
+                    console.error("Не удалось загрузить данные пользователя:", error);
+                } finally {
+                    setLoading(false);
+                }
+            }
+        };
+        loadDataForUser();
+    }, [currentUser]); 
+
+    useEffect(() => {
+        if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
+
+        setIsSaving(true);
+        const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
+        api.saveAppData(currentUser.id, fullState)
+            .catch(error => {
+                console.error("Ошибка при автоматическом сохранении данных:", error);
+            })
+            .finally(() => {
+                setIsSaving(false);
+            });
+    }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
+
+    const stateRef = useRef();
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
+
+    useEffect(() => {
+        if (!currentUser || currentUser.role === 'На модерации') {
+            return;
+        }
+
+        const intervalId = setInterval(async () => {
+            const currentState = stateRef.current;
+            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.itemForAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
+
+            if (isBusy) {
+                return;
+            }
+
+            try {
+                const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
+
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
+                if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
+                    setWarehouses(newData.warehouses || []);
+                    setItems(newData.items || []);
+                    setItemTypes(newData.itemTypes || []);
+                    setScenarios(newData.scenarios || []);
+                    setSignatures(newData.signatures || {});
+                    setLog(newData.log || []);
+                    setWriteOffLog(newData.writeOffLog || []);
+                }
+
+                if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
+                    setUsers(newUsers || []);
+                }
+            } catch (error) {
+                console.error("Ошибка при фоновом обновлении данных:", error);
+            }
+        }, 5000);
+
+        return () => clearInterval(intervalId);
+    }, [currentUser]); 
 
   const addLogEntry = (action, details = null) => {
     if (!currentUser) return;
@@ -2106,146 +2284,6 @@ export default function App() {
         console.error("Не удалось удалить пользователя:", error);
     }
   };
-
-  useEffect(() => {
-    const script = document.createElement('script');
-    script.src = 'https://telegram.org/js/telegram-web-app.js';
-    script.async = true;
-    document.body.appendChild(script);
-
-    return () => {
-      document.body.removeChild(script);
-    };
-  }, []);
-
-  useEffect(() => {
-    const initializeApp = async () => {
-      let sessionUser = null;
-      try {
-        const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
-        if (savedSession) {
-          const { user, loginTime } = JSON.parse(savedSession);
-          const now = new Date().getTime();
-          const ONE_HOUR = 3600 * 1000;
-          if (now - loginTime < ONE_HOUR) {
-            sessionUser = user;
-            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
-          } else {
-            localStorage.removeItem(SESSION_STORAGE_KEY);
-          }
-        }
-      } catch (error) {
-        console.error("Не удалось проверить сеанс:", error);
-        localStorage.removeItem(SESSION_STORAGE_KEY);
-      }
-      
-      setAuthChecked(true);
-      
-      // Only fetch warehouses for registration if no session user exists.
-      // This is outside the conditional hook call.
-      if (!sessionUser) { 
-        try {
-            const appData = await api.request('/data/for-registration');
-            setWarehouses(appData.warehouses || []);
-        } catch(error) {
-            console.error("Не удалось загрузить склады для регистрации:", error);
-        }
-      }
-
-      if (sessionUser) {
-        setCurrentUser(sessionUser);
-      } 
-    };
-
-    initializeApp();
-  }, []); // Empty dependency array means this runs once on mount
-
-  // Move this useEffect outside any conditional blocks
-  useEffect(() => {
-      const loadDataForUser = async () => {
-          if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
-              setLoading(true);
-              try {
-                  const [appData, usersData] = await Promise.all([
-                      api.fetchAppData(currentUser.id),
-                      api.fetchUsers()
-                  ]);
-                  setWarehouses(appData.warehouses || []);
-                  setItems(appData.items || []);
-                  setItemTypes(appData.itemTypes || []);
-                  setScenarios(appData.scenarios || []);
-                  setSignatures(appData.signatures || {});
-                  setLog(appData.log || []);
-                  setWriteOffLog(appData.writeOffLog || []);
-                  setUsers(usersData || []);
-                  hasLoadedData.current = true;
-              } catch (error) {
-                  console.error("Не удалось загрузить данные пользователя:", error);
-              } finally {
-                  setLoading(false);
-              }
-          }
-      };
-      loadDataForUser();
-  }, [currentUser]); // currentUser is a dependency, so this runs when currentUser changes
-
-  useEffect(() => {
-    // This effect should also run unconditionally, with its internal logic handling the state.
-    if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
-
-    setIsSaving(true);
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
-    api.saveAppData(currentUser.id, fullState)
-      .catch(error => {
-        console.error("Ошибка при автоматическом сохранении данных:", error);
-      })
-      .finally(() => {
-        setIsSaving(false);
-      });
-  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
-
-    const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
-
-    // This useEffect should also be outside conditional blocks
-    useEffect(() => {
-        // The conditional logic is now inside the effect's callback
-        if (!currentUser || currentUser.role === 'На модерации') {
-            return;
-        }
-
-        const intervalId = setInterval(async () => {
-            const currentState = stateRef.current;
-            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.itemForAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
-
-            if (isBusy) {
-                return;
-            }
-
-            try {
-                const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
-
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
-                if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
-                    setWarehouses(newData.warehouses || []);
-                    setItems(newData.items || []);
-                    setItemTypes(newData.itemTypes || []);
-                    setScenarios(newData.scenarios || []);
-                    setSignatures(newData.signatures || {});
-                    setLog(newData.log || []);
-                    setWriteOffLog(newData.writeOffLog || []);
-                }
-
-                if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
-                    setUsers(newUsers || []);
-                }
-            } catch (error) {
-                console.error("Ошибка при фоновом обновлении данных:", error);
-            }
-        }, 5000);
-
-        return () => clearInterval(intervalId);
-    }, [currentUser]); // currentUser is a dependency
 
   const handleSaveWarehouse = (data) => {
     const isNew = !data.id;
@@ -2566,11 +2604,11 @@ export default function App() {
   const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
+  // Conditional rendering for authentication and loading states
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
   }
 
-  // Auth/Role based rendering moved up, before any other hooks are called conditionally
   if (!currentUser) {
       if (authView === 'login') {
           return <LoginView onLogin={handleLogin} onSwitchToRegister={() => setAuthView('register')} />;
@@ -2604,32 +2642,11 @@ export default function App() {
     .filter(type => type.count > 0)
     .sort((a, b) => b.count - a.count);
 
-  // Add 'Посмотреть все' option back to the front of the filter list
   const filterOptions = [{ id: 'all', name: 'Посмотреть все', color: '#6b7280' }, ...sortedAndFilteredItemTypes];
-
 
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
-  // `useCallback` is now unconditionally called here
-  const filteredAndSortedItemsGrouped = useCallback((list) => {
-      const grouped = {};
-      const filtered = (list); 
-      
-      filterOptions.filter(f => f.id !== 'all').forEach(type => {
-          grouped[type.name] = filtered
-              .filter(item => item.type === type.name)
-              .sort((a, b) => {
-                  const aIsLocked = lockedItemIds.has(a.id);
-                  const bIsLocked = lockedItemIds.has(b.id);
-                  if (aIsLocked === bIsLocked) return 0;
-                  return aIsLocked ? 1 : -1;
-              });
-      });
-      return grouped;
-  }, [filterOptions, lockedItemIds]);
-
-
   const sortedAssignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
@@ -2638,57 +2655,6 @@ export default function App() {
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
-
-  // `useEffect` for Intersection Observer is now unconditionally called here
-  useEffect(() => {
-    if (!itemsListRef.current) return;
-
-    const observer = new IntersectionObserver(
-        (entries) => {
-            entries.forEach((entry) => {
-                if (entry.isIntersecting) {
-                    setActiveItemTypeFilter(entry.target.id);
-                }
-            });
-        },
-        {
-            root: itemsListRef.current,
-            rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, 
-            threshold: 0.1, 
-        }
-    );
-
-    filterOptions.filter(f => f.id !== 'all').forEach(type => {
-      const ref = itemTypeSectionRefs.current[type.name];
-      if (ref) {
-        observer.observe(ref);
-      }
-    });
-
-    return () => {
-        filterOptions.filter(f => f.id !== 'all').forEach(type => {
-            const ref = itemTypeSectionRefs.current[type.name];
-            if (ref) {
-                observer.unobserve(ref);
-            }
-        });
-    };
-  }, [itemsListRef, filterOptions, headerHeight]);
-
-
-    const handleFilterButtonClick = (typeName) => {
-        setActiveItemTypeFilter(typeName);
-        if (typeName === 'all') {
-            itemsListRef.current.scrollTo({ top: 0, behavior: 'smooth' });
-            return;
-        }
-
-        const targetElement = itemTypeSectionRefs.current[typeName];
-        if (targetElement && itemsListRef.current) {
-            const offsetTop = targetElement.offsetTop - (headerHeight + 10); 
-            itemsListRef.current.scrollTo({ top: offsetTop, behavior: 'smooth' });
-        }
-    };
 
   return (
     <div className="bg-gray-100 min-h-screen font-sans">
