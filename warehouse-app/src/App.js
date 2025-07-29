@@ -1584,7 +1584,6 @@ const WarehousePlacesBlock = ({ warehouse, items, itemTypes, onPlaceSelect, onEd
             </div>
             <div className="mb-4 border-b pb-2">
                 <PalletStats places={warehouse.places || []} items={warehouseItems} />
-                {/* [ИЗМЕНЕНИЕ] Добавлена шкала заполненности */}
                 <PalletCapacityScale places={warehouse.places || []} items={warehouseItems} />
             </div>
             <div className="flex-grow overflow-auto">
@@ -2751,12 +2750,13 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* [ИЗМЕНЕНИЕ] Фильтр по типу сделан отдельным выпадающим списком */}
-                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-gray-100 -mx-4 px-4 py-2 mb-4 border-b">
+                                     
+                                     {/* [ИЗМЕНЕНИЕ] Фильтр прилипает к верху, имеет фон и тень для наглядности */}
+                                     <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white -mx-4 px-4 py-2 mb-4 border-b shadow-sm">
                                         <select 
                                             value={activeItemTypeFilter} 
                                             onChange={(e) => setActiveItemTypeFilter(e.target.value)}
-                                            className="w-full p-3 border border-gray-300 rounded-lg bg-white shadow-sm"
+                                            className="w-full p-3 border border-gray-300 rounded-lg bg-white"
                                         >
                                             <option value="all">Фильтр по типу: Все</option>
                                             {sortedAndFilteredItemTypes.map(type => (
