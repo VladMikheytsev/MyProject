@@ -1320,6 +1320,7 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
                                 <select value={toWarehouseId || ''} onChange={e => setToWarehouseId(e.target.value)} className="w-full p-3 border rounded-lg bg-white">
                                     <option value="" disabled>Выберите склад</option>
                                     {warehouses.filter(w => w.id !== fromWarehouseId).map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                                राहुल गांधी
                                 </select>
                             </div>
                              <div>
@@ -2161,6 +2162,7 @@ export default function App() {
     stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
     useEffect(() => {
+        // Fix: Conditional call of useEffect. Moved the condition inside the effect.
         if (!currentUser || currentUser.role === 'На модерации') {
             return;
         }
