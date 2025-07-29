@@ -1,11 +1,11 @@
-import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
+import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas';
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
-const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
+const EditIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="16" height="16" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2.5" strokeLinecap="round" strokeLinejoin="round"><path d="M17 3a2.828 2.828 0 1 1 4 4L7.5 20.5 2 22l1.5-5.5L17 3z"></path></svg>;
 const ChevronDownIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="6 9 12 15 18 9"></polyline></svg>;
 const ChevronUpIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="18 15 12 9 6 15"></polyline></svg>;
 const TrashIcon = ({ width = "24", height = "24" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><polyline points="3 6 5 6 21 6"></polyline><path d="M19 6v14a2 2 0 0 1-2 2H7a2 2 0 0 1-2-2V6m3 0V4a2 2 0 0 1 2-2h4a2 2 0 0 1 2 2v2"></path></svg>;
@@ -1833,8 +1833,8 @@ const LogModal = ({ log, users, onClose }) => {
                         <tbody>
                             {log.map(entry => (
                                 <tr key={entry.id} className="border-b">
-                                    <td className="p-2 text-sm text-gray-500 align-top">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
-                                    <td className="p-2 font-semibold align-top">{getUserName(entry.userId)}</td>
+                                    <td className="p-2 text-sm text-gray-500">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
+                                    <td className="p-2 font-semibold">{getUserName(entry.userId)}</td>
                                     <td className="p-2">{entry.action}</td>
                                 </tr>
                             ))}
@@ -1940,11 +1940,6 @@ export default function App() {
   const [qrScanPurpose, setQrScanPurpose] = useState(null);
   const [isSaving, setIsSaving] = useState(false);
   const [activeItemTypeFilter, setActiveItemTypeFilter] = useState('all');
-
-  // Refs for item type sections for Intersection Observer
-  const itemTypeSectionRefs = useRef({});
-  // Ref for the scrollable container
-  const itemsListRef = useRef(null);
   
   // Refs
   const actionsMenuRef = useRef(null);
@@ -1955,7 +1950,6 @@ export default function App() {
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
 
-    // All useEffects and useCallbacks are moved here, before any conditional returns.
     useEffect(() => {
         function handleClickOutside(event) {
             if (actionsMenuRef.current && !actionsMenuRef.current.contains(event.target)) {
@@ -1979,194 +1973,16 @@ export default function App() {
       return () => window.removeEventListener('resize', updateHeaderHeight);
     }, []);
 
-    const handlePrintScenario = useReactToPrint({
-        content: () => scenarioPrintRef.current,
-        documentTitle: `Document-${scenarioToPrint?.number || 'undefined'}`, // Dynamic title
-        onAfterPrint: () => setScenarioToPrint(null),
-    });
+  const handlePrintScenario = useReactToPrint({
+      content: () => scenarioPrintRef.current,
+      onAfterPrint: () => setScenarioToPrint(null),
+  });
 
-    useEffect(() => {
-        if (scenarioToPrint) {
-            handlePrintScenario();
-        }
-    }, [scenarioToPrint, handlePrintScenario]);
-
-    // `useCallback` is now unconditionally called here
-    const filteredAndSortedItemsGrouped = useCallback((list) => {
-        const grouped = {};
-        const filtered = (list); 
-        
-        filterOptions.filter(f => f.id !== 'all').forEach(type => {
-            grouped[type.name] = filtered
-                .filter(item => item.type === type.name)
-                .sort((a, b) => {
-                    const aIsLocked = lockedItemIds.has(a.id);
-                    const bIsLocked = lockedItemIds.has(b.id);
-                    if (aIsLocked === bIsLocked) return 0;
-                    return aIsLocked ? 1 : -1;
-                });
-        });
-        return grouped;
-    }, [/* Dependencies are now correctly listed here */ itemTypes, scenarios, items]); // Added itemTypes, scenarios, items as dependencies as they are used inside.
-
-    // `useEffect` for Intersection Observer is now unconditionally called here
-    useEffect(() => {
-        if (!itemsListRef.current) return;
-
-        const observer = new IntersectionObserver(
-            (entries) => {
-                entries.forEach((entry) => {
-                    if (entry.isIntersecting) {
-                        setActiveItemTypeFilter(entry.target.id);
-                    }
-                });
-            },
-            {
-                root: itemsListRef.current,
-                rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, 
-                threshold: 0.1, 
-            }
-        );
-
-        filterOptions.filter(f => f.id !== 'all').forEach(type => {
-            const ref = itemTypeSectionRefs.current[type.name];
-            if (ref) {
-                observer.observe(ref);
-            }
-        });
-
-        return () => {
-            filterOptions.filter(f => f.id !== 'all').forEach(type => {
-                const ref = itemTypeSectionRefs.current[type.name];
-                if (ref) {
-                    observer.unobserve(ref);
-                }
-            });
-        };
-    }, [itemsListRef, filterOptions, headerHeight]); // Dependencies are correctly listed here.
-
-    useEffect(() => {
-        const initializeApp = async () => {
-            let sessionUser = null;
-            try {
-                const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
-                if (savedSession) {
-                    const { user, loginTime } = JSON.parse(savedSession);
-                    const now = new Date().getTime();
-                    const ONE_HOUR = 3600 * 1000;
-                    if (now - loginTime < ONE_HOUR) {
-                        sessionUser = user;
-                        localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
-                    } else {
-                        localStorage.removeItem(SESSION_STORAGE_KEY);
-                    }
-                }
-            } catch (error) {
-                console.error("Не удалось проверить сеанс:", error);
-                localStorage.removeItem(SESSION_STORAGE_KEY);
-            }
-            
-            setAuthChecked(true);
-            
-            if (!sessionUser) { 
-                try {
-                    const appData = await api.request('/data/for-registration');
-                    setWarehouses(appData.warehouses || []);
-                } catch(error) {
-                    console.error("Не удалось загрузить склады для регистрации:", error);
-                }
-            }
-
-            if (sessionUser) {
-                setCurrentUser(sessionUser);
-            } 
-        };
-
-        initializeApp();
-    }, []); 
-
-    useEffect(() => {
-        const loadDataForUser = async () => {
-            if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
-                setLoading(true);
-                try {
-                    const [appData, usersData] = await Promise.all([
-                        api.fetchAppData(currentUser.id),
-                        api.fetchUsers()
-                    ]);
-                    setWarehouses(appData.warehouses || []);
-                    setItems(appData.items || []);
-                    setItemTypes(appData.itemTypes || []);
-                    setScenarios(appData.scenarios || []);
-                    setSignatures(appData.signatures || {});
-                    setLog(appData.log || []);
-                    setWriteOffLog(appData.writeOffLog || []);
-                    setUsers(usersData || []);
-                    hasLoadedData.current = true;
-                } catch (error) {
-                    console.error("Не удалось загрузить данные пользователя:", error);
-                } finally {
-                    setLoading(false);
-                }
-            }
-        };
-        loadDataForUser();
-    }, [currentUser]); 
-
-    useEffect(() => {
-        if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
-
-        setIsSaving(true);
-        const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
-        api.saveAppData(currentUser.id, fullState)
-            .catch(error => {
-                console.error("Ошибка при автоматическом сохранении данных:", error);
-            })
-            .finally(() => {
-                setIsSaving(false);
-            });
-    }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
-
-    const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
-
-    useEffect(() => {
-        if (!currentUser || currentUser.role === 'На модерации') {
-            return;
-        }
-
-        const intervalId = setInterval(async () => {
-            const currentState = stateRef.current;
-            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.itemForAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
-
-            if (isBusy) {
-                return;
-            }
-
-            try {
-                const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
-
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
-                if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
-                    setWarehouses(newData.warehouses || []);
-                    setItems(newData.items || []);
-                    setItemTypes(newData.itemTypes || []);
-                    setScenarios(newData.scenarios || []);
-                    setSignatures(newData.signatures || {});
-                    setLog(newData.log || []);
-                    setWriteOffLog(newData.writeOffLog || []);
-                }
-
-                if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
-                    setUsers(newUsers || []);
-                }
-            } catch (error) {
-                console.error("Ошибка при фоновом обновлении данных:", error);
-            }
-        }, 5000);
-
-        return () => clearInterval(intervalId);
-    }, [currentUser]); 
+  useEffect(() => {
+      if (scenarioToPrint) {
+          handlePrintScenario();
+      }
+  }, [scenarioToPrint, handlePrintScenario]);
 
   const addLogEntry = (action, details = null) => {
     if (!currentUser) return;
@@ -2284,6 +2100,138 @@ export default function App() {
         console.error("Не удалось удалить пользователя:", error);
     }
   };
+
+  useEffect(() => {
+    const script = document.createElement('script');
+    script.src = 'https://telegram.org/js/telegram-web-app.js';
+    script.async = true;
+    document.body.appendChild(script);
+
+    return () => {
+      document.body.removeChild(script);
+    };
+  }, []);
+
+  useEffect(() => {
+    const initializeApp = async () => {
+      let sessionUser = null;
+      try {
+        const savedSession = localStorage.getItem(SESSION_STORAGE_KEY);
+        if (savedSession) {
+          const { user, loginTime } = JSON.parse(savedSession);
+          const now = new Date().getTime();
+          const ONE_HOUR = 3600 * 1000;
+          if (now - loginTime < ONE_HOUR) {
+            sessionUser = user;
+            localStorage.setItem(SESSION_STORAGE_KEY, JSON.stringify({ user: user, loginTime: now }));
+          } else {
+            localStorage.removeItem(SESSION_STORAGE_KEY);
+          }
+        }
+      } catch (error) {
+        console.error("Не удалось проверить сеанс:", error);
+        localStorage.removeItem(SESSION_STORAGE_KEY);
+      }
+      
+      setAuthChecked(true);
+      
+      if (sessionUser) {
+        setCurrentUser(sessionUser);
+      } else {
+        try {
+            const appData = await api.request('/data/for-registration');
+            setWarehouses(appData.warehouses || []);
+        } catch(error) {
+            console.error("Не удалось загрузить склады для регистрации:", error);
+        }
+      }
+    };
+
+    initializeApp();
+  }, []);
+  
+  useEffect(() => {
+      const loadDataForUser = async () => {
+          if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
+              setLoading(true);
+              try {
+                  const [appData, usersData] = await Promise.all([
+                      api.fetchAppData(currentUser.id),
+                      api.fetchUsers()
+                  ]);
+                  setWarehouses(appData.warehouses || []);
+                  setItems(appData.items || []);
+                  setItemTypes(appData.itemTypes || []);
+                  setScenarios(appData.scenarios || []);
+                  setSignatures(appData.signatures || {});
+                  setLog(appData.log || []);
+                  setWriteOffLog(appData.writeOffLog || []);
+                  setUsers(usersData || []);
+                  hasLoadedData.current = true;
+              } catch (error) {
+                  console.error("Не удалось загрузить данные пользователя:", error);
+              } finally {
+                  setLoading(false);
+              }
+          }
+      };
+      loadDataForUser();
+  }, [currentUser]);
+
+  useEffect(() => {
+    if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
+
+    setIsSaving(true);
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
+    api.saveAppData(currentUser.id, fullState)
+      .catch(error => {
+        console.error("Ошибка при автоматическом сохранении данных:", error);
+      })
+      .finally(() => {
+        setIsSaving(false);
+      });
+  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
+
+    const stateRef = useRef();
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
+
+    useEffect(() => {
+        if (!currentUser || currentUser.role === 'На модерации') {
+            return;
+        }
+
+        const intervalId = setInterval(async () => {
+            const currentState = stateRef.current;
+            const isBusy = currentState.isSaving || currentState.editingWarehouse || currentState.isPlacesEditorOpen || currentState.isItemEditorOpen || currentState.isItemTypesManagerOpen || currentState.itemForAction || currentState.isCreateScenarioModalOpen || currentState.verifyingItem || currentState.editingItem || currentState.isScenariosModalOpen;
+
+            if (isBusy) {
+                return;
+            }
+
+            try {
+                const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
+
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
+                if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
+                    setWarehouses(newData.warehouses || []);
+                    setItems(newData.items || []);
+                    setItemTypes(newData.itemTypes || []);
+                    setScenarios(newData.scenarios || []);
+                    setSignatures(newData.signatures || {});
+                    setLog(newData.log || []);
+                    setWriteOffLog(newData.writeOffLog || []);
+                }
+
+                if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
+                    setUsers(newUsers || []);
+                }
+            } catch (error) {
+                console.error("Ошибка при фоновом обновлении данных:", error);
+            }
+        }, 5000);
+
+        return () => clearInterval(intervalId);
+    }, [currentUser]);
 
   const handleSaveWarehouse = (data) => {
     const isNew = !data.id;
@@ -2604,7 +2552,6 @@ export default function App() {
   const sortedWarehouses = [{ id: 'all', name: 'Все склады' }, ...[...warehouses].sort((a, b) => a.name.localeCompare(b.name))];
   const { activeIndex, setActiveIndex, ...swipeHandlers } = useSwipeNavigation(sortedWarehouses.length);
 
-  // Conditional rendering for authentication and loading states
   if (!authChecked) {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
   }
@@ -2642,13 +2589,24 @@ export default function App() {
     .filter(type => type.count > 0)
     .sort((a, b) => b.count - a.count);
 
-  const filterOptions = [{ id: 'all', name: 'Посмотреть все', color: '#6b7280' }, ...sortedAndFilteredItemTypes];
-
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
-  const sortedAssignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItemsGrouped = filteredAndSortedItemsGrouped(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
+  const filteredAndSortedItems = (list) => {
+      const filtered = (activeItemTypeFilter === 'all'
+          ? list
+          : list.filter(item => item.type === activeItemTypeFilter)
+      );
+      return filtered.sort((a, b) => {
+          const aIsLocked = lockedItemIds.has(a.id);
+          const bIsLocked = lockedItemIds.has(b.id);
+          if (aIsLocked === bIsLocked) return 0;
+          return aIsLocked ? 1 : -1;
+      });
+  };
+
+  const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
@@ -2728,6 +2686,7 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
+                 {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                  <div className="bg-white rounded-xl shadow-md">
                     <div className="flex border-b">
                         <button 
@@ -2744,6 +2703,7 @@ export default function App() {
                         </button>
                     </div>
 
+                    {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                     <div>
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
@@ -2793,103 +2753,80 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
+                                     {/* Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
-                                         {filterOptions.map(type => (
-                                             <button 
-                                                key={type.id || type.name} 
-                                                onClick={() => handleFilterButtonClick(type.name)} 
-                                                className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full transition-all duration-200 ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} 
-                                                style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}
-                                            >
-                                                 {type.name === 'Посмотреть все' ? 'Посмотреть все' : <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>}
-                                                 {type.name !== 'Посмотреть все' && type.name}
+                                         <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
+                                         {sortedAndFilteredItemTypes.map(type => (
+                                             <button key={type.id} onClick={() => setActiveItemTypeFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
+                                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                                                 {type.name}
                                              </button>
                                          ))}
                                      </div>
-                                     <div ref={itemsListRef} className="overflow-y-auto max-h-[calc(100vh-250px)]">
-                                        {filterOptions.filter(f => f.id !== 'all').map(type => {
-                                            const itemsOfType = sortedAssignedFilteredItemsGrouped[type.name];
-                                            if (itemsOfType && itemsOfType.length > 0) {
-                                                return (
-                                                    <div key={type.name} id={type.name} ref={el => itemTypeSectionRefs.current[type.name] = el} className="mb-6">
-                                                        <h4 className="text-md font-bold text-gray-700 mb-3 sticky top-[70px] bg-white pt-2 pb-2 -mx-4 px-4 z-20" style={{ top: `${headerHeight + 20}px` }}>
-                                                            {type.name}
-                                                        </h4>
-                                                        <div className="space-y-3">
-                                                            {itemsOfType.map(item => {
-                                                                const itemType = itemTypes.find(it => it.name === item.type);
-                                                                const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
-                                                                const isUnplaced = item.placeId === null;
-                                                                const isLocked = lockedItemIds.has(item.id);
+                                     {sortedAssignedFilteredItems.length > 0 ? (
+                                         <div className="space-y-3">
+                                             {sortedAssignedFilteredItems.map(item => {
+                                                 const itemType = itemTypes.find(it => it.name === item.type);
+                                                 const itemWarehouse = warehouses.find(w => w.id === item.warehouseId);
+                                                 const isUnplaced = item.placeId === null;
+                                                 const isLocked = lockedItemIds.has(item.id);
 
-                                                                return (
-                                                                    <div 
-                                                                        key={item.id} 
-                                                                        className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
-                                                                    >
-                                                                        <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
-                                                                            <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                                            <div>
-                                                                                <p className="font-bold text-gray-800">{item.name}</p>
-                                                                                <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                                {isUnplaced ? (
-                                                                                    <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
-                                                                                ) : (
-                                                                                    <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
-                                                                                )}
-                                                                            </div>
-                                                                        </div>
-                                                                        <div className="flex items-center flex-shrink-0 ml-2">
-                                                                            <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
-                                                                            {!isLocked && isActionableUser && (
-                                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                                            )}
-                                                                        </div>
-                                                                    </div>
-                                                            )})}
-                                                        </div>
-                                                    </div>
-                                                );
-                                            }
-                                            return null;
-                                        })}
-                                        
-                                        {Object.values(sortedAssignedFilteredItemsGrouped).flat().length === 0 && (
-                                            <div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>
-                                        )}
-
-                                        {activeWarehouseId === 'all' && Object.values(sortedUnassignedFilteredItemsGrouped).flat().length > 0 && (
-                                            <div id="unassigned" ref={el => itemTypeSectionRefs.current['unassigned'] = el} className="mt-6 pt-4 border-t">
-                                                <h3 className="text-sm font-semibold text-gray-500 mb-3 sticky top-[70px] bg-white pt-2 pb-2 -mx-4 px-4 z-20" style={{ top: `${headerHeight + 20}px` }}>
-                                                    ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ
-                                                </h3>
-                                                <div className="space-y-3">
-                                                    {Object.values(sortedUnassignedFilteredItemsGrouped).flat().map(item => {
-                                                        const itemType = itemTypes.find(it => it.name === item.type);
-                                                        const isLocked = lockedItemIds.has(item.id);
-                                                        return (
-                                                            <div key={item.id} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}>
-                                                                <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
-                                                                    <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
-                                                                    <div>
-                                                                        <p className="font-bold text-gray-800">{item.name}</p>
-                                                                        <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
-                                                                        <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
-                                                                    </div>
-                                                                </div>
-                                                                <div className="flex items-center flex-shrink-0 ml-2">
-                                                                    <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
-                                                                    {!isLocked && isActionableUser && (
-                                                                        <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
-                                                                    )}
-                                                                </div>
-                                                            </div>
-                                                        )
-                                                    })}
-                                                </div>
-                                            </div>
-                                        )}
-                                     </div>
+                                                 return (
+                                                     <div 
+                                                         key={item.id} 
+                                                         className={`${isUnplaced ? 'bg-red-50' : 'bg-gray-50'} p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}
+                                                     >
+                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
+                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                             <div>
+                                                                 <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                 {isUnplaced ? (
+                                                                     <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
+                                                                 ) : (
+                                                                     <p className="text-sm text-gray-500 mt-1">Склад: {itemWarehouse?.name} / Место: #{item.placeId + 1}</p>
+                                                                 )}
+                                                             </div>
+                                                         </div>
+                                                         <div className="flex items-center flex-shrink-0 ml-2">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                             {!isLocked && isActionableUser && (
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                             )}
+                                                         </div>
+                                                     </div>
+                                             )})}
+                                         </div>
+                                     ) : (<div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>)}
+                                     
+                                     {sortedUnassignedFilteredItems.length > 0 && (
+                                         <div className="mt-6 pt-4 border-t">
+                                             <h3 className="text-sm font-semibold text-gray-500 mb-3">ПОЛНОСТЬЮ НЕРАСПРЕДЕЛЕННЫЕ</h3>
+                                             <div className="space-y-3">
+                                                 {sortedUnassignedFilteredItems.map(item => {
+                                                     const itemType = itemTypes.find(it => it.name === item.type);
+                                                     const isLocked = lockedItemIds.has(item.id);
+                                                     return (
+                                                     <div key={item.id} className={`bg-red-50 p-3 rounded-lg flex items-start justify-between ${isLocked ? 'opacity-60' : ''}`}>
+                                                         <div className="flex items-start gap-3 flex-grow" onClick={() => { if (userRole === 'Администратор' && !isLocked) { setEditingItem(item); } }}>
+                                                             <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                                             <div>
+                                                                 <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                                                 <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
+                                                             </div>
+                                                         </div>
+                                                         <div className="flex items-center flex-shrink-0 ml-2">
+                                                             <button onClick={(e) => { e.stopPropagation(); setItemToPrint(item); }} className="text-gray-400 hover:text-blue-600 p-2"><PrintIcon width="20" height="20"/></button>
+                                                              {!isLocked && isActionableUser && (
+                                                                <button onClick={(e) => { e.stopPropagation(); setQrScanPurpose('action'); setVerifyingItem(item); }} className="text-gray-400 hover:text-green-600 p-2"><TruckIcon width="20" height="20"/></button>
+                                                             )}
+                                                         </div>
+                                                     </div>
+                                                 )})}
+                                             </div>
+                                         </div>
+                                     )}
                                 </div>
                             </div>
                         )}
@@ -2981,3 +2918,4 @@ export default function App() {
     </div>
   );
 }
+
