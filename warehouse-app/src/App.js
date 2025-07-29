@@ -1,4 +1,4 @@
-import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react'; // Added useCallback
+import React, { useState, useEffect, useRef, useLayoutEffect, useCallback } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas';
@@ -667,7 +667,7 @@ const ItemEditModal = ({ itemToEdit, itemTypes, onSave, onCancel }) => {
                             >
                                 <option>Паллета</option>
                                 <option>Коробка</option>
-                                <option>Шт</option>
+                                <option>Шt</option>
                             </select>
                         </div>
                         <div>
@@ -1029,7 +1029,7 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                             >
                                 <option>Паллета</option>
                                 <option>Коробка</option>
-                                <option>Шт</option>
+                                <option>Шt</option>
                             </select>
                         </div>
                     </div>
@@ -2141,9 +2141,9 @@ export default function App() {
       
       setAuthChecked(true);
       
-      if (sessionUser) {
-        setCurrentUser(sessionUser);
-      } else {
+      // Only fetch warehouses for registration if no session user exists.
+      // This is outside the conditional hook call.
+      if (!sessionUser) { 
         try {
             const appData = await api.request('/data/for-registration');
             setWarehouses(appData.warehouses || []);
@@ -2151,11 +2151,16 @@ export default function App() {
             console.error("Не удалось загрузить склады для регистрации:", error);
         }
       }
+
+      if (sessionUser) {
+        setCurrentUser(sessionUser);
+      } 
     };
 
     initializeApp();
-  }, []);
-  
+  }, []); // Empty dependency array means this runs once on mount
+
+  // Move this useEffect outside any conditional blocks
   useEffect(() => {
       const loadDataForUser = async () => {
           if (currentUser && currentUser.role !== 'На модерации' && !hasLoadedData.current) {
@@ -2182,9 +2187,10 @@ export default function App() {
           }
       };
       loadDataForUser();
-  }, [currentUser]);
+  }, [currentUser]); // currentUser is a dependency, so this runs when currentUser changes
 
   useEffect(() => {
+    // This effect should also run unconditionally, with its internal logic handling the state.
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
 
     setIsSaving(true);
@@ -2201,7 +2207,9 @@ export default function App() {
     const stateRef = useRef();
     stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
+    // This useEffect should also be outside conditional blocks
     useEffect(() => {
+        // The conditional logic is now inside the effect's callback
         if (!currentUser || currentUser.role === 'На модерации') {
             return;
         }
@@ -2237,7 +2245,7 @@ export default function App() {
         }, 5000);
 
         return () => clearInterval(intervalId);
-    }, [currentUser]);
+    }, [currentUser]); // currentUser is a dependency
 
   const handleSaveWarehouse = (data) => {
     const isNew = !data.id;
@@ -2562,6 +2570,7 @@ export default function App() {
     return <div className="w-full h-screen flex items-center justify-center bg-gray-100"><div className="text-lg font-semibold text-gray-500">Проверка сессии...</div></div>;
   }
 
+  // Auth/Role based rendering moved up, before any other hooks are called conditionally
   if (!currentUser) {
       if (authView === 'login') {
           return <LoginView onLogin={handleLogin} onSwitchToRegister={() => setAuthView('register')} />;
@@ -2602,11 +2611,12 @@ export default function App() {
   const activeScenarios = scenarios.filter(s => s.status === 'new' || s.status === 'accepted');
   const lockedItemIds = new Set(activeScenarios.flatMap(s => Object.keys(s.items)));
   
+  // `useCallback` is now unconditionally called here
   const filteredAndSortedItemsGrouped = useCallback((list) => {
       const grouped = {};
-      const filtered = (list); // Filtering by type will happen when iterating through sortedAndFilteredItemTypes
+      const filtered = (list); 
       
-      filterOptions.filter(f => f.id !== 'all').forEach(type => { // Exclude 'all' from initial grouping logic
+      filterOptions.filter(f => f.id !== 'all').forEach(type => {
           grouped[type.name] = filtered
               .filter(item => item.type === type.name)
               .sort((a, b) => {
@@ -2629,7 +2639,7 @@ export default function App() {
 
   const isActionableUser = userRole === 'Администратор' || userRole === 'Сотрудник склада';
 
-  // Intersection Observer for filter scrolling
+  // `useEffect` for Intersection Observer is now unconditionally called here
   useEffect(() => {
     if (!itemsListRef.current) return;
 
@@ -2637,20 +2647,17 @@ export default function App() {
         (entries) => {
             entries.forEach((entry) => {
                 if (entry.isIntersecting) {
-                    // This is a simple logic; for more complex layouts,
-                    // you might need to consider entry.intersectionRatio or multiple intersecting elements.
                     setActiveItemTypeFilter(entry.target.id);
                 }
             });
         },
         {
             root: itemsListRef.current,
-            rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, // Adjust based on header height and desired trigger point
-            threshold: 0.1, // Trigger when 10% of the target is visible
+            rootMargin: `-${headerHeight + 20}px 0px -50% 0px`, 
+            threshold: 0.1, 
         }
     );
 
-    // Observe each item type section
     filterOptions.filter(f => f.id !== 'all').forEach(type => {
       const ref = itemTypeSectionRefs.current[type.name];
       if (ref) {
@@ -2659,7 +2666,6 @@ export default function App() {
     });
 
     return () => {
-        // Disconnect observer on cleanup
         filterOptions.filter(f => f.id !== 'all').forEach(type => {
             const ref = itemTypeSectionRefs.current[type.name];
             if (ref) {
@@ -2679,7 +2685,7 @@ export default function App() {
 
         const targetElement = itemTypeSectionRefs.current[typeName];
         if (targetElement && itemsListRef.current) {
-            const offsetTop = targetElement.offsetTop - (headerHeight + 10); // Adjust scroll position for fixed header
+            const offsetTop = targetElement.offsetTop - (headerHeight + 10); 
             itemsListRef.current.scrollTo({ top: offsetTop, behavior: 'smooth' });
         }
     };
@@ -2756,7 +2762,6 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                  <div className="bg-white rounded-xl shadow-md">
                     <div className="flex border-b">
                         <button 
@@ -2773,7 +2778,6 @@ export default function App() {
                         </button>
                     </div>
 
-                    {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                     <div>
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
@@ -2823,11 +2827,10 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          {filterOptions.map(type => (
                                              <button 
-                                                key={type.id || type.name} // Use id for 'all', name for others
+                                                key={type.id || type.name} 
                                                 onClick={() => handleFilterButtonClick(type.name)} 
                                                 className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full transition-all duration-200 ${activeItemTypeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} 
                                                 style={{backgroundColor: activeItemTypeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}
@@ -2837,7 +2840,7 @@ export default function App() {
                                              </button>
                                          ))}
                                      </div>
-                                     <div ref={itemsListRef} className="overflow-y-auto max-h-[calc(100vh-250px)]"> {/* Adjusted max-height */}
+                                     <div ref={itemsListRef} className="overflow-y-auto max-h-[calc(100vh-250px)]">
                                         {filterOptions.filter(f => f.id !== 'all').map(type => {
                                             const itemsOfType = sortedAssignedFilteredItemsGrouped[type.name];
                                             if (itemsOfType && itemsOfType.length > 0) {
@@ -2889,7 +2892,6 @@ export default function App() {
                                             <div className="text-center text-gray-400 py-8">Позиций с выбранным типом нет</div>
                                         )}
 
-                                        {/* Unassigned items always at the bottom if activeWarehouseId is 'all' */}
                                         {activeWarehouseId === 'all' && Object.values(sortedUnassignedFilteredItemsGrouped).flat().length > 0 && (
                                             <div id="unassigned" ref={el => itemTypeSectionRefs.current['unassigned'] = el} className="mt-6 pt-4 border-t">
                                                 <h3 className="text-sm font-semibold text-gray-500 mb-3 sticky top-[70px] bg-white pt-2 pb-2 -mx-4 px-4 z-20" style={{ top: `${headerHeight + 20}px` }}>
