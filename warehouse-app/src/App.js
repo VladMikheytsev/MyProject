@@ -1934,7 +1934,7 @@ export default function App() {
   const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
   
   // UI State
-  const [mainViewTab, setMainViewTab] = useState('warehouses');
+  const [mainViewTab, setMainViewTab] = useState('mainMenu'); // Изменено на 'mainMenu'
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
   const [qrScanPurpose, setQrScanPurpose] = useState(null);
@@ -2686,9 +2686,14 @@ export default function App() {
       <div className="max-w-7xl mx-auto px-4 pb-4 mt-4">
         {warehouses.length > 0 ? (
             <div className="space-y-6">
-                 {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                  <div className="bg-white rounded-xl shadow-md">
                     <div className="flex border-b">
+                        <button 
+                            onClick={() => setMainViewTab('mainMenu')} 
+                            className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'mainMenu' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
+                        >
+                            Главное меню
+                        </button>
                         <button 
                             onClick={() => setMainViewTab('warehouses')} 
                             className={`flex-1 p-4 text-center font-bold transition-colors duration-300 ${mainViewTab === 'warehouses' ? 'text-blue-600 border-b-2 border-blue-600' : 'text-gray-500'}`}
@@ -2703,8 +2708,41 @@ export default function App() {
                         </button>
                     </div>
 
-                    {/* [ИЗМЕНЕНИЕ] Удален overflow-hidden */}
                     <div>
+                        {mainViewTab === 'mainMenu' && (
+                            <div className="p-6 bg-gray-50 rounded-b-xl">
+                                <h3 className="text-xl font-bold text-gray-800 mb-6">Управление складом:</h3>
+                                <div className="space-y-4 max-w-md mx-auto">
+                                    <button
+                                        onClick={() => setItemEditorOpen(true)}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FilePlusIcon /></div>
+                                        <span className="font-semibold text-gray-700">Создать позицию</span>
+                                    </button>
+                                    <button
+                                        onClick={() => {
+                                            setQrScanPurpose('action');
+                                            setVerifyingItem({ id: 'any', name: 'любой товар' });
+                                        }}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
+                                        <span className="font-semibold text-gray-700">Переместить позицию</span>
+                                    </button>
+                                    <button
+                                         onClick={() => {
+                                            setQrScanPurpose('action');
+                                            setVerifyingItem({ id: 'any', name: 'любой товар' });
+                                        }}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-red-100 text-red-600 rounded-lg"><TrashIcon width="18" height="18" /></div>
+                                        <span className="font-semibold text-gray-700">Списать позицию</span>
+                                    </button>
+                                </div>
+                            </div>
+                        )}
                         {mainViewTab === 'warehouses' && (
                             <div className="p-4">
                                 <div {...swipeHandlers}>
@@ -2753,7 +2791,6 @@ export default function App() {
                                 
                                 <div className="mt-6 pt-4 border-t">
                                      <h3 className="text-sm font-semibold text-gray-500 mb-3">СПИСОК ПОЗИЦИЙ</h3>
-                                     {/* Фильтр сделан "прилипающим" */}
                                      <div style={{ top: `${headerHeight}px` }} className="sticky z-30 bg-white flex overflow-x-auto space-x-2 mb-4 border-b pb-2 pt-2 -mx-4 px-4">
                                          <button onClick={() => setActiveItemTypeFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeItemTypeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>Посмотреть все</button>
                                          {sortedAndFilteredItemTypes.map(type => (
@@ -2918,4 +2955,3 @@ export default function App() {
     </div>
   );
 }
-
