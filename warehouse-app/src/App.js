@@ -1894,6 +1894,93 @@ const WriteOffLogModal = ({ log, users, signatures, onClose }) => {
     );
 };
 
+const WriteOffModal = ({ warehouses, items, itemTypes, onSelectItem, onClose }) => {
+    const [selectedWarehouseId, setSelectedWarehouseId] = useState(warehouses[0]?.id || null);
+    const [activeFilter, setActiveFilter] = useState('all');
+    const modalBodyRef = useRef(null);
+
+    const itemsOnWarehouse = items.filter(i => i.warehouseId === selectedWarehouseId);
+
+    const itemCounts = itemsOnWarehouse.reduce((acc, item) => {
+        acc[item.type] = (acc[item.type] || 0) + 1;
+        return acc;
+    }, {});
+
+    const sortedItemTypes = itemTypes
+        .map(type => ({
+            ...type,
+            count: itemCounts[type.name] || 0
+        }))
+        .filter(type => type.count > 0)
+        .sort((a, b) => b.count - a.count);
+
+    const filteredItems = activeFilter === 'all'
+        ? itemsOnWarehouse
+        : itemsOnWarehouse.filter(item => item.type === activeFilter);
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto flex flex-col" style={{maxHeight: '90vh'}}>
+                <div className="flex justify-between items-center mb-4 flex-shrink-0">
+                    <h2 className="text-2xl font-bold text-gray-800">Списать позицию</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+
+                <div className="flex-shrink-0 mb-4">
+                    <label className="block text-sm font-medium text-gray-700 mb-1">Выберите склад:</label>
+                    <select
+                        value={selectedWarehouseId || ''}
+                        onChange={(e) => setSelectedWarehouseId(e.target.value)}
+                        className="w-full p-3 border rounded-lg bg-white"
+                    >
+                        {warehouses.map(w => <option key={w.id} value={w.id}>{w.name}</option>)}
+                    </select>
+                </div>
+
+                {/* Sticky Filter */}
+                <div className="sticky top-0 bg-white py-2 z-10 border-b">
+                     <div className="flex overflow-x-auto space-x-2 pb-2">
+                         <button onClick={() => setActiveFilter('all')} className={`flex-shrink-0 px-3 py-1 text-sm font-semibold rounded-full ${activeFilter === 'all' ? 'bg-blue-600 text-white' : 'bg-gray-200 text-gray-700'}`}>
+                             Все
+                         </button>
+                         {sortedItemTypes.map(type => (
+                             <button key={type.id} onClick={() => setActiveFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeFilter !== type.name ? '#e5e7eb' : type.color, color: activeFilter !== type.name ? '#374151' : 'white'}}>
+                                 <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
+                                 {type.name}
+                             </button>
+                         ))}
+                     </div>
+                </div>
+
+                {/* Item List */}
+                <div ref={modalBodyRef} className="overflow-y-auto mt-4">
+                    <div className="space-y-3">
+                        {filteredItems.length > 0 ? filteredItems.map(item => {
+                             const itemType = itemTypes.find(it => it.name === item.type);
+                             return (
+                                <div
+                                    key={item.id}
+                                    onClick={() => onSelectItem(item)}
+                                    className="bg-gray-50 p-3 rounded-lg flex items-start justify-between cursor-pointer hover:bg-gray-100"
+                                >
+                                    <div className="flex items-start gap-3 flex-grow">
+                                        <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
+                                        <div>
+                                            <p className="font-bold text-gray-800">{item.name}</p>
+                                            <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
+                                            <p className="text-sm text-gray-500 mt-1">Место: #{item.placeId !== null ? item.placeId + 1 : 'Не указано'}</p>
+                                        </div>
+                                    </div>
+                                </div>
+                             )
+                        }) : <p className="text-center text-gray-500 py-8">На этом складе нет позиций с выбранным типом.</p>}
+                    </div>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -1932,6 +2019,7 @@ export default function App() {
   const [pendingMove, setPendingMove] = useState(null);
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
+  const [isWriteOffModalOpen, setWriteOffModalOpen] = useState(false);
   
   // UI State
   const [mainViewTab, setMainViewTab] = useState('mainMenu'); // Изменено на 'mainMenu'
@@ -2512,6 +2600,11 @@ export default function App() {
     );
   };
 
+  const handleSelectItemToWriteOff = (item) => {
+    setWriteOffModalOpen(false);
+    setPendingWriteOff({ item: item });
+  };
+
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
@@ -2737,8 +2830,15 @@ export default function App() {
                                         }}
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
                                     >
+                                        <div className="p-2 bg-red-100 text-red-600 rounded-lg"><QrIcon color="currentColor" width="18" height="18"/></div>
+                                        <span className="font-semibold text-gray-700">Списать позицию по QR коду</span>
+                                    </button>
+                                    <button
+                                         onClick={() => setWriteOffModalOpen(true)}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
                                         <div className="p-2 bg-red-100 text-red-600 rounded-lg"><TrashIcon width="18" height="18" /></div>
-                                        <span className="font-semibold text-gray-700">Списать позицию</span>
+                                        <span className="font-semibold text-gray-700">Списать позицию без QR кода</span>
                                     </button>
                                 </div>
                             </div>
@@ -2938,6 +3038,7 @@ export default function App() {
       {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
       {pendingWriteOff && <ActionConfirmationModal title="Подтверждение списания" onConfirm={handleConfirmWriteOff} onCancel={() => setPendingWriteOff(null)} />}
       {pendingMove && <ActionConfirmationModal title="Подтверждение перемещения" onConfirm={handleConfirmMove} onCancel={() => setPendingMove(null)} />}
+      {isWriteOffModalOpen && <WriteOffModal warehouses={warehouses} items={items} itemTypes={itemTypes} onClose={() => setWriteOffModalOpen(false)} onSelectItem={handleSelectItemToWriteOff} />}
       
       {/* --- Print Documents (Hidden) --- */}
       <div style={{ display: 'none' }}>
