@@ -1637,17 +1637,19 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     
     // This is the container for the right side elements
     const signatureGroupStyle = {
-        position: 'relative', // For the signature image
+        position: 'relative',
         display: 'flex',
         alignItems: 'flex-end',
-        paddingLeft: '50px', // Space for the signature
-        marginLeft: '5cm'
+        marginLeft: 'auto',
+        paddingRight: '1cm',
+        // 1cm padding + 50px for image
+        paddingLeft: 'calc(1cm + 50px)', 
     };
     
     // The signature image itself
     const signatureImageStyle = {
         position: 'absolute',
-        left: '0px',
+        left: '1cm', // Position it inside the left padding
         bottom: '0px',
         height: '48px',
         transform: 'translateY(-10%)',
