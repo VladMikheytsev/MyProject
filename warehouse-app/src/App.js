@@ -1658,7 +1658,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     };
 
     const nameStyle = {
-        marginRight: '1em' // Space between name and date
+        marginRight: '1cm' // Space between name and date
     };
 
 
