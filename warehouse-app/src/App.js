@@ -1640,7 +1640,8 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         position: 'relative', // For the signature image
         display: 'flex',
         alignItems: 'flex-end',
-        paddingLeft: '50px' // Space for the signature
+        paddingLeft: '50px', // Space for the signature
+        marginLeft: '5cm'
     };
     
     // The signature image itself
@@ -1718,7 +1719,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             }}>
                 <div style={signatureLineStyle}>
                     <span style={signatureLabelStyle}><strong>Transferred by:</strong></span>
-                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
                     <div style={signatureGroupStyle}>
                         {signatures[scenario.creatorSignatureId] && 
                             <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={signatureImageStyle} />}
@@ -1728,7 +1728,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 </div>
                 <div style={signatureLineStyle}>
                     <span style={signatureLabelStyle}><strong>Driver:</strong></span>
-                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
                     <div style={signatureGroupStyle}>
                         {signatures[scenario.driverSignatureId] && 
                             <img src={signatures[scenario.driverSignatureId]} alt="signature" style={signatureImageStyle} />}
@@ -1738,7 +1737,6 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
                 </div>
                 <div style={{...signatureLineStyle, marginBottom: 0 }}>
                     <span style={signatureLabelStyle}><strong>Received by:</strong></span>
-                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
                     <div style={signatureGroupStyle}>
                         {signatures[scenario.completerSignatureId] && 
                             <img src={signatures[scenario.completerSignatureId]} alt="signature" style={signatureImageStyle} />}
