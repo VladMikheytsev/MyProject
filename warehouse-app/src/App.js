@@ -1634,16 +1634,19 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         width: '130px',
         flexShrink: 0
     };
-
-    const signatureContentStyle = {
-        position: 'relative',
-        flexGrow: 1,
-        paddingLeft: '1em'
+    
+    // This is the container for the right side elements
+    const signatureGroupStyle = {
+        position: 'relative', // For the signature image
+        display: 'flex',
+        alignItems: 'flex-end',
+        paddingLeft: '50px' // Space for the signature
     };
-
+    
+    // The signature image itself
     const signatureImageStyle = {
         position: 'absolute',
-        left: '0.5em',
+        left: '0px',
         bottom: '0px',
         height: '48px',
         transform: 'translateY(-10%)',
@@ -1651,8 +1654,8 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
         pointerEvents: 'none'
     };
 
-    const dateStyle = {
-        paddingLeft: '1em'
+    const nameStyle = {
+        marginRight: '1em' // Space between name and date
     };
 
 
@@ -1715,30 +1718,33 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
             }}>
                 <div style={signatureLineStyle}>
                     <span style={signatureLabelStyle}><strong>Transferred by:</strong></span>
-                    <span style={signatureContentStyle}>
-                        {getUserNameById(scenario.creatorId)}
+                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
+                    <div style={signatureGroupStyle}>
                         {signatures[scenario.creatorSignatureId] && 
                             <img src={signatures[scenario.creatorSignatureId]} alt="signature" style={signatureImageStyle} />}
-                    </span>
-                    <span style={dateStyle}>{currentDate}</span>
+                        <span style={nameStyle}>{getUserNameById(scenario.creatorId)}</span>
+                        <span>{currentDate}</span>
+                    </div>
                 </div>
                 <div style={signatureLineStyle}>
                     <span style={signatureLabelStyle}><strong>Driver:</strong></span>
-                    <span style={signatureContentStyle}>
-                        {getUserNameById(scenario.driverId)}
+                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
+                    <div style={signatureGroupStyle}>
                         {signatures[scenario.driverSignatureId] && 
                             <img src={signatures[scenario.driverSignatureId]} alt="signature" style={signatureImageStyle} />}
-                    </span>
-                    <span style={dateStyle}>{currentDate}</span>
+                        <span style={nameStyle}>{getUserNameById(scenario.driverId)}</span>
+                        <span>{currentDate}</span>
+                    </div>
                 </div>
-                <div style={{ ...signatureLineStyle, marginBottom: 0 }}>
+                <div style={{...signatureLineStyle, marginBottom: 0 }}>
                     <span style={signatureLabelStyle}><strong>Received by:</strong></span>
-                    <span style={signatureContentStyle}>
-                        {getUserNameById(scenario.completerId)}
+                    <span style={{ flexGrow: 1 }}></span> {/* Spacer */}
+                    <div style={signatureGroupStyle}>
                         {signatures[scenario.completerSignatureId] && 
                             <img src={signatures[scenario.completerSignatureId]} alt="signature" style={signatureImageStyle} />}
-                    </span>
-                    <span style={dateStyle}>{currentDate}</span>
+                        <span style={nameStyle}>{getUserNameById(scenario.completerId)}</span>
+                        <span>{currentDate}</span>
+                    </div>
                 </div>
             </footer>
         </div>
