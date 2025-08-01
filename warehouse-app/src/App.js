@@ -1059,18 +1059,31 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
                     )}
                 </div>
                 
-                <div className="border-t mt-8 pt-6">
-                     <button 
-                        onClick={handleWriteOffClick} 
-                        className="w-full flex items-center justify-center gap-2 px-6 py-3 rounded-lg text-red-700 bg-red-100 hover:bg-red-200 font-semibold"
+                <div className="flex justify-center items-center gap-x-6 mt-8 w-full border-t pt-6">
+                    <button 
+                        onClick={onCancel} 
+                        className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-gray-400"
+                        aria-label="Отмена"
                     >
-                        <TrashIcon width="20" height="20" /> Списать позицию
+                        <XIcon />
                     </button>
-                </div>
 
-                <div className="flex justify-end space-x-4 mt-6">
-                    <button onClick={onCancel} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
-                    <button onClick={handleMove} disabled={destination.placeId === null} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold disabled:bg-gray-400">Переместить</button>
+                    <button 
+                        onClick={handleWriteOffClick} 
+                        className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-red-500 hover:bg-red-600 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-red-400"
+                        aria-label="Списать"
+                    >
+                        <TrashIcon />
+                    </button>
+                    
+                    <button 
+                        onClick={handleMove} 
+                        disabled={destination.placeId === null} 
+                        className="flex items-center justify-center w-16 h-16 rounded-full text-white bg-blue-600 hover:bg-blue-700 font-semibold transition-all duration-200 ease-in-out shadow-md hover:shadow-lg focus:outline-none focus:ring-2 focus:ring-offset-2 focus:ring-blue-500 disabled:bg-gray-400 disabled:shadow-none"
+                        aria-label="Переместить"
+                    >
+                        <TruckIcon />
+                    </button>
                 </div>
             </div>
         </div>
