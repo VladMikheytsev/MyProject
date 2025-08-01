@@ -230,7 +230,7 @@ const AllWarehousesFreeSpace = ({ warehouses = [], items = [] }) => {
     );
 };
 
-const LabelsToPrint = React.forwardRef(({ item, qrCodeUrl }, ref) => {
+const LabelsToPrint = React.forwardRef(({ item, user, qrCodeUrl }, ref) => {
     const getLabelCount = () => {
         if (item.size === 'Паллета') {
             return 2;
@@ -242,6 +242,7 @@ const LabelsToPrint = React.forwardRef(({ item, qrCodeUrl }, ref) => {
     };
 
     const labelCount = getLabelCount();
+    const printTime = new Date();
 
     const formatCode = (code) => {
         if (!code || code.length !== 8) return '';
@@ -258,25 +259,90 @@ const LabelsToPrint = React.forwardRef(({ item, qrCodeUrl }, ref) => {
                     }
                     body {
                         margin: 0;
+                        -webkit-print-color-adjust: exact;
+                        print-color-adjust: exact;
                     }
                     .label-container {
                         width: 100%;
                         height: 100%;
                         display: flex;
                         flex-direction: column;
-                        align-items: center;
-                        justify-content: center;
-                        padding: 0.25in;
+                        justify-content: space-between;
+                        font-family: sans-serif;
                         box-sizing: border-box;
+                        padding: 0.2in;
                         page-break-after: always;
+                    }
+                    .label-name {
+                        font-size: 28pt;
+                        font-weight: bold;
+                        text-align: center;
+                    }
+                    .label-middle-section, .label-bottom-section {
+                        display: flex;
+                        justify-content: space-between;
+                        align-items: center;
+                        width: 100%;
+                        border-top: 1px solid #999;
+                        padding-top: 8px;
+                    }
+                    .label-middle-section {
+                        align-items: flex-end;
+                        padding-bottom: 8px;
+                    }
+                    .label-type-section, .label-datetime-section, .label-user-section, .label-code-section {
+                        display: flex;
+                        flex-direction: column;
+                    }
+                    .label-title {
+                        font-size: 10pt;
+                        color: #555;
+                    }
+                    .label-content {
+                        font-size: 14pt;
+                        font-weight: bold;
+                    }
+                    .label-content-small {
+                        font-size: 11pt;
+                    }
+                    .label-content-mono {
+                        font-family: monospace;
+                        font-size: 16pt;
+                        font-weight: bold;
+                    }
+                    .label-qr-section img {
+                        width: 1.2in;
+                        height: 1.2in;
                     }
                 `}
             </style>
             {Array.from({ length: labelCount }).map((_, i) => (
                 <div key={i} className="label-container">
-                    <h2 style={{ fontSize: '32pt', fontWeight: 'bold', textAlign: 'center', margin: '0 0 10px 0' }}>{item.name}</h2>
-                    {qrCodeUrl ? <img src={qrCodeUrl} alt="QR Code" style={{ width: '2in' }} /> : <div>Loading QR...</div>}
-                    {item.uniqueCode && <p style={{ fontFamily: 'monospace', fontSize: '24pt', letterSpacing: '0.1em', margin: '10px 0 0 0' }}>{formatCode(item.uniqueCode)}</p>}
+                    <div className="label-name">{item.name}</div>
+
+                    <div className="label-middle-section">
+                        <div className="label-type-section">
+                            <span className="label-title">Тип геля</span>
+                            <span className="label-content">{item.type}</span>
+                        </div>
+                        <div className="label-qr-section">
+                            {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" />}
+                        </div>
+                    </div>
+
+                    <div className="label-bottom-section">
+                        <div className="label-code-section">
+                            <span className="label-content-mono">{formatCode(item.uniqueCode)}</span>
+                        </div>
+                        <div className="label-datetime-section">
+                            <span className="label-content-small">{printTime.toLocaleDateString('ru-RU')}</span>
+                            <span className="label-content-small">{printTime.toLocaleTimeString('ru-RU')}</span>
+                        </div>
+                        <div className="label-user-section">
+                            <span className="label-title">Пользователь</span>
+                            <span className="label-content">{user.firstName} {user.lastName}</span>
+                        </div>
+                    </div>
                 </div>
             ))}
         </div>
