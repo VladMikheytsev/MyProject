@@ -947,30 +947,30 @@
             "uniqueCode": "PWLPTRVG"
         },
         {
-            "name": "Caps",
+            "name": "Caps (198 шт)",
             "type": "Капсулы",
             "size": "Коробка",
-            "quantity": "198",
+            "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
             "id": "f635fc15-e965-464a-97a0-4572a63303ba",
             "uniqueCode": "SM92VX4K"
         },
         {
-            "name": "Caps",
+            "name": "Caps (185 шт)",
             "type": "Капсулы",
             "size": "Коробка",
-            "quantity": "185",
+            "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
             "id": "b76d141b-1a91-44df-bf91-e3d8c8cfed09",
             "uniqueCode": "OLC730YS"
         },
         {
-            "name": "Caps",
+            "name": "Caps (191 шт)",
             "type": "Капсулы",
             "size": "Коробка",
-            "quantity": "191",
+            "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
             "id": "488c75cf-8019-4855-866f-307ed47a55dd",
@@ -1785,6 +1785,26 @@
             "placeId": 15,
             "id": "2bf8fda7-421d-4dac-b817-6a1a685c0cec",
             "uniqueCode": "KHBCJYCJ"
+        },
+        {
+            "name": "Голубые флаеры",
+            "type": "Флаеры",
+            "size": "Коробка",
+            "quantity": 18,
+            "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
+            "placeId": 26,
+            "id": "fb97604a-03a6-4b53-a724-6f6f9625c46e",
+            "uniqueCode": "2P2GJYHO"
+        },
+        {
+            "name": "Зеленые Тик-Ток флаеры",
+            "type": "Флаеры",
+            "size": "Паллета",
+            "quantity": 15,
+            "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
+            "placeId": 26,
+            "id": "0b5e3f2c-820a-427b-aa46-b5c8f0b73107",
+            "uniqueCode": "S18HW91F"
         }
     ],
     "itemTypes": [
@@ -1942,6 +1962,11 @@
             "name": "Лимонады",
             "color": "#c21e6d",
             "id": "2c8d641b-dc8c-4378-a8ae-52d08bcf81f0"
+        },
+        {
+            "name": "Флаеры",
+            "color": "#39bbcc",
+            "id": "da42eda8-f200-47ae-a7cd-175ff5600f6b"
         }
     ],
     "users": [
@@ -2104,6 +2129,78 @@
         "sig_c32fe5a9-19fd-4e9c-a525-a6d3a683347b": "data:image/png;base64,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"
     },
     "log": [
+        {
+            "id": "a555341a-2874-4a63-8353-95eda0cef8ac",
+            "timestamp": "2025-08-01T17:13:59.207Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Зеленые Тик-Ток флаеры': Количество: '18' -> '15'"
+        },
+        {
+            "id": "f4095bf5-cc27-481d-b5d6-8711743f3d8d",
+            "timestamp": "2025-08-01T17:13:54.060Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Зеленые Тик-Ток флаеры': Количество: '1' -> '18'"
+        },
+        {
+            "id": "352ce45a-a758-4192-9d0d-25bf614306c9",
+            "timestamp": "2025-08-01T17:13:30.507Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Голубые флаеры': Количество: '135000' -> '18'"
+        },
+        {
+            "id": "28ee5c71-d139-4f9a-a08b-c3678cd617e0",
+            "timestamp": "2025-08-01T17:13:19.507Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Создал позицию: Зеленые Тик-Ток флаеры"
+        },
+        {
+            "id": "7ae7ce06-d51e-471f-82aa-d71d2cd94517",
+            "timestamp": "2025-08-01T17:11:35.641Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Создал позицию: Голубые флаеры"
+        },
+        {
+            "id": "ab6cf820-32a3-42f2-9131-92c56e212694",
+            "timestamp": "2025-08-01T17:10:53.579Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал типы позиций"
+        },
+        {
+            "id": "b44a5ff7-f661-4ae1-af19-6b2a27854d2c",
+            "timestamp": "2025-08-01T06:57:40.601Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (185 шт)': Наименование: 'Caps (185шт )' -> 'Caps (185 шт)'"
+        },
+        {
+            "id": "7d46fe38-678f-404d-88ad-92b11c827859",
+            "timestamp": "2025-08-01T06:57:20.473Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (198 шт)': Наименование: 'Caps (198)' -> 'Caps (198 шт)'"
+        },
+        {
+            "id": "f802207a-458f-4624-8ccc-17d6290e3ad9",
+            "timestamp": "2025-08-01T06:57:16.280Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (185шт )': Наименование: 'Caps (185)' -> 'Caps (185шт )'"
+        },
+        {
+            "id": "e9338b09-1180-4df8-922c-f7402cd44a6b",
+            "timestamp": "2025-08-01T06:57:11.612Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (191 шт)': Наименование: 'Caps' -> 'Caps (191 шт)'; Количество: '191' -> '1'"
+        },
+        {
+            "id": "1d092718-9031-479b-a555-1e3dd986e21b",
+            "timestamp": "2025-08-01T06:57:00.834Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (185)': Наименование: 'Caps' -> 'Caps (185)'; Количество: '185' -> '1'"
+        },
+        {
+            "id": "605816a6-a545-4f97-8328-010808c0bfe1",
+            "timestamp": "2025-08-01T06:56:54.157Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Отредактировал позицию 'Caps (198)': Наименование: 'Caps' -> 'Caps (198)'; Количество: '198' -> '1'"
+        },
         {
             "id": "1d67fcab-12f9-4bd1-8108-76167cbe12ee",
             "timestamp": "2025-08-01T04:54:33.795Z",
