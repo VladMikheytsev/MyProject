@@ -2836,14 +2836,7 @@ export default function App() {
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
                                     >
                                         <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
-                                        <span className="font-semibold text-gray-700">Переместить позицию без QR</span>
-                                    </button>
-                                    <button
-                                         onClick={() => setWriteOffModalOpen(true)}
-                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
-                                    >
-                                        <div className="p-2 bg-red-100 text-red-600 rounded-lg"><TrashIcon width="18" height="18" /></div>
-                                        <span className="font-semibold text-gray-700">Списать позицию без QR кода</span>
+                                        <span className="font-semibold text-gray-700">переместить/удалить позицию</span>
                                     </button>
                                 </div>
                             </div>
