@@ -723,7 +723,8 @@
             "quantity": 1344,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 0,
-            "id": "06dea7b5-cd62-4417-ac9b-803cb8fb9b00"
+            "id": "06dea7b5-cd62-4417-ac9b-803cb8fb9b00",
+            "uniqueCode": "Q7663724"
         },
         {
             "name": "SPB (720)",
@@ -732,7 +733,8 @@
             "quantity": "720",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 1,
-            "id": "c2b8289e-0c73-45ab-8d33-eff0e2e5919b"
+            "id": "c2b8289e-0c73-45ab-8d33-eff0e2e5919b",
+            "uniqueCode": "W7KISU0B"
         },
         {
             "name": "R (1512)",
@@ -741,7 +743,8 @@
             "quantity": "1512",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 2,
-            "id": "7f3ce806-5e82-4c2b-9512-5aff7928dab5"
+            "id": "7f3ce806-5e82-4c2b-9512-5aff7928dab5",
+            "uniqueCode": "9PMPIMNP"
         },
         {
             "name": "R (1344)",
@@ -750,7 +753,8 @@
             "quantity": "1344",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 7,
-            "id": "e3701672-a8fd-4a41-8676-59474c128b65"
+            "id": "e3701672-a8fd-4a41-8676-59474c128b65",
+            "uniqueCode": "22SKYN5B"
         },
         {
             "name": "R (1434)",
@@ -759,7 +763,8 @@
             "quantity": "1434",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 8,
-            "id": "af556103-e2d6-4e4c-a69c-e56ba7e74542"
+            "id": "af556103-e2d6-4e4c-a69c-e56ba7e74542",
+            "uniqueCode": "QXPE59VT"
         },
         {
             "name": "R (1002)",
@@ -768,7 +773,8 @@
             "quantity": "1002",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 9,
-            "id": "4fcff68c-9e47-481f-a1bc-51add55e5512"
+            "id": "4fcff68c-9e47-481f-a1bc-51add55e5512",
+            "uniqueCode": "0UX1PPZ7"
         },
         {
             "name": "Oatmeal (235 шт)",
@@ -777,7 +783,8 @@
             "quantity": "20",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 14,
-            "id": "6ac22ff5-6ddd-46e6-8d8a-0cce2c0ddf4d"
+            "id": "6ac22ff5-6ddd-46e6-8d8a-0cce2c0ddf4d",
+            "uniqueCode": "KR0WI1H4"
         },
         {
             "name": "Oatmeal (140 шт)",
@@ -786,7 +793,8 @@
             "quantity": 1,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 14,
-            "id": "c5599a70-a1ed-4393-b139-4dea036e9e21"
+            "id": "c5599a70-a1ed-4393-b139-4dea036e9e21",
+            "uniqueCode": "NKOT4S5H"
         },
         {
             "name": "Coffee (235 шт)",
@@ -795,7 +803,8 @@
             "quantity": "10",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 14,
-            "id": "0f81962c-c86a-45cd-8eb7-7ef013530a4b"
+            "id": "0f81962c-c86a-45cd-8eb7-7ef013530a4b",
+            "uniqueCode": "VVK0TJT3"
         },
         {
             "name": "Coffee (235 шт)",
@@ -804,7 +813,8 @@
             "quantity": "14",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 15,
-            "id": "c0318801-0e0b-4cb9-a0a2-92364e849001"
+            "id": "c0318801-0e0b-4cb9-a0a2-92364e849001",
+            "uniqueCode": "UW5M63YC"
         },
         {
             "name": "Matcha (235 шт)",
@@ -813,7 +823,8 @@
             "quantity": "7",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 15,
-            "id": "5c9a0554-5e0e-4288-bdfc-ed7a2c7c0b7d"
+            "id": "5c9a0554-5e0e-4288-bdfc-ed7a2c7c0b7d",
+            "uniqueCode": "3DY0N0AO"
         },
         {
             "name": "Aloe (235 шт)",
@@ -822,7 +833,8 @@
             "quantity": "8",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 15,
-            "id": "2eaba5dc-56fb-4eb3-b0d3-000eb61d189c"
+            "id": "2eaba5dc-56fb-4eb3-b0d3-000eb61d189c",
+            "uniqueCode": "JWT9JIVJ"
         },
         {
             "name": "Oatmeal (288 шт)",
@@ -831,7 +843,8 @@
             "quantity": "48",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 16,
-            "id": "1e23e1cc-b30b-4b63-8caa-c570262804d1"
+            "id": "1e23e1cc-b30b-4b63-8caa-c570262804d1",
+            "uniqueCode": "36NEB9JR"
         },
         {
             "name": "Aloe (288 шт)",
@@ -840,7 +853,8 @@
             "quantity": "60",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 21,
-            "id": "d271a9da-ea9a-4454-bc9b-651276987bc8"
+            "id": "d271a9da-ea9a-4454-bc9b-651276987bc8",
+            "uniqueCode": "TY16T894"
         },
         {
             "name": "Matcha (288 шт)",
@@ -849,7 +863,8 @@
             "quantity": "54",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 22,
-            "id": "d66f1646-abfd-48b6-b23e-4fc43c358ce5"
+            "id": "d66f1646-abfd-48b6-b23e-4fc43c358ce5",
+            "uniqueCode": "7N1GI5XJ"
         },
         {
             "name": "Coffee (288 шт)",
@@ -858,7 +873,8 @@
             "quantity": "50",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 23,
-            "id": "d61e03e8-6fc1-4268-bf96-f942fbdbedfd"
+            "id": "d61e03e8-6fc1-4268-bf96-f942fbdbedfd",
+            "uniqueCode": "IW8V8ZET"
         },
         {
             "name": "Oatmeal (140 шт)",
@@ -867,7 +883,8 @@
             "quantity": 2,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 28,
-            "id": "5d1bffb5-3718-4690-ad6a-90a012da683e"
+            "id": "5d1bffb5-3718-4690-ad6a-90a012da683e",
+            "uniqueCode": "IPU87E4O"
         },
         {
             "name": "Coffee (140 шт)",
@@ -876,7 +893,8 @@
             "quantity": "16",
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 29,
-            "id": "3f732217-b7f1-4b5c-abea-def0955a4766"
+            "id": "3f732217-b7f1-4b5c-abea-def0955a4766",
+            "uniqueCode": "VHFBKSQU"
         },
         {
             "name": "Sachet (Mix)",
@@ -885,7 +903,8 @@
             "quantity": 1,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 30,
-            "id": "9b1085b0-6347-4ee9-a68d-a82f81bc9e7e"
+            "id": "9b1085b0-6347-4ee9-a68d-a82f81bc9e7e",
+            "uniqueCode": "XAJ13ELG"
         },
         {
             "name": "Sachet (Mix)",
@@ -894,7 +913,8 @@
             "quantity": 1,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 35,
-            "id": "e8e1784f-9fa2-448a-b373-0463c635a9c5"
+            "id": "e8e1784f-9fa2-448a-b373-0463c635a9c5",
+            "uniqueCode": "7E7P3ETK"
         },
         {
             "name": "Sachet (Mix)",
@@ -903,7 +923,8 @@
             "quantity": 1,
             "warehouseId": "ecc4c1ac-56b7-4e78-9280-959bad274575",
             "placeId": 36,
-            "id": "65c5b1ad-d913-4473-b30d-1c40526df820"
+            "id": "65c5b1ad-d913-4473-b30d-1c40526df820",
+            "uniqueCode": "WOAPIZWJ"
         },
         {
             "name": "Футболки",
@@ -912,7 +933,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "af3fe7a1-ab55-4008-bfab-4570089f0c14"
+            "id": "af3fe7a1-ab55-4008-bfab-4570089f0c14",
+            "uniqueCode": "1O604T6P"
         },
         {
             "name": "Футболки",
@@ -921,7 +943,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "54ee2108-0322-4852-9c2f-b056ec9b2f37"
+            "id": "54ee2108-0322-4852-9c2f-b056ec9b2f37",
+            "uniqueCode": "PWLPTRVG"
         },
         {
             "name": "Caps",
@@ -930,7 +953,8 @@
             "quantity": "198",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "f635fc15-e965-464a-97a0-4572a63303ba"
+            "id": "f635fc15-e965-464a-97a0-4572a63303ba",
+            "uniqueCode": "SM92VX4K"
         },
         {
             "name": "Caps",
@@ -939,7 +963,8 @@
             "quantity": "185",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "b76d141b-1a91-44df-bf91-e3d8c8cfed09"
+            "id": "b76d141b-1a91-44df-bf91-e3d8c8cfed09",
+            "uniqueCode": "OLC730YS"
         },
         {
             "name": "Caps",
@@ -948,7 +973,8 @@
             "quantity": "191",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "488c75cf-8019-4855-866f-307ed47a55dd"
+            "id": "488c75cf-8019-4855-866f-307ed47a55dd",
+            "uniqueCode": "9R26Q00X"
         },
         {
             "name": "Ложки TSM сиреневые (250 шт)",
@@ -957,7 +983,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "04ac6dca-c18c-4e6f-9c86-be3fdcd3f50f"
+            "id": "04ac6dca-c18c-4e6f-9c86-be3fdcd3f50f",
+            "uniqueCode": "UI0T31R3"
         },
         {
             "name": "ECaps (35 шт)",
@@ -966,7 +993,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "4e0282b8-0fad-4ae3-b39a-694cb0dd0bff"
+            "id": "4e0282b8-0fad-4ae3-b39a-694cb0dd0bff",
+            "uniqueCode": "E6868KNL"
         },
         {
             "name": "ECaps (35 шт)",
@@ -975,7 +1003,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "2b19f0b1-9d34-40b7-952b-66e1685c5f4a"
+            "id": "2b19f0b1-9d34-40b7-952b-66e1685c5f4a",
+            "uniqueCode": "YSCMFWPG"
         },
         {
             "name": "ECaps (72 шт)",
@@ -984,7 +1013,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "d97fbd2c-5bcb-44ad-a6af-8b6aac4e341a"
+            "id": "d97fbd2c-5bcb-44ad-a6af-8b6aac4e341a",
+            "uniqueCode": "JX6L5QLR"
         },
         {
             "name": "Vevor 30L Ultrasonic cleaner",
@@ -993,7 +1023,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "11e2f841-9e14-49c9-bbda-0aa549ee9f81"
+            "id": "11e2f841-9e14-49c9-bbda-0aa549ee9f81",
+            "uniqueCode": "3KNJKQ01"
         },
         {
             "name": "Крышки (Влажные)",
@@ -1002,7 +1033,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "90b87aa5-c6d5-49bb-a7eb-7e2946beb76f"
+            "id": "90b87aa5-c6d5-49bb-a7eb-7e2946beb76f",
+            "uniqueCode": "X4AM6Q2I"
         },
         {
             "name": "Коробки для ED",
@@ -1011,7 +1043,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "d1fa75b4-b4d0-452f-a2bb-d0cb194c461a"
+            "id": "d1fa75b4-b4d0-452f-a2bb-d0cb194c461a",
+            "uniqueCode": "1ZHL50KP"
         },
         {
             "name": "Коробки для SD",
@@ -1020,7 +1053,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 44,
-            "id": "97afc144-b62a-42c7-a9f1-36a0b1aca94d"
+            "id": "97afc144-b62a-42c7-a9f1-36a0b1aca94d",
+            "uniqueCode": "1ODVWRCS"
         },
         {
             "name": "MS Gold 1 pound (26 шт)",
@@ -1029,7 +1063,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "67c35075-c07c-45d5-b3da-78c4f69ff0a0"
+            "id": "67c35075-c07c-45d5-b3da-78c4f69ff0a0",
+            "uniqueCode": "S5LRICJ1"
         },
         {
             "name": "MS 8 oz (71 шт)",
@@ -1038,7 +1073,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "9af3b29e-2483-488c-a73f-bb9ab5fa8fb5"
+            "id": "9af3b29e-2483-488c-a73f-bb9ab5fa8fb5",
+            "uniqueCode": "080XD283"
         },
         {
             "name": "Powder (27 шт)",
@@ -1047,7 +1083,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "40d96cdc-08fb-43bf-8bc5-96d622492f92"
+            "id": "40d96cdc-08fb-43bf-8bc5-96d622492f92",
+            "uniqueCode": "XX638DW1"
         },
         {
             "name": "Powder (33 шт)",
@@ -1056,7 +1093,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "5c05fa5f-9799-4268-b3f0-1b99243025b8"
+            "id": "5c05fa5f-9799-4268-b3f0-1b99243025b8",
+            "uniqueCode": "QGGZV2U3"
         },
         {
             "name": "Подарочная коробка (60 шт)",
@@ -1065,7 +1103,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "1ab49bbf-f87b-4f00-8096-b8fb4d80939f"
+            "id": "1ab49bbf-f87b-4f00-8096-b8fb4d80939f",
+            "uniqueCode": "XUK26S6K"
         },
         {
             "name": "Скотч прозрачный (30 шт)",
@@ -1074,7 +1113,8 @@
             "quantity": "7",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "97b7ad51-f894-42b7-bbea-d0ba04b93ad3"
+            "id": "97b7ad51-f894-42b7-bbea-d0ba04b93ad3",
+            "uniqueCode": "XFKC56N9"
         },
         {
             "name": "Скотч прозрачный (60 шт)",
@@ -1083,7 +1123,8 @@
             "quantity": "60",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "4c933536-945c-44d8-960f-fc78404e18a1"
+            "id": "4c933536-945c-44d8-960f-fc78404e18a1",
+            "uniqueCode": "26KE1OA2"
         },
         {
             "name": "Скотч прозрачный (20 шт)",
@@ -1092,7 +1133,8 @@
             "quantity": "1",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "7fd546ee-b6fd-4f95-a086-2bd8ad8ba515"
+            "id": "7fd546ee-b6fd-4f95-a086-2bd8ad8ba515",
+            "uniqueCode": "UMTYGHO1"
         },
         {
             "name": "Fragile Invoice",
@@ -1101,7 +1143,8 @@
             "quantity": "20",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "a3e666d0-ec8d-43c6-9265-c441d04a0232"
+            "id": "a3e666d0-ec8d-43c6-9265-c441d04a0232",
+            "uniqueCode": "JIPQJ0YR"
         },
         {
             "name": "Перчатки L (1000 шт)",
@@ -1110,7 +1153,8 @@
             "quantity": "9",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "6e4d1671-afa5-438f-84f4-74238f1b5f84"
+            "id": "6e4d1671-afa5-438f-84f4-74238f1b5f84",
+            "uniqueCode": "MQDRWUER"
         },
         {
             "name": "Перчатки M (1000 шт)",
@@ -1119,7 +1163,8 @@
             "quantity": "7",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "d5f3cf9d-c38b-49dd-91cf-9c4f4cde0115"
+            "id": "d5f3cf9d-c38b-49dd-91cf-9c4f4cde0115",
+            "uniqueCode": "PZ38K04Y"
         },
         {
             "name": "Перчатки M (100 шт)",
@@ -1128,7 +1173,8 @@
             "quantity": "9",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "1d24636a-bc45-4166-b6c2-cb9142b57c2a"
+            "id": "1d24636a-bc45-4166-b6c2-cb9142b57c2a",
+            "uniqueCode": "QWO5ZN7H"
         },
         {
             "name": "Перчатки S (1000 шт)",
@@ -1137,7 +1183,8 @@
             "quantity": "4",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "8bce9506-469b-46b7-a946-33d6311a50ce"
+            "id": "8bce9506-469b-46b7-a946-33d6311a50ce",
+            "uniqueCode": "CV9TLW7J"
         },
         {
             "name": "Крышки к ведрам",
@@ -1146,7 +1193,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "9da7c796-a448-4b44-a55b-1063642c5774"
+            "id": "9da7c796-a448-4b44-a55b-1063642c5774",
+            "uniqueCode": "QSF2EVMS"
         },
         {
             "name": "Ведра",
@@ -1155,7 +1203,8 @@
             "quantity": "10",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "e983af4c-b43e-4c77-b1ba-2a57eae81325"
+            "id": "e983af4c-b43e-4c77-b1ba-2a57eae81325",
+            "uniqueCode": "IMNDTG7J"
         },
         {
             "name": "Упаковка POWDER",
@@ -1164,7 +1213,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "94e669b8-7a09-49f5-8d59-a9241f9f13d6"
+            "id": "94e669b8-7a09-49f5-8d59-a9241f9f13d6",
+            "uniqueCode": "8719WB41"
         },
         {
             "name": "Старая упаковка для PURPLE 2oz",
@@ -1173,7 +1223,8 @@
             "quantity": "200",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "1f778a1c-76f0-4805-b8dd-f175dd79f4d2"
+            "id": "1f778a1c-76f0-4805-b8dd-f175dd79f4d2",
+            "uniqueCode": "5IUOA79H"
         },
         {
             "name": "Старая упаковка для GOLD 2oz (1300 шт)",
@@ -1182,7 +1233,8 @@
             "quantity": "2",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "ebb1c04e-915f-476e-9c25-052a46bea1ca"
+            "id": "ebb1c04e-915f-476e-9c25-052a46bea1ca",
+            "uniqueCode": "PFZ2CFBB"
         },
         {
             "name": "Старая упаковка для PURPLE 1 pound",
@@ -1191,7 +1243,8 @@
             "quantity": "100",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "a12d2f50-4424-4554-acc7-33fac546d5da"
+            "id": "a12d2f50-4424-4554-acc7-33fac546d5da",
+            "uniqueCode": "EPHIJ66X"
         },
         {
             "name": "Пакеты для EL-MIX",
@@ -1200,7 +1253,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "3eb54984-2bd8-47df-ad16-75e8bc4ee350"
+            "id": "3eb54984-2bd8-47df-ad16-75e8bc4ee350",
+            "uniqueCode": "SDCNYIRX"
         },
         {
             "name": "Сырой мох",
@@ -1209,7 +1263,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "4e939bfe-f8ca-4139-81a0-ce9224e6d382"
+            "id": "4e939bfe-f8ca-4139-81a0-ce9224e6d382",
+            "uniqueCode": "2V06MF5Y"
         },
         {
             "name": "Машинка для бумажной упаковки",
@@ -1218,7 +1273,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 22,
-            "id": "bb038099-093f-43c0-9965-f953d3596012"
+            "id": "bb038099-093f-43c0-9965-f953d3596012",
+            "uniqueCode": "COP2KHYK"
         },
         {
             "name": "Наклейки на крышки (5000 шт)",
@@ -1227,7 +1283,8 @@
             "quantity": "9",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 15,
-            "id": "f75e138b-f3fe-4ccc-8532-a95879156188"
+            "id": "f75e138b-f3fe-4ccc-8532-a95879156188",
+            "uniqueCode": "2E9P0FB2"
         },
         {
             "name": "13x3x3 (25 шт)",
@@ -1236,7 +1293,8 @@
             "quantity": "10",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 15,
-            "id": "df9527a2-1a88-477e-a913-ff2ce939eaf7"
+            "id": "df9527a2-1a88-477e-a913-ff2ce939eaf7",
+            "uniqueCode": "ESGUHBCK"
         },
         {
             "name": "Fragile (10000 шт)",
@@ -1245,7 +1303,8 @@
             "quantity": "11",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 9,
-            "id": "5d20247d-3779-41cf-b7d7-cdfe9cf2ec97"
+            "id": "5d20247d-3779-41cf-b7d7-cdfe9cf2ec97",
+            "uniqueCode": "MXM6CRWS"
         },
         {
             "name": "Elderberry Drops (100 шт)",
@@ -1254,7 +1313,8 @@
             "quantity": "4",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 10,
-            "id": "6ae030c8-57c6-4fc5-a168-f1a569c11f24"
+            "id": "6ae030c8-57c6-4fc5-a168-f1a569c11f24",
+            "uniqueCode": "ZV7WCU1E"
         },
         {
             "name": "Apple Drops (100 шт)",
@@ -1263,7 +1323,8 @@
             "quantity": "14",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 10,
-            "id": "17d370af-5551-4e69-8a1a-6635c11bfd19"
+            "id": "17d370af-5551-4e69-8a1a-6635c11bfd19",
+            "uniqueCode": "PRROBUDG"
         },
         {
             "name": "Складные столы",
@@ -1272,7 +1333,8 @@
             "quantity": "9",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 11,
-            "id": "44ded0ed-64ad-44bb-9779-e904576bdd51"
+            "id": "44ded0ed-64ad-44bb-9779-e904576bdd51",
+            "uniqueCode": "R6LCM1PL"
         },
         {
             "name": "Пудра в коробках",
@@ -1281,7 +1343,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 11,
-            "id": "1eca3a1e-b549-43b9-b22c-1d2631d36f42"
+            "id": "1eca3a1e-b549-43b9-b22c-1d2631d36f42",
+            "uniqueCode": "R7S3TX6F"
         },
         {
             "name": "Пудра Powder",
@@ -1290,7 +1353,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 11,
-            "id": "f73ed23e-205b-4a4a-9aa4-b62aaef8f576"
+            "id": "f73ed23e-205b-4a4a-9aa4-b62aaef8f576",
+            "uniqueCode": "YW3RIWDN"
         },
         {
             "name": "Пакеты для мыла",
@@ -1299,7 +1363,8 @@
             "quantity": "12",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 12,
-            "id": "a00a0268-11bd-4d35-aed7-148a07feed4b"
+            "id": "a00a0268-11bd-4d35-aed7-148a07feed4b",
+            "uniqueCode": "86RMNER7"
         },
         {
             "name": "Наклейки на крышки (12500 шт)",
@@ -1308,7 +1373,8 @@
             "quantity": "31",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 16,
-            "id": "237ee192-0628-4970-818e-324a6a954b1e"
+            "id": "237ee192-0628-4970-818e-324a6a954b1e",
+            "uniqueCode": "WMYWQXYJ"
         },
         {
             "name": "Наклейки на CAPS (1000 шт)",
@@ -1317,7 +1383,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 16,
-            "id": "7b444471-2311-474f-a76b-79f8af53412a"
+            "id": "7b444471-2311-474f-a76b-79f8af53412a",
+            "uniqueCode": "CXUQY9PZ"
         },
         {
             "name": "9x6x4",
@@ -1326,7 +1393,8 @@
             "quantity": "2",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 18,
-            "id": "e105702f-9ca5-4888-b816-1d6f646ca47f"
+            "id": "e105702f-9ca5-4888-b816-1d6f646ca47f",
+            "uniqueCode": "9YSDBOA7"
         },
         {
             "name": "Коробки для мыла (старые)",
@@ -1335,7 +1403,8 @@
             "quantity": "1",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 2,
-            "id": "357a9c8b-e69e-4306-9aec-f4b7b61713c2"
+            "id": "357a9c8b-e69e-4306-9aec-f4b7b61713c2",
+            "uniqueCode": "0R5UX0A0"
         },
         {
             "name": "Крышки (мокрые)",
@@ -1344,7 +1413,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 2,
-            "id": "be00d459-88dd-4173-a3e6-568f16a00ee0"
+            "id": "be00d459-88dd-4173-a3e6-568f16a00ee0",
+            "uniqueCode": "IDD5P3LL"
         },
         {
             "name": "Bubble",
@@ -1353,7 +1423,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 2,
-            "id": "9ba07d57-6eda-4d0e-b971-458b4fad29f5"
+            "id": "9ba07d57-6eda-4d0e-b971-458b4fad29f5",
+            "uniqueCode": "EA0E7C0L"
         },
         {
             "name": "Мох в мешках",
@@ -1362,7 +1433,8 @@
             "quantity": 1,
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 7,
-            "id": "5c594d48-3aa2-4dac-8818-9df5abf92f16"
+            "id": "5c594d48-3aa2-4dac-8818-9df5abf92f16",
+            "uniqueCode": "YGUCPWDA"
         },
         {
             "name": "Мох в мешках",
@@ -1371,7 +1443,8 @@
             "quantity": 1,
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 14,
-            "id": "82e5833a-499a-4585-af26-b446e62ef0c8"
+            "id": "82e5833a-499a-4585-af26-b446e62ef0c8",
+            "uniqueCode": "L31GB4M5"
         },
         {
             "name": "Мох в мешках",
@@ -1380,7 +1453,8 @@
             "quantity": 1,
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 21,
-            "id": "5e8d5093-0aec-452f-89ff-57433f9cf18d"
+            "id": "5e8d5093-0aec-452f-89ff-57433f9cf18d",
+            "uniqueCode": "PAJOCLQH"
         },
         {
             "name": "R 12oz, S 12oz",
@@ -1389,7 +1463,8 @@
             "quantity": 1,
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 28,
-            "id": "7d1c734c-5bed-4ea9-837d-1e42464205b7"
+            "id": "7d1c734c-5bed-4ea9-837d-1e42464205b7",
+            "uniqueCode": "HOF18X3Y"
         },
         {
             "name": "Мох в мешках",
@@ -1398,7 +1473,8 @@
             "quantity": 1,
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 1,
-            "id": "0271dda5-2f5a-4e59-bd69-0f6b2e6d68dc"
+            "id": "0271dda5-2f5a-4e59-bd69-0f6b2e6d68dc",
+            "uniqueCode": "S7GNZOWH"
         },
         {
             "name": "FF-TX MP",
@@ -1407,7 +1483,8 @@
             "quantity": "1344",
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 8,
-            "id": "a9cb4f6e-bb2f-4085-9d9e-aef5996317b4"
+            "id": "a9cb4f6e-bb2f-4085-9d9e-aef5996317b4",
+            "uniqueCode": "5MWOM1F3"
         },
         {
             "name": "FF-TX MP",
@@ -1416,7 +1493,8 @@
             "quantity": "1344",
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 15,
-            "id": "500b9eb6-e553-45dc-a594-3eba89e230e0"
+            "id": "500b9eb6-e553-45dc-a594-3eba89e230e0",
+            "uniqueCode": "DEZFCL92"
         },
         {
             "name": "FF-TX S",
@@ -1425,7 +1503,8 @@
             "quantity": "1344",
             "warehouseId": "bce250b3-3245-4655-a46f-3e2b06d34868",
             "placeId": 22,
-            "id": "95f8be76-7cc6-4819-82c4-1c0c2114ea89"
+            "id": "95f8be76-7cc6-4819-82c4-1c0c2114ea89",
+            "uniqueCode": "31376DRJ"
         },
         {
             "name": "CC",
@@ -1434,7 +1513,8 @@
             "quantity": 1,
             "warehouseId": "00221057-de86-4922-99c4-9c39ba32cbb4",
             "placeId": 1,
-            "id": "0dc31e6c-a6b2-487d-9a9e-f5d68d38cdad"
+            "id": "0dc31e6c-a6b2-487d-9a9e-f5d68d38cdad",
+            "uniqueCode": "FOSAR5MA"
         },
         {
             "name": "Перчатки XL (1000 шт)",
@@ -1443,7 +1523,8 @@
             "quantity": "3",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 29,
-            "id": "91f57b92-1501-4cfc-abdb-145a75914651"
+            "id": "91f57b92-1501-4cfc-abdb-145a75914651",
+            "uniqueCode": "NQXWN5PZ"
         },
         {
             "name": "ABG",
@@ -1452,7 +1533,8 @@
             "quantity": "1008",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 0,
-            "id": "e441d961-d31b-42a1-a8e0-b91ed3fd51f5"
+            "id": "e441d961-d31b-42a1-a8e0-b91ed3fd51f5",
+            "uniqueCode": "LRLSQBDC"
         },
         {
             "name": "MA",
@@ -1461,7 +1543,8 @@
             "quantity": "936",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 1,
-            "id": "aa37c892-4e17-420e-a62b-4c4ee9521545"
+            "id": "aa37c892-4e17-420e-a62b-4c4ee9521545",
+            "uniqueCode": "W2P2VRQJ"
         },
         {
             "name": "ABG",
@@ -1470,7 +1553,8 @@
             "quantity": "1008",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 2,
-            "id": "bebebe56-29b2-4aec-8422-ccb1b9732862"
+            "id": "bebebe56-29b2-4aec-8422-ccb1b9732862",
+            "uniqueCode": "GXYAEHT2"
         },
         {
             "name": "ABG",
@@ -1479,7 +1563,8 @@
             "quantity": "1008",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 3,
-            "id": "652642ff-fc04-4183-9475-34b057ee6499"
+            "id": "652642ff-fc04-4183-9475-34b057ee6499",
+            "uniqueCode": "6RL3MJ4Q"
         },
         {
             "name": "ABG",
@@ -1488,7 +1573,8 @@
             "quantity": "1008",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 4,
-            "id": "0e43a586-4361-433f-a74f-f72daa20ad5c"
+            "id": "0e43a586-4361-433f-a74f-f72daa20ad5c",
+            "uniqueCode": "J17DDK8U"
         },
         {
             "name": "ABG",
@@ -1497,7 +1583,8 @@
             "quantity": "1008",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 7,
-            "id": "1bd9de4a-9003-459c-ba7f-1aa4ca2abe35"
+            "id": "1bd9de4a-9003-459c-ba7f-1aa4ca2abe35",
+            "uniqueCode": "ZRGH1V80"
         },
         {
             "name": "M",
@@ -1506,7 +1593,8 @@
             "quantity": "852",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 8,
-            "id": "7581069e-e54e-40c0-b09b-bc3bb35165d9"
+            "id": "7581069e-e54e-40c0-b09b-bc3bb35165d9",
+            "uniqueCode": "QJHS6CB1"
         },
         {
             "name": "SO",
@@ -1515,7 +1603,8 @@
             "quantity": "1344",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 9,
-            "id": "8905638e-66aa-47ac-af4f-8ec6edf552e0"
+            "id": "8905638e-66aa-47ac-af4f-8ec6edf552e0",
+            "uniqueCode": "IC6BFYD8"
         },
         {
             "name": "P",
@@ -1524,7 +1613,8 @@
             "quantity": "1344",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 10,
-            "id": "d1429496-1684-44d2-8fc6-a3c03b3ce862"
+            "id": "d1429496-1684-44d2-8fc6-a3c03b3ce862",
+            "uniqueCode": "GKQD144K"
         },
         {
             "name": "S",
@@ -1533,7 +1623,8 @@
             "quantity": "1344",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 11,
-            "id": "415802d2-eda7-420a-9cb1-2378f43ea44c"
+            "id": "415802d2-eda7-420a-9cb1-2378f43ea44c",
+            "uniqueCode": "JSQFJJGR"
         },
         {
             "name": "E",
@@ -1542,7 +1633,8 @@
             "quantity": "1344",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 14,
-            "id": "97a96b92-66a4-4268-9596-7a2734c56d1a"
+            "id": "97a96b92-66a4-4268-9596-7a2734c56d1a",
+            "uniqueCode": "G86ILUP0"
         },
         {
             "name": "EL-LL старые",
@@ -1551,7 +1643,8 @@
             "quantity": "37",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "43b3e38e-8e72-420e-978e-9faf4b2e1c3c"
+            "id": "43b3e38e-8e72-420e-978e-9faf4b2e1c3c",
+            "uniqueCode": "O5EEGAU4"
         },
         {
             "name": "EL - LL старые",
@@ -1560,7 +1653,8 @@
             "quantity": "52",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "ba9e2e06-0555-4d2c-85e4-4aee57270bad"
+            "id": "ba9e2e06-0555-4d2c-85e4-4aee57270bad",
+            "uniqueCode": "7DJX96KU"
         },
         {
             "name": "EL - BS старые",
@@ -1569,7 +1663,8 @@
             "quantity": "32",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "a2709474-3db2-4bd6-8587-d48767300237"
+            "id": "a2709474-3db2-4bd6-8587-d48767300237",
+            "uniqueCode": "EH0LZ3W6"
         },
         {
             "name": "EL - BS старые",
@@ -1578,7 +1673,8 @@
             "quantity": "52",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "d4758649-83b9-4629-a4c1-1ffadf78087f"
+            "id": "d4758649-83b9-4629-a4c1-1ffadf78087f",
+            "uniqueCode": "ZIL8LG3X"
         },
         {
             "name": "EL - MP старые",
@@ -1587,7 +1683,8 @@
             "quantity": "39",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "4e5f52b2-8d16-4bf7-aa9a-7638eb6f5221"
+            "id": "4e5f52b2-8d16-4bf7-aa9a-7638eb6f5221",
+            "uniqueCode": "8GB38MVA"
         },
         {
             "name": "EL - MW старые",
@@ -1596,7 +1693,8 @@
             "quantity": "55",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "59973970-94ae-43c0-afcc-fc5bb8f92cd5"
+            "id": "59973970-94ae-43c0-afcc-fc5bb8f92cd5",
+            "uniqueCode": "FFNPGQU2"
         },
         {
             "name": "Белая пудра в прозрачном контейнере",
@@ -1605,7 +1703,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "a29db13d-3c0b-49b8-8c4c-b5cbddeb422b"
+            "id": "a29db13d-3c0b-49b8-8c4c-b5cbddeb422b",
+            "uniqueCode": "7RDQ64SW"
         },
         {
             "name": "Мох MS 1 pound",
@@ -1614,7 +1713,8 @@
             "quantity": "15",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 36,
-            "id": "c3a8bfee-70b5-4894-828b-433a02e7ab94"
+            "id": "c3a8bfee-70b5-4894-828b-433a02e7ab94",
+            "uniqueCode": "JTHFV5KP"
         },
         {
             "name": "Mixed berry",
@@ -1623,7 +1723,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 17,
-            "id": "c19869b6-42af-46a9-a88d-3d94b8fd1970"
+            "id": "c19869b6-42af-46a9-a88d-3d94b8fd1970",
+            "uniqueCode": "19BXD2HM"
         },
         {
             "name": "Lemon",
@@ -1632,7 +1733,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 19,
-            "id": "73a3385f-85cb-47b8-9737-46dff01e52a9"
+            "id": "73a3385f-85cb-47b8-9737-46dff01e52a9",
+            "uniqueCode": "SUV0V33D"
         },
         {
             "name": "Mango",
@@ -1641,7 +1743,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 23,
-            "id": "f8011601-4359-47e6-990d-71f26982d410"
+            "id": "f8011601-4359-47e6-990d-71f26982d410",
+            "uniqueCode": "CU7YMQYO"
         },
         {
             "name": "Pina colada",
@@ -1650,7 +1753,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 24,
-            "id": "31120519-cfaf-45f5-af91-bb2802aa086c"
+            "id": "31120519-cfaf-45f5-af91-bb2802aa086c",
+            "uniqueCode": "HPFMULT9"
         },
         {
             "name": "Разделители для лимонадов",
@@ -1659,7 +1763,8 @@
             "quantity": "2",
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 25,
-            "id": "1c67a647-20f0-4016-81e6-d7023ddea0c2"
+            "id": "1c67a647-20f0-4016-81e6-d7023ddea0c2",
+            "uniqueCode": "1Y58XKKC"
         },
         {
             "name": "Коробки для Лимонадов",
@@ -1668,7 +1773,8 @@
             "quantity": 1,
             "warehouseId": "744e15d8-0f4b-4f92-8d6d-75f990139f10",
             "placeId": 25,
-            "id": "692d8bb0-0c52-47c8-8b1b-7c62e431c627"
+            "id": "692d8bb0-0c52-47c8-8b1b-7c62e431c627",
+            "uniqueCode": "M0AUB1PM"
         },
         {
             "name": "ABG",
@@ -1677,7 +1783,8 @@
             "quantity": "1344",
             "warehouseId": "0abde75a-2827-4a2e-8ddf-9646c0b01b99",
             "placeId": 15,
-            "id": "2bf8fda7-421d-4dac-b817-6a1a685c0cec"
+            "id": "2bf8fda7-421d-4dac-b817-6a1a685c0cec",
+            "uniqueCode": "KHBCJYCJ"
         }
     ],
     "itemTypes": [

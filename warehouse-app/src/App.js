@@ -230,15 +230,69 @@ const AllWarehousesFreeSpace = ({ warehouses = [], items = [] }) => {
     );
 };
 
+const LabelsToPrint = React.forwardRef(({ item, qrCodeUrl }, ref) => {
+    const getLabelCount = () => {
+        if (item.size === 'Паллета') {
+            return 2;
+        }
+        if (item.size === 'Коробка') {
+            return (item.quantity || 1) * 2;
+        }
+        return 1; // Default for other types
+    };
+
+    const labelCount = getLabelCount();
+
+    const formatCode = (code) => {
+        if (!code || code.length !== 8) return '';
+        return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
+    };
+
+    return (
+        <div ref={ref}>
+            <style type="text/css" media="print">
+                {`
+                    @page {
+                        size: 6in 4in landscape;
+                        margin: 0;
+                    }
+                    body {
+                        margin: 0;
+                    }
+                    .label-container {
+                        width: 100%;
+                        height: 100%;
+                        display: flex;
+                        flex-direction: column;
+                        align-items: center;
+                        justify-content: center;
+                        padding: 0.25in;
+                        box-sizing: border-box;
+                        page-break-after: always;
+                    }
+                `}
+            </style>
+            {Array.from({ length: labelCount }).map((_, i) => (
+                <div key={i} className="label-container">
+                    <h2 style={{ fontSize: '32pt', fontWeight: 'bold', textAlign: 'center', margin: '0 0 10px 0' }}>{item.name}</h2>
+                    {qrCodeUrl ? <img src={qrCodeUrl} alt="QR Code" style={{ width: '2in' }} /> : <div>Loading QR...</div>}
+                    {item.uniqueCode && <p style={{ fontFamily: 'monospace', fontSize: '24pt', letterSpacing: '0.1em', margin: '10px 0 0 0' }}>{formatCode(item.uniqueCode)}</p>}
+                </div>
+            ))}
+        </div>
+    );
+});
+
 
 const QRCodePrintModal = ({ item, user, onClose }) => {
     const [qrCodeUrl, setQrCodeUrl] = useState('');
-    const qrCodePrintRef = useRef();
+    const qrCodePreviewRef = useRef();
+    const printComponentRef = useRef();
     const titleRef = useRef(null);
 
-    const handlePrintQRCode = useReactToPrint({
-        content: () => qrCodePrintRef.current,
-        documentTitle: `QR-Code-${item.name}`,
+    const handlePrint = useReactToPrint({
+        content: () => printComponentRef.current,
+        documentTitle: `Labels-${item.name}`,
     });
     
     useEffect(() => {
@@ -281,7 +335,7 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up">
-                <div ref={qrCodePrintRef} className="text-center p-4 flex flex-col items-center">
+                <div ref={qrCodePreviewRef} className="text-center p-4 flex flex-col items-center">
                     <h2 
                         ref={titleRef} 
                         className="font-bold text-gray-800" 
@@ -307,9 +361,13 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
                 </div>
                 <div className="flex justify-center space-x-4 mt-6">
                     <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
-                    <button onClick={handlePrintQRCode} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
+                    <button onClick={handlePrint} className="px-6 py-2 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold flex items-center gap-2">
                         <PrintIcon /> Печать
                     </button>
+                </div>
+
+                <div style={{ display: 'none' }}>
+                    <LabelsToPrint ref={printComponentRef} item={item} user={user} qrCodeUrl={qrCodeUrl} />
                 </div>
             </div>
         </div>
