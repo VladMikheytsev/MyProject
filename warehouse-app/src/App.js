@@ -1658,7 +1658,7 @@ const ScenarioPrintDocument = React.forwardRef(({ scenario, warehouses, items, u
     };
 
     const nameStyle = {
-        marginRight: '1cm' // Space between name and date
+        marginRight: '1em' // Space between name and date
     };
 
 
@@ -1898,7 +1898,7 @@ const WriteOffLogModal = ({ log, users, signatures, onClose }) => {
     );
 };
 
-const WriteOffModal = ({ warehouses, items, itemTypes, onSelectItem, onClose }) => {
+const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onClose }) => {
     const [selectedWarehouseId, setSelectedWarehouseId] = useState(warehouses[0]?.id || null);
     const [activeFilter, setActiveFilter] = useState('all');
     const modalBodyRef = useRef(null);
@@ -1926,7 +1926,7 @@ const WriteOffModal = ({ warehouses, items, itemTypes, onSelectItem, onClose }) 
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto flex flex-col" style={{maxHeight: '90vh'}}>
                 <div className="flex justify-between items-center mb-4 flex-shrink-0">
-                    <h2 className="text-2xl font-bold text-gray-800">Списать позицию</h2>
+                    <h2 className="text-2xl font-bold text-gray-800">{title}</h2>
                     <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
                 </div>
 
@@ -2024,6 +2024,7 @@ export default function App() {
   const [isLogModalOpen, setLogModalOpen] = useState(false);
   const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
   const [isWriteOffModalOpen, setWriteOffModalOpen] = useState(false);
+  const [isMoveSelectionModalOpen, setMoveSelectionModalOpen] = useState(false);
   
   // UI State
   const [mainViewTab, setMainViewTab] = useState('mainMenu'); // Изменено на 'mainMenu'
@@ -2818,24 +2819,11 @@ export default function App() {
                                         <span className="font-semibold text-gray-700">Создать позицию</span>
                                     </button>
                                     <button
-                                        onClick={() => {
-                                            setQrScanPurpose('action');
-                                            setVerifyingItem({ id: 'any', name: 'любой товар' });
-                                        }}
+                                        onClick={() => setMoveSelectionModalOpen(true)}
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
                                     >
                                         <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
-                                        <span className="font-semibold text-gray-700">Переместить позицию</span>
-                                    </button>
-                                    <button
-                                         onClick={() => {
-                                            setQrScanPurpose('action');
-                                            setVerifyingItem({ id: 'any', name: 'любой товар' });
-                                        }}
-                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
-                                    >
-                                        <div className="p-2 bg-red-100 text-red-600 rounded-lg"><QrIcon color="currentColor" width="18" height="18"/></div>
-                                        <span className="font-semibold text-gray-700">Списать позицию по QR коду</span>
+                                        <span className="font-semibold text-gray-700">Переместить позицию без QR</span>
                                     </button>
                                     <button
                                          onClick={() => setWriteOffModalOpen(true)}
@@ -3042,7 +3030,19 @@ export default function App() {
       {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
       {pendingWriteOff && <ActionConfirmationModal title="Подтверждение списания" onConfirm={handleConfirmWriteOff} onCancel={() => setPendingWriteOff(null)} />}
       {pendingMove && <ActionConfirmationModal title="Подтверждение перемещения" onConfirm={handleConfirmMove} onCancel={() => setPendingMove(null)} />}
-      {isWriteOffModalOpen && <WriteOffModal warehouses={warehouses} items={items} itemTypes={itemTypes} onClose={() => setWriteOffModalOpen(false)} onSelectItem={handleSelectItemToWriteOff} />}
+      {isWriteOffModalOpen && <WriteOffModal title="Списать позицию" warehouses={warehouses} items={items} itemTypes={itemTypes} onClose={() => setWriteOffModalOpen(false)} onSelectItem={handleSelectItemToWriteOff} />}
+      {isMoveSelectionModalOpen && <WriteOffModal 
+        title="Выберите позицию для перемещения"
+        warehouses={warehouses} 
+        items={items.filter(item => !lockedItemIds.has(item.id))}
+        itemTypes={itemTypes} 
+        onClose={() => setMoveSelectionModalOpen(false)} 
+        onSelectItem={(item) => {
+            setItemForAction(item);
+            setMoveSelectionModalOpen(false);
+        }} 
+      />}
+
       
       {/* --- Print Documents (Hidden) --- */}
       <div style={{ display: 'none' }}>
