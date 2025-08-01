@@ -295,6 +295,11 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
                     ) : (
                         <div style={{width: '256px', height: '256px'}} className="bg-gray-200 animate-pulse mx-auto"></div>
                     )}
+                    {item.uniqueCode && (
+                        <p className="font-mono text-2xl text-gray-800 mt-4 tracking-widest">
+                            {item.uniqueCode.substring(0, 4)} {item.uniqueCode.substring(4, 8)}
+                        </p>
+                    )}
                     <div className="text-xs text-gray-500 mt-4">
                         <p>Дата печати: {new Date().toLocaleString('ru-RU')}</p>
                         <p>Пользователь: {user.firstName} {user.lastName}</p>
@@ -727,6 +732,10 @@ const ItemTypesManager = ({ types, onSave, onCancel }) => {
     );
 };
 const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
+    const formatCode = (code) => {
+        if (!code || code.length !== 8) return '';
+        return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
+    };
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-md p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
@@ -742,6 +751,7 @@ const ItemsOnPlaceModal = ({ place, items, itemTypes, onClose }) => {
                                 <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                 <div>
                                     <p className="font-bold text-gray-800">{item.name}</p>
+                                    <p className="text-xs font-mono text-gray-400 tracking-widest">{formatCode(item.uniqueCode)}</p>
                                     <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                 </div>
                             </div>
@@ -941,6 +951,11 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
     const [disabledPlaces, setDisabledPlaces] = useState([]);
     const quantityInputRef = useRef(null);
 
+    const formatCode = (code) => {
+        if (!code || code.length !== 8) return '';
+        return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
+    };
+
     useEffect(() => {
         const selectedWarehouse = warehouses.find(w => w.id === destination.warehouseId);
         if (!selectedWarehouse) return;
@@ -1002,6 +1017,7 @@ const ItemActionModal = ({ itemToAction, warehouses, items, itemTypes, onMove, o
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50">
             <div className="bg-white rounded-xl shadow-2xl w-full max-w-lg p-6 animate-fade-in-up my-auto">
                 <h2 className="text-2xl font-bold mb-2 text-gray-800">Перемещение / Списание</h2>
+                <p className="font-mono text-sm text-gray-400 tracking-widest">{formatCode(itemToAction.uniqueCode)}</p>
                 <p className="mb-6 text-gray-600">"{itemToAction.name}" (Доступно: {itemToAction.quantity})</p>
 
                 <div className="space-y-4">
@@ -1916,6 +1932,11 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
     const [activeFilter, setActiveFilter] = useState('all');
     const modalBodyRef = useRef(null);
 
+    const formatCode = (code) => {
+        if (!code || code.length !== 8) return '';
+        return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
+    };
+
     const itemsOnWarehouse = items.filter(i => i.warehouseId === selectedWarehouseId);
 
     const itemCounts = itemsOnWarehouse.reduce((acc, item) => {
@@ -1984,6 +2005,7 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
                                         <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                         <div>
                                             <p className="font-bold text-gray-800">{item.name}</p>
+                                            <p className="text-xs font-mono text-gray-400 tracking-widest">{formatCode(item.uniqueCode)}</p>
                                             <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                             <p className="text-sm text-gray-500 mt-1">Место: #{item.placeId !== null ? item.placeId + 1 : 'Не указано'}</p>
                                         </div>
@@ -2055,6 +2077,29 @@ export default function App() {
   const scenarioPrintRef = useRef();
   const hasLoadedData = useRef(false);
   const SESSION_STORAGE_KEY = 'warehouseAppSession';
+
+    const generateUniqueCode = (existingItems) => {
+        const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+        let code;
+        let isUnique = false;
+        const existingCodes = new Set(existingItems.map(item => item.uniqueCode));
+
+        while (!isUnique) {
+            code = '';
+            for (let i = 0; i < 8; i++) {
+                code += chars.charAt(Math.floor(Math.random() * chars.length));
+            }
+            if (!existingCodes.has(code)) {
+                isUnique = true;
+            }
+        }
+        return code;
+    };
+
+    const formatCode = (code) => {
+        if (!code || code.length !== 8) return '';
+        return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
+    };
 
     useEffect(() => {
         function handleClickOutside(event) {
@@ -2265,8 +2310,32 @@ export default function App() {
                       api.fetchAppData(currentUser.id),
                       api.fetchUsers()
                   ]);
+
+                  let loadedItems = appData.items || [];
+                
+                  const itemsToUpdate = loadedItems.filter(item => !item.uniqueCode);
+                  if (itemsToUpdate.length > 0) {
+                      const existingCodes = new Set(loadedItems.map(item => item.uniqueCode).filter(Boolean));
+                      const generateUniqueCodeForMigration = () => {
+                           const chars = 'ABCDEFGHIJKLMNOPQRSTUVWXYZ0123456789';
+                           let code;
+                           do {
+                               code = '';
+                               for (let i = 0; i < 8; i++) {
+                                   code += chars.charAt(Math.floor(Math.random() * chars.length));
+                               }
+                           } while (existingCodes.has(code));
+                           existingCodes.add(code);
+                           return code;
+                      };
+  
+                      loadedItems = loadedItems.map(item => 
+                          item.uniqueCode ? item : { ...item, uniqueCode: generateUniqueCodeForMigration() }
+                      );
+                  }
+
                   setWarehouses(appData.warehouses || []);
-                  setItems(appData.items || []);
+                  setItems(loadedItems);
                   setItemTypes(appData.itemTypes || []);
                   setScenarios(appData.scenarios || []);
                   setSignatures(appData.signatures || {});
@@ -2367,8 +2436,10 @@ export default function App() {
     setPlacesEditorOpen(false);
   };
   const handleSaveItem = (itemData) => {
-    setItems(prev => [...prev, itemData]);
-    addLogEntry(`Создал позицию: ${itemData.name}`);
+    const newCode = generateUniqueCode(items);
+    const newItem = { ...itemData, uniqueCode: newCode };
+    setItems(prev => [...prev, newItem]);
+    addLogEntry(`Создал позицию: ${newItem.name}`);
     setItemEditorOpen(false);
   };
   const handleSaveItemTypes = (types) => {
@@ -2915,6 +2986,7 @@ export default function App() {
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-xs font-mono text-gray-400 tracking-widest">{formatCode(item.uniqueCode)}</p>
                                                                  <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                                                  {isUnplaced ? (
                                                                      <p className="text-sm text-red-600 mt-1">Склад: {itemWarehouse?.name} / Местоположение не задано</p>
@@ -2947,6 +3019,7 @@ export default function App() {
                                                              <div style={{width: '30px', height: '30px', backgroundColor: itemType?.color || '#ccc', borderRadius: '4px', flexShrink: 0}}></div>
                                                              <div>
                                                                  <p className="font-bold text-gray-800">{item.name}</p>
+                                                                 <p className="text-xs font-mono text-gray-400 tracking-widest">{formatCode(item.uniqueCode)}</p>
                                                                  <p className="text-sm text-gray-600">Тип: {item.type} | Размер: {item.size} | Кол-во: {item.quantity}</p>
                                                                  <p className="text-sm text-red-600 mt-1">Позиция не привязана к складу</p>
                                                              </div>
