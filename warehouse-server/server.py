@@ -34,7 +34,9 @@ db = {
     "users": [],
     "scenarios": [],
     "signatures": {},
-    "log": []
+    "log": [],
+    "writeOffLog": [],
+    "routeConfig": [] 
 }
 
 # --- Модели данных (Pydantic) ---
@@ -57,7 +59,10 @@ class AppData(BaseModel):
     itemTypes: list
     scenarios: list
     signatures: dict
-    log: Optional[list] = None # <-- [ИЗМЕНЕНО] Журнал теперь необязателен
+    log: Optional[list] = None
+    writeOffLog: Optional[list] = None
+    routeConfig: Optional[list] = None
+
 
 def load_data():
     global db
@@ -72,6 +77,8 @@ def load_data():
             db["scenarios"] = loaded_db.get("scenarios", [])
             db["signatures"] = loaded_db.get("signatures", {})
             db["log"] = loaded_db.get("log", [])
+            db["writeOffLog"] = loaded_db.get("writeOffLog", [])
+            db["routeConfig"] = loaded_db.get("routeConfig", [])
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         db["users"] = [
@@ -94,7 +101,7 @@ def save_data():
         json.dump(db, f, ensure_ascii=False, indent=4)
     print(f"💾 Данные сохранены в {DB_FILE}")
 
-# --- [ДОБАВЛЕНО] Вспомогательная функция для получения пользователя по ID ---
+# --- Вспомогательная функция для получения пользователя по ID ---
 def get_user_by_id(user_id: str):
     for user in db["users"]:
         if user["id"] == user_id:
@@ -108,7 +115,12 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-# <-- [ИЗМЕНЕНО] Эндпоинт теперь требует user_id и проверяет роль ---
+@app.get("/data/for-registration")
+async def get_data_for_registration():
+    # Этот эндпоинт возвращает только неконфиденциальные данные, необходимые для регистрации
+    return {"warehouses": db.get("warehouses", [])}
+
+
 @app.get("/data/{user_id}")
 async def get_app_data(user_id: str):
     user = get_user_by_id(user_id)
@@ -121,15 +133,17 @@ async def get_app_data(user_id: str):
         "itemTypes": db.get("itemTypes", []),
         "scenarios": db.get("scenarios", []),
         "signatures": db.get("signatures", {}),
+        "routeConfig": db.get("routeConfig", [])
     }
 
-    # Возвращаем журнал только если пользователь - администратор
+    # Возвращаем журналы только если пользователь - администратор
     if user.get("role") == "Администратор":
         data_to_return["log"] = db.get("log", [])
+        data_to_return["writeOffLog"] = db.get("writeOffLog", [])
     
     return data_to_return
 
-# <-- [ИЗМЕНЕНО] Эндпоинт теперь требует user_id и проверяет роль для сохранения журнала ---
+
 @app.post("/data/{user_id}")
 async def save_app_data(user_id: str, data: AppData):
     global db
@@ -143,10 +157,15 @@ async def save_app_data(user_id: str, data: AppData):
     db["scenarios"] = data.scenarios
     db["signatures"] = data.signatures
     
-    # Только администратор может обновлять журнал
+    if data.routeConfig is not None:
+        db["routeConfig"] = data.routeConfig
+
+    # Только администратор может обновлять журналы
     if user.get("role") == "Администратор":
         if data.log is not None:
             db["log"] = data.log
+        if data.writeOffLog is not None:
+            db["writeOffLog"] = data.writeOffLog
     
     save_data()
     return {"message": "Данные успешно сохранены"}
