@@ -1,8 +1,9 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-import { useReactToPrint } from 'react-to-print';
-import QRCode from 'qrcode';
-import SignatureCanvas from 'react-signature-canvas';
+// import { useReactToPrint } from 'react-to-print';
+// import QRCode from 'qrcode';
+// import SignatureCanvas from 'react-signature-canvas';
 import moment from 'moment';
+import 'moment/dist/locale/ru';
 
 // Set Russian locale for moment.js
 moment.locale('ru');
@@ -37,7 +38,6 @@ const RouteIcon = ({ width = "18", height = "18" }) => <svg xmlns="http://www.w3
 const Clock3Icon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>;
 const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>;
 const CarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h-2c-1.105 0-2 .895-2 2s.895 2 2 2h2c1.105 0 2-.895 2-2s-.895-2-2-2z"></path><path d="M5 17h-2c-1.105 0-2 .895-2 2s.895 2 2 2h2c1.105 0 2-.895 2-2s-.895-2-2-2z"></path><path d="M17 17h-11a3 3 0 0 1-3-3v-4h17v4a3 3 0 0 1-3 3z"></path><path d="M1 10h22"></path><path d="M17 10v-3a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v3"></path></svg>;
-
 
 // --- API Configuration ---
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
@@ -2517,7 +2517,7 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
                              Все
                          </button>
                          {sortedItemTypes.map(type => (
-                             <button key={type.id} onClick={() => setActiveFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeFilter !== type.name ? '#e5e7eb' : type.color, color: activeFilter !== type.name ? '#374151' : 'white'}}>
+                             <button key={type.id} onClick={() => setActiveFilter(type.name)} className={`flex-shrink-0 flex items-center gap-2 px-3 py-1 text-sm font-semibold rounded-full ${activeFilter === type.name ? 'ring-2 ring-offset-1 ring-blue-500' : ''}`} style={{backgroundColor: activeFilter !== type.name ? '#e5e7eb' : type.color, color: activeItemTypeFilter !== type.name ? '#374151' : 'white'}}>
                                  <div className="w-3 h-3 rounded-full" style={{backgroundColor: 'white'}}></div>
                                  {type.name}
                              </button>

@@ -2076,6 +2076,12 @@
     },
     "log": [
         {
+            "id": "cee23e87-93d2-4b3c-8f0c-3e8cf7a36730",
+            "timestamp": "2025-08-04T06:18:15.751Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
             "id": "d93d031b-7acf-4d41-91e8-7df892eb12f3",
             "timestamp": "2025-08-04T04:39:40.660Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
@@ -3348,7 +3354,7 @@
         },
         {
             "id": "1012a663-8b95-4436-a383-df29bb1fecf8",
-            "name": "FF-CA",
+            "name": "FCA",
             "address": "",
             "description": "",
             "phone": "",
