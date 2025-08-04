@@ -29,6 +29,8 @@ const JournalIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" hei
 const QrIcon = ({ color = "currentColor", width="18", height="18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke={color} strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><rect x="3" y="3" width="7" height="7"></rect><rect x="14" y="3" width="7" height="7"></rect><rect x="3" y="14" width="7" height="7"></rect><line x1="14" y1="14" x2="14.01" y2="14"></line><line x1="21" y1="14" x2="21.01" y2="14"></line><line x1="14" y1="21" x2="14.01" y2="21"></line><line x1="21" y1="21" x2="21.01" y2="21"></line></svg>;
 const SignatureIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8.5"/><path d="m21.1 12.5-6.6 6.6"/><path d="M11 13h3a2 2 0 0 1 2 2v3"/><path d="m15 13 6 6"/><path d="M12.5 21.1 22 11.6"/></svg>;
 const MapPinIcon = ({ width = "18", height = "18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
+const RouteIcon = ({ width = "18", height = "18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2L12 22"></path><path d="M20 16L12 22L4 16"></path><path d="M4 8L12 2L20 8"></path></svg>;
+
 
 // --- API Configuration ---
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io"; 
@@ -65,7 +67,151 @@ const api = {
   registerUser: (userData) => api.request('/register', 'POST', userData),
   updateUser: (userData) => api.request(`/users/${userData.id}`, 'PUT', userData),
   deleteUser: (userId) => api.request(`/users/${userId}`, 'DELETE'),
+  getRouteEta: (origin) => api.request('/get-route-eta', 'POST', { origin }),
 };
+
+// --- [НОВЫЙ КОМПОНЕНТ] RouteConfigurator ---
+const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
+    const [places, setPlaces] = useState(initialConfig || []);
+    const [expandedPlaceId, setExpandedPlaceId] = useState(null);
+
+    const handleAddPlace = () => {
+        const newPlace = {
+            id: crypto.randomUUID(),
+            name: '',
+            address: '',
+            description: '',
+            phone: '',
+            employeeName: '',
+            employeePosition: '',
+            ordinalNumber: places.length,
+            characteristic: 'Погрузка',
+            connections: {}
+        };
+        setPlaces(prev => [...prev, newPlace]);
+        setExpandedPlaceId(newPlace.id);
+    };
+
+    const handlePlaceChange = (placeId, field, value) => {
+        setPlaces(prev => prev.map(p => {
+            if (p.id === placeId) {
+                return { ...p, [field]: value };
+            }
+            return p;
+        }));
+    };
+
+    const handleConnectionChange = (sourceId, targetId, field, value) => {
+        setPlaces(prev => prev.map(p => {
+            if (p.id === sourceId) {
+                const updatedConnections = { ...p.connections };
+                if (!updatedConnections[targetId]) {
+                    updatedConnections[targetId] = { connected: false, distance: '', time: '' };
+                }
+                updatedConnections[targetId] = { ...updatedConnections[targetId], [field]: value };
+                return { ...p, connections: updatedConnections };
+            }
+            return p;
+        }));
+    };
+
+    const handleDeletePlace = (placeId) => {
+        if (window.confirm('Вы уверены, что хотите удалить это место?')) {
+            setPlaces(prev => prev.filter(p => p.id !== placeId));
+        }
+    };
+
+    const handleSaveConfig = () => {
+        onSave(places);
+        alert('Конфигурация маршрута сохранена!');
+    };
+    
+    const sortedPlaces = [...places].sort((a, b) => (a.ordinalNumber || 0) - (b.ordinalNumber || 0));
+
+    return (
+        <div className="p-4 bg-gray-50 rounded-b-xl">
+            <div className="flex justify-between items-center mb-6">
+                <h3 className="text-xl font-bold text-gray-800">Настройка маршрутов</h3>
+                <button onClick={onClose} className="p-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300"><XIcon /></button>
+            </div>
+
+            <div className="space-y-4">
+                {sortedPlaces.map(place => (
+                    <div key={place.id} className="bg-white rounded-lg shadow-sm border">
+                        <div 
+                            className="p-4 cursor-pointer flex justify-between items-center"
+                            onClick={() => setExpandedPlaceId(expandedPlaceId === place.id ? null : place.id)}
+                        >
+                            <h4 className="font-bold text-lg text-gray-800">{place.name || 'Новое место'}</h4>
+                            <div className="flex items-center gap-4">
+                               <span className="text-sm font-mono text-gray-400">#{place.ordinalNumber}</span>
+                               {expandedPlaceId === place.id ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                            </div>
+                        </div>
+
+                        {expandedPlaceId === place.id && (
+                            <div className="p-4 border-t animate-fade-in-up space-y-4">
+                                <div className="grid grid-cols-1 md:grid-cols-2 gap-4">
+                                    <input type="text" placeholder="Название" value={place.name} onChange={e => handlePlaceChange(place.id, 'name', e.target.value)} className="w-full p-2 border rounded-md" />
+                                    <input type="number" placeholder="Порядковый номер" value={place.ordinalNumber} onChange={e => handlePlaceChange(place.id, 'ordinalNumber', parseInt(e.target.value) || 0)} className="w-full p-2 border rounded-md" />
+                                    <input type="text" placeholder="Адрес" value={place.address} onChange={e => handlePlaceChange(place.id, 'address', e.target.value)} className="w-full p-2 border rounded-md md:col-span-2" />
+                                    <textarea placeholder="Описание" value={place.description} onChange={e => handlePlaceChange(place.id, 'description', e.target.value)} className="w-full p-2 border rounded-md md:col-span-2" rows="2"></textarea>
+                                    <input type="text" placeholder="Имя сотрудника" value={place.employeeName} onChange={e => handlePlaceChange(place.id, 'employeeName', e.target.value)} className="w-full p-2 border rounded-md" />
+                                    <input type="text" placeholder="Должность" value={place.employeePosition} onChange={e => handlePlaceChange(place.id, 'employeePosition', e.target.value)} className="w-full p-2 border rounded-md" />
+                                    <input type="tel" placeholder="Номер телефона" value={place.phone} onChange={e => handlePlaceChange(place.id, 'phone', e.target.value)} className="w-full p-2 border rounded-md" />
+                                    <select value={place.characteristic} onChange={e => handlePlaceChange(place.id, 'characteristic', e.target.value)} className="w-full p-2 border rounded-md bg-white">
+                                        <option>Погрузка</option>
+                                        <option>Разгрузка</option>
+                                        <option>Погрузка и разгрузка</option>
+                                    </select>
+                                </div>
+
+                                <div className="pt-4 border-t">
+                                    <h5 className="font-semibold mb-2">Связи с другими местами:</h5>
+                                    <div className="space-y-3 max-h-48 overflow-y-auto">
+                                        {places.filter(p => p.id !== place.id).map(targetPlace => {
+                                            const connection = place.connections?.[targetPlace.id] || { connected: false, distance: '', time: '' };
+                                            return (
+                                                <div key={targetPlace.id} className="grid grid-cols-[1fr,auto,auto,auto] gap-2 items-center text-sm">
+                                                    <span className="font-medium">{targetPlace.name}</span>
+                                                    <button 
+                                                        onClick={() => handleConnectionChange(place.id, targetPlace.id, 'connected', !connection.connected)}
+                                                        className={`px-3 py-1 rounded-full text-xs font-bold ${connection.connected ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}
+                                                    >
+                                                        {connection.connected ? 'Есть' : 'Нет'}
+                                                    </button>
+                                                    {connection.connected && (
+                                                        <>
+                                                            <input type="text" placeholder="Расст." value={connection.distance} onChange={e => handleConnectionChange(place.id, targetPlace.id, 'distance', e.target.value)} className="w-20 p-1 border rounded-md" />
+                                                            <input type="text" placeholder="Время" value={connection.time} onChange={e => handleConnectionChange(place.id, targetPlace.id, 'time', e.target.value)} className="w-20 p-1 border rounded-md" />
+                                                        </>
+                                                    )}
+                                                </div>
+                                            );
+                                        })}
+                                    </div>
+                                </div>
+                                <div className="flex justify-end pt-4 border-t">
+                                    <button onClick={() => handleDeletePlace(place.id)} className="p-2 text-red-500 hover:text-red-700"><TrashIcon /></button>
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                ))}
+            </div>
+
+            <div className="mt-6 flex justify-between items-center">
+                <button onClick={handleAddPlace} className="px-4 py-2 bg-blue-600 text-white rounded-lg hover:bg-blue-700 font-semibold flex items-center gap-2">
+                    <PlusIcon /> Добавить место
+                </button>
+                <button onClick={handleSaveConfig} className="px-6 py-2 bg-green-600 text-white rounded-lg hover:bg-green-700 font-semibold flex items-center gap-2">
+                    <SaveIcon /> Сохранить
+                </button>
+            </div>
+        </div>
+    );
+};
+
 
 const PalletLines = ({ orientation = 'vertical' }) => {
     const longLineStyle = { position: 'absolute', backgroundColor: 'rgb(255, 249, 230)' };
@@ -2118,6 +2264,32 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
     );
 };
 
+const RouteInfoModal = ({ routeInfo, onClose, onOpenMap }) => {
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up text-center">
+                <h2 className="text-2xl font-bold mb-4 text-gray-800">Маршрут</h2>
+                {routeInfo.loading && <p>Получение данных о маршруте...</p>}
+                {routeInfo.error && <p className="text-red-600">{routeInfo.error}</p>}
+                {routeInfo.eta && (
+                    <div className="space-y-4">
+                        <p className="text-lg">{routeInfo.eta}</p>
+                        <button 
+                            onClick={onOpenMap}
+                            className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold"
+                        >
+                            Открыть карту
+                        </button>
+                    </div>
+                )}
+                <div className="mt-6">
+                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -2134,6 +2306,8 @@ export default function App() {
   const [signatures, setSignatures] = useState({});
   const [log, setLog] = useState([]);
   const [writeOffLog, setWriteOffLog] = useState([]);
+  const [routeInfo, setRouteInfo] = useState({ eta: null, loading: false, error: null, url: null });
+  const [routeConfig, setRouteConfig] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
   
   // Modals and editors state
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null);
@@ -2203,12 +2377,33 @@ export default function App() {
         const destination = "10681 Production Ave, Fontana, CA 92337";
     
         if (navigator.geolocation) {
+            setRouteInfo({ eta: null, loading: true, error: null, url: null });
+    
             navigator.geolocation.getCurrentPosition(
-                (position) => {
+                async (position) => {
                     const { latitude, longitude } = position.coords;
                     const origin = `${latitude},${longitude}`;
-                    const url = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(destination)}`;
-                    window.open(url, '_blank');
+                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(destination)}`;
+    
+                    try {
+                        // ПРИМЕЧАНИЕ: Для этой части требуется эндпоинт на вашем сервере (/get-route-eta),
+                        // который безопасно вызовет Google Maps API с вашим ключом.
+                        // const etaData = await api.getRouteEta({ latitude, longitude });
+                        // const arrivalTime = new Date(Date.now() + etaData.durationInSeconds * 1000);
+    
+                        // --- ВРЕМЕННОЕ РЕШЕНИЕ (без backend): Открываем карту напрямую ---
+                        // Замените этот блок на реальный вызов API, когда он будет готов.
+                        setRouteInfo({
+                            eta: `Нажмите "Открыть карту", чтобы построить маршрут.`,
+                            loading: false,
+                            error: null,
+                            url: mapsUrl
+                        });
+                        // --- КОНЕЦ ВРЕМЕННОГО РЕШЕНИЯ ---
+    
+                    } catch (error) {
+                        setRouteInfo({ eta: null, loading: false, error: 'Не удалось рассчитать маршрут. ' + error.message, url: null });
+                    }
                 },
                 (error) => {
                     let errorMessage = "Не удалось получить вашу геолокацию. ";
@@ -2226,7 +2421,7 @@ export default function App() {
                             errorMessage += "Произошла неизвестная ошибка.";
                             break;
                     }
-                    alert(errorMessage);
+                    setRouteInfo({ eta: null, loading: false, error: errorMessage, url: null });
                 }
             );
         } else {
@@ -2353,6 +2548,7 @@ export default function App() {
       setSignatures({});
       setLog([]);
       setWriteOffLog([]);
+      setRouteConfig([]); // <-- СБРОС
       setWarehouseIdForEditor(null);
   };
 
@@ -2474,6 +2670,7 @@ export default function App() {
                   setSignatures(appData.signatures || {});
                   setLog(appData.log || []);
                   setWriteOffLog(appData.writeOffLog || []);
+                  setRouteConfig(appData.routeConfig || []); // <-- ЗАГРУЗКА
                   setUsers(usersData || []);
                   hasLoadedData.current = true;
               } catch (error) {
@@ -2490,7 +2687,7 @@ export default function App() {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
 
     setIsSaving(true);
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog };
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig }; // <-- ДОБАВЛЕНО В СОХРАНЕНИЕ
     api.saveAppData(currentUser.id, fullState)
       .catch(error => {
         console.error("Ошибка при автоматическом сохранении данных:", error);
@@ -2498,10 +2695,10 @@ export default function App() {
       .finally(() => {
         setIsSaving(false);
       });
-  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, currentUser, loading]);
+  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, currentUser, loading]);
 
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2519,7 +2716,7 @@ export default function App() {
             try {
                 const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
 
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog };
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog, routeConfig: currentState.routeConfig };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
@@ -2528,6 +2725,7 @@ export default function App() {
                     setSignatures(newData.signatures || {});
                     setLog(newData.log || []);
                     setWriteOffLog(newData.writeOffLog || []);
+                    setRouteConfig(newData.routeConfig || []);
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
@@ -3040,7 +3238,7 @@ export default function App() {
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
                                     >
                                         <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
-                                        <span className="font-semibold text-gray-700">переместить/удалить позицию</span>
+                                        <span className="font-semibold text-gray-700">Переместить/удалить позицию</span>
                                     </button>
                                     <button
                                         onClick={handleRouteClick}
@@ -3048,6 +3246,14 @@ export default function App() {
                                     >
                                         <div className="p-2 bg-orange-100 text-orange-600 rounded-lg"><MapPinIcon /></div>
                                         <span className="font-semibold text-gray-700">Маршрут</span>
+                                    </button>
+                                    {/* --- НОВАЯ КНОПКА --- */}
+                                    <button
+                                        onClick={() => setMainViewTab('routeConfig')}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><RouteIcon /></div>
+                                        <span className="font-semibold text-gray-700">Настройка маршрута</span>
                                     </button>
                                 </div>
                             </div>
@@ -3218,6 +3424,17 @@ export default function App() {
                                 </div>
                             </div>
                         )}
+                        {/* --- НОВЫЙ РАЗДЕЛ --- */}
+                        {mainViewTab === 'routeConfig' && (
+                            <RouteConfigurator 
+                                initialConfig={routeConfig}
+                                onSave={(newConfig) => {
+                                    setRouteConfig(newConfig);
+                                    addLogEntry('Обновил конфигурацию маршрутов');
+                                }}
+                                onClose={() => setMainViewTab('mainMenu')}
+                            />
+                        )}
                     </div>
                 </div>
             </div>
@@ -3244,6 +3461,13 @@ export default function App() {
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       {itemForAction && <ItemActionModal itemToAction={itemForAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleItemActionMove} onWriteOff={handleItemActionWriteOff} onCancel={() => setItemForAction(null)} />}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
+      {(routeInfo.loading || routeInfo.eta || routeInfo.error) && 
+        <RouteInfoModal 
+            routeInfo={routeInfo} 
+            onClose={() => setRouteInfo({ eta: null, loading: false, error: null, url: null })}
+            onOpenMap={() => window.open(routeInfo.url, '_blank')}
+        />
+      }
       {isScenariosModalOpen && <ScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={(scenario, newStatus) => setPendingAction({ scenario, newStatus })} onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onDelete={handleDeleteScenario} onClose={() => setScenariosModalOpen(false)} onPrint={(scenario) => setScenarioToPrint(scenario)} />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
