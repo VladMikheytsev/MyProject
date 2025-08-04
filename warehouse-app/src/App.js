@@ -3417,11 +3417,6 @@ export default function App() {
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
 
-  const viewingPlac
-
-  const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
-  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
-
   const viewingPlace = warehouses.find(w => w.id === viewingPlaceInfo?.warehouseId)?.places?.find(p => p.id === viewingPlaceInfo?.placeId);
   const itemsOnViewingPlace = items.filter(i => i.placeId === viewingPlaceInfo?.placeId && i.warehouseId === viewingPlaceInfo?.warehouseId);
   const notificationCount = scenarios.filter(s => s.status === 'new' || s.status === 'accepted').length;
@@ -3555,6 +3550,14 @@ export default function App() {
                                     >
                                         <div className="p-2 bg-purple-100 text-purple-600 rounded-lg"><RouteIcon /></div>
                                         <span className="font-semibold text-gray-700">Настройка маршрута</span>
+                                    </button>
+                                    {/* --- НОВАЯ КНОПКА --- */}
+                                    <button
+                                        onClick={() => setDriverSettingsModalOpen(true)}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-pink-100 text-pink-600 rounded-lg"><CarIcon /></div>
+                                        <span className="font-semibold text-gray-700">Настройка водителей</span>
                                     </button>
                                 </div>
                             </div>
@@ -3725,7 +3728,6 @@ export default function App() {
                                 </div>
                             </div>
                         )}
-                        {/* --- НОВЫЙ РАЗДЕЛ --- */}
                         {mainViewTab === 'routeConfig' && (
                             <RouteConfigurator 
                                 initialConfig={routeConfig}
@@ -3759,6 +3761,7 @@ export default function App() {
       {isUserModerationModalOpen && <UserModerationModal users={users} warehouses={warehouses} onSave={handleUpdateUser} onDelete={handleDeleteUser} onClose={() => setUserModerationModalOpen(false)} currentUser={currentUser} />}
       {isLogModalOpen && userRole === 'Администратор' && <LogModal log={log} users={users} onClose={() => setLogModalOpen(false)} />}
       {isWriteOffLogOpen && userRole === 'Администратор' && <WriteOffLogModal log={writeOffLog} users={users} signatures={signatures} onClose={() => setWriteOffLogOpen(false)} />}
+      {isDriverSettingsModalOpen && userRole === 'Администратор' && <DriverSettingsModal drivers={users.filter(u => u.role === 'Водитель')} onSaveDriver={handleUpdateUser} onClose={() => setDriverSettingsModalOpen(false)} />}
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       {itemForAction && <ItemActionModal itemToAction={itemForAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleItemActionMove} onWriteOff={handleItemActionWriteOff} onCancel={() => setItemForAction(null)} />}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
