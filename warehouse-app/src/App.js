@@ -2,16 +2,11 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 // import { useReactToPrint } from 'react-to-print';
 // import QRCode from 'qrcode';
 // import SignatureCanvas from 'react-signature-canvas';
-// import moment from 'moment';
-// import 'moment/dist/locale/ru';
+import moment from 'moment';
+import 'moment/dist/locale/ru';
 
-// Load moment.js from CDN to avoid module not found errors
-// This is a temporary solution for the sandbox environment
-const moment = window.moment;
-if (moment) {
-    moment.locale('ru');
-}
-
+// Set Russian locale for moment.js
+moment.locale('ru');
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -490,20 +485,22 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
     const printComponentRef = useRef();
     const titleRef = useRef(null);
 
-    const handlePrint = useReactToPrint({
-        content: () => printComponentRef.current,
-        documentTitle: `Labels-${item.name}`,
-    });
+    // const handlePrint = useReactToPrint({
+    //     content: () => printComponentRef.current,
+    //     documentTitle: `Labels-${item.name}`,
+    // });
     
     useEffect(() => {
         const generateQr = async () => {
             const qrString = item.id;
             try {
-                const url = await QRCode.toDataURL(qrString, {
-                    width: 256,
-                    margin: 2,
-                });
-                setQrCodeUrl(url);
+                // const url = await QRCode.toDataURL(qrString, {
+                //     width: 256,
+                //     margin: 2,
+                // });
+                // setQrCodeUrl(url);
+                // Placeholder for QRCode generation
+                setQrCodeUrl('https://placehold.co/256x256/E5E7EB/A1A1AA?text=QR+Code+Placeholder');
             } catch (err) {
                 console.error('Не удалось сгенерировать QR-код:', err);
             }
@@ -531,6 +528,10 @@ const QRCodePrintModal = ({ item, user, onClose }) => {
         }
 
     }, [item.name, qrCodeUrl]);
+    
+    const handlePrint = () => {
+        alert('Функция печати не поддерживается в этом окружении.');
+    };
 
     return (
         <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
@@ -1103,8 +1104,9 @@ const ContactsModal = ({ users, warehouses, onClose, onOpenModeration, userRole 
 const DriverSettingsModal = ({ drivers, onSaveDriver, onClose }) => {
   const [expandedDriverId, setExpandedDriverId] = useState(null);
   const daysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
-  const now = moment();
-  const [currentMonth, setCurrentMonth] = useState(now);
+  // const now = moment();
+  const now = new Date();
+  const [currentMonth, setCurrentMonth] = useState(moment(now));
   const [selectedDayForNonWork, setSelectedDayForNonWork] = useState(null);
   const [nonWorkTimes, setNonWorkTimes] = useState({});
 
@@ -1886,11 +1888,12 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
     };
 
     const handleCreate = () => {
-        if (signatureRef.current.isEmpty()) {
-            alert('Пожалуйста, поставьте свою подпись.');
-            return;
-        }
-        const signatureData = signatureRef.current.toDataURL();
+        // if (signatureRef.current.isEmpty()) {
+        //     alert('Пожалуйста, поставьте свою подпись.');
+        //     return;
+        // }
+        // const signatureData = signatureRef.current.toDataURL();
+        const signatureData = 'placeholder-signature-data';
         onCreate({ fromWarehouseId, toWarehouseId, items: selectedItems, driverId, signatureData });
     };
 
@@ -1956,17 +1959,20 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
                         <h2 className="text-2xl font-bold mb-4">Новая задача: Шаг 3/3 - Подпись</h2>
                         <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения создания задачи.</p>
                         <div ref={signatureContainerRef} className="bg-gray-100 rounded-lg border-2 border-dashed w-full h-48">
-                             <SignatureCanvas 
+                             {/* <SignatureCanvas 
                                 ref={signatureRef} 
                                 canvasProps={{ 
                                     width: signatureCanvasSize.width, 
                                     height: signatureCanvasSize.height, 
                                     className: 'block' 
                                 }} 
-                             />
+                             /> */}
+                             <p className="text-center text-sm text-gray-500 py-16">
+                                 Функция подписи недоступна без внешней библиотеки.
+                             </p>
                         </div>
                          <div className="flex justify-center gap-4 mt-4">
-                             <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>
+                             {/* <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button> */}
                          </div>
                         <div className="flex justify-between items-center mt-8">
                             <button onClick={() => setStep(2)} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300"><ArrowLeftIcon /></button>
@@ -1988,7 +1994,7 @@ const LoginView = ({ onLogin, onSwitchToRegister }) => {
         e.preventDefault();
         setError('');
         if (!username || !password) {
-            setError('Имя пользователя и пароль обязательны.');
+            alert('Имя пользователя и пароль обязательны.');
             return;
         }
         try {
@@ -2040,7 +2046,7 @@ const RegisterView = ({ onRegister, onSwitchToLogin, warehouses }) => {
         setError('');
         const { username, password, firstName, lastName, position, phone } = formData;
         if (!username || !password || !firstName || !lastName || !position || !phone) {
-            setError('Все поля обязательны для заполнения.');
+            alert('Все поля обязательны для заполнения.');
             return;
         }
         try {
@@ -2342,11 +2348,12 @@ const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
     }, []);
 
     const handleConfirm = () => {
-        if (signatureRef.current.isEmpty()) {
-            alert('Пожалуйста, поставьте подпись для подтверждения.');
-            return;
-        }
-        const signatureData = signatureRef.current.toDataURL();
+        // if (signatureRef.current.isEmpty()) {
+        //     alert('Пожалуйста, поставьте подпись для подтверждения.');
+        //     return;
+        // }
+        // const signatureData = signatureRef.current.toDataURL();
+        const signatureData = 'placeholder-signature-data';
         onConfirm(signatureData);
     };
 
@@ -2356,17 +2363,20 @@ const ActionConfirmationModal = ({ title, onConfirm, onCancel }) => {
                 <h2 className="text-2xl font-bold mb-4">{title}</h2>
                 <p className="text-gray-600 mb-4">Пожалуйста, поставьте вашу подпись для подтверждения действия.</p>
                 <div ref={signatureContainerRef} className="bg-gray-100 rounded-lg border-2 border-dashed w-full h-48">
-                    <SignatureCanvas 
+                    {/* <SignatureCanvas 
                         ref={signatureRef} 
                         canvasProps={{ 
                             width: signatureCanvasSize.width, 
                             height: signatureCanvasSize.height, 
                             className: 'block' 
                         }} 
-                    />
+                    /> */}
+                    <p className="text-center text-sm text-gray-500 py-16">
+                         Функция подписи недоступна без внешней библиотеки.
+                    </p>
                 </div>
                 <div className="flex justify-center gap-4 mt-4">
-                    <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button>
+                    {/* <button onClick={() => signatureRef.current.clear()} className="text-sm font-semibold text-gray-600 hover:text-black">Очистить</button> */}
                 </div>
                 <div className="flex justify-between items-center mt-8">
                     <button onClick={onCancel} className="flex items-center justify-center w-16 h-16 rounded-full text-gray-600 bg-gray-200 hover:bg-gray-300">
