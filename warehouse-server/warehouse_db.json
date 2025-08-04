@@ -2076,6 +2076,54 @@
     },
     "log": [
         {
+            "id": "d93d031b-7acf-4d41-91e8-7df892eb12f3",
+            "timestamp": "2025-08-04T04:39:40.660Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "939757b8-9103-4f2c-b7c1-3f6b0af0dcc1",
+            "timestamp": "2025-08-04T04:35:53.742Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "2c71ef80-e1c0-42ff-868e-74a765807e23",
+            "timestamp": "2025-08-04T04:35:39.963Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "90a2a4a9-4b88-489b-85be-cdf843000709",
+            "timestamp": "2025-08-04T04:35:29.827Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "b727ac6e-fd6b-4d88-b165-759d8f8290e0",
+            "timestamp": "2025-08-04T04:35:14.894Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "8d596f0d-7958-4a56-a92f-dcad64ba5a80",
+            "timestamp": "2025-08-04T04:35:04.411Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "e37e22fc-1fa6-4e49-ba59-b2bbcf1b2202",
+            "timestamp": "2025-08-04T04:34:49.856Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
+            "id": "8a48e585-6a96-4ab5-8665-35cd974daa78",
+            "timestamp": "2025-08-04T04:34:37.472Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
             "id": "f907436d-657e-44f9-a4a2-7a290bb8bd58",
             "timestamp": "2025-08-04T04:24:39.730Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
@@ -3256,6 +3304,176 @@
             "timestamp": "2025-07-28T02:13:58.599Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
             "action": "Открыл журнал действий"
+        }
+    ],
+    "writeOffLog": [],
+    "routeConfig": [
+        {
+            "id": "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7",
+            "name": "SAN",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 1,
+            "characteristic": "Погрузка",
+            "connections": {
+                "1012a663-8b95-4436-a383-df29bb1fecf8": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "12ff3db0-4cff-444e-94cb-9333de74e79c": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "8ed5b03b-dc80-44b7-8f46-61bcc934daf1": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "98a67464-d68c-4091-a83b-eb03389fd722": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                }
+            }
+        },
+        {
+            "id": "1012a663-8b95-4436-a383-df29bb1fecf8",
+            "name": "FF-CA",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 0,
+            "characteristic": "Погрузка",
+            "connections": {
+                "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7": {
+                    "connected": false,
+                    "distance": "",
+                    "time": ""
+                },
+                "8ed5b03b-dc80-44b7-8f46-61bcc934daf1": {
+                    "connected": false,
+                    "distance": "",
+                    "time": ""
+                }
+            }
+        },
+        {
+            "id": "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2",
+            "name": "CAT",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 2,
+            "characteristic": "Погрузка",
+            "connections": {}
+        },
+        {
+            "id": "12ff3db0-4cff-444e-94cb-9333de74e79c",
+            "name": "DUA",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 3,
+            "characteristic": "Погрузка и разгрузка",
+            "connections": {
+                "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7": {
+                    "connected": false,
+                    "distance": "",
+                    "time": ""
+                },
+                "8ed5b03b-dc80-44b7-8f46-61bcc934daf1": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                }
+            }
+        },
+        {
+            "id": "8ed5b03b-dc80-44b7-8f46-61bcc934daf1",
+            "name": "NOH",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 4,
+            "characteristic": "Погрузка",
+            "connections": {
+                "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "98a67464-d68c-4091-a83b-eb03389fd722": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "1012a663-8b95-4436-a383-df29bb1fecf8": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                }
+            }
+        },
+        {
+            "id": "98a67464-d68c-4091-a83b-eb03389fd722",
+            "name": "NO2",
+            "address": "",
+            "description": "",
+            "phone": "",
+            "employeeName": "",
+            "employeePosition": "",
+            "ordinalNumber": 5,
+            "characteristic": "Погрузка",
+            "connections": {
+                "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "12ff3db0-4cff-444e-94cb-9333de74e79c": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                },
+                "8ed5b03b-dc80-44b7-8f46-61bcc934daf1": {
+                    "connected": true,
+                    "distance": "",
+                    "time": ""
+                }
+            }
         }
     ]
 }

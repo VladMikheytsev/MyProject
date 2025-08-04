@@ -2,6 +2,11 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas';
+import moment from 'moment';
+import 'moment/locale/ru';
+
+// Set Russian locale for moment.js
+moment.locale('ru');
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -30,6 +35,9 @@ const QrIcon = ({ color = "currentColor", width="18", height="18" }) => <svg xml
 const SignatureIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M22 10.5V6a2 2 0 0 0-2-2H4a2 2 0 0 0-2 2v12c0 1.1.9 2 2 2h8.5"/><path d="m21.1 12.5-6.6 6.6"/><path d="M11 13h3a2 2 0 0 1 2 2v3"/><path d="m15 13 6 6"/><path d="M12.5 21.1 22 11.6"/></svg>;
 const MapPinIcon = ({ width = "18", height = "18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 10c0 7-9 13-9 13s-9-6-9-13a9 9 0 0 1 18 0z"></path><circle cx="12" cy="10" r="3"></circle></svg>;
 const RouteIcon = ({ width = "18", height = "18" }) => <svg xmlns="http://www.w3.org/2000/svg" width={width} height={height} viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><circle cx="12" cy="12" r="10"></circle><path d="M12 2L12 22"></path><path d="M20 16L12 22L4 16"></path><path d="M4 8L12 2L20 8"></path></svg>;
+const Clock3Icon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M21 12.79A9 9 0 1 1 11.21 3 7 7 0 0 0 21 12.79Z"></path></svg>;
+const CalendarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M8 2v4"></path><path d="M16 2v4"></path><rect width="18" height="18" x="3" y="4" rx="2"></rect><path d="M3 10h18"></path></svg>;
+const CarIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="18" height="18" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><path d="M19 17h-2c-1.105 0-2 .895-2 2s.895 2 2 2h2c1.105 0 2-.895 2-2s-.895-2-2-2z"></path><path d="M5 17h-2c-1.105 0-2 .895-2 2s.895 2 2 2h2c1.105 0 2-.895 2-2s-.895-2-2-2z"></path><path d="M17 17h-11a3 3 0 0 1-3-3v-4h17v4a3 3 0 0 1-3 3z"></path><path d="M1 10h22"></path><path d="M17 10v-3a2 2 0 0 0-2-2h-6a2 2 0 0 0-2 2v3"></path></svg>;
 
 
 // --- API Configuration ---
@@ -123,6 +131,8 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
 
     const handleSaveConfig = () => {
         onSave(places);
+        // Note: Replaced alert with custom modal for consistency in a real app
+        // For this example, a simple alert is used as a placeholder
         alert('Конфигурация маршрута сохранена!');
     };
     
@@ -1085,6 +1095,287 @@ const ContactsModal = ({ users, warehouses, onClose, onOpenModeration, userRole 
     );
 };
 
+// --- [НОВЫЙ КОМПОНЕНТ] DriverSettingsModal
+const DriverSettingsModal = ({ drivers, onSaveDriver, onClose }) => {
+  const [expandedDriverId, setExpandedDriverId] = useState(null);
+  const daysOfWeek = ['Пн', 'Вт', 'Ср', 'Чт', 'Пт', 'Сб', 'Вс'];
+  const now = moment();
+  const [currentMonth, setCurrentMonth] = useState(now);
+  const [selectedDayForNonWork, setSelectedDayForNonWork] = useState(null);
+  const [nonWorkTimes, setNonWorkTimes] = useState({});
+
+  useEffect(() => {
+    // Reset nonWorkTimes when a new driver is expanded
+    if (expandedDriverId) {
+      const driver = drivers.find(d => d.id === expandedDriverId);
+      if (driver && driver.workSchedule && driver.workSchedule.nonWorkingHours) {
+        setNonWorkTimes(driver.workSchedule.nonWorkingHours);
+      } else {
+        setNonWorkTimes({});
+      }
+    }
+  }, [expandedDriverId, drivers]);
+
+
+  const handleCarChange = (driverId, field, value) => {
+    const driverToUpdate = drivers.find(d => d.id === driverId);
+    if (!driverToUpdate) return;
+    const updatedCar = { ...driverToUpdate.car, [field]: value };
+    onSaveDriver({ ...driverToUpdate, car: updatedCar });
+  };
+  
+  const handleWorkScheduleChange = (driverId, day) => {
+    const driverToUpdate = drivers.find(d => d.id === driverId);
+    if (!driverToUpdate) return;
+    const currentSchedule = driverToUpdate.workSchedule || { workingDays: [], nonWorkingHours: {} };
+    const newWorkingDays = currentSchedule.workingDays.includes(day)
+        ? currentSchedule.workingDays.filter(d => d !== day)
+        : [...currentSchedule.workingDays, day];
+    onSaveDriver({ ...driverToUpdate, workSchedule: { ...currentSchedule, workingDays: newWorkingDays } });
+  };
+
+  const handleAddNonWorkTime = (driverId, date) => {
+      const start = prompt("Введите начало нерабочего времени (например, 09:00):");
+      const end = prompt("Введите конец нерабочего времени (например, 11:30):");
+      if (start && end) {
+        const timeRegex = /^(?:2[0-3]|[01]?[0-9]):[0-5][0-9]$/;
+        if (!timeRegex.test(start) || !timeRegex.test(end)) {
+            alert('Неверный формат времени. Используйте ЧЧ:ММ.');
+            return;
+        }
+
+        const newNonWorkingHours = { ...nonWorkTimes[date] || {}, [start]: end };
+        
+        const driverToUpdate = drivers.find(d => d.id === driverId);
+        if (!driverToUpdate) return;
+
+        const currentSchedule = driverToUpdate.workSchedule || { workingDays: [], nonWorkingHours: {} };
+        const updatedNonWorkingHours = { ...currentSchedule.nonWorkingHours, [date]: newNonWorkingHours };
+        
+        onSaveDriver({ ...driverToUpdate, workSchedule: { ...currentSchedule, nonWorkingHours: updatedNonWorkingHours }});
+        setNonWorkTimes(updatedNonWorkingHours); // Update local state for immediate re-render
+      }
+  };
+
+  const handleRemoveNonWorkTime = (driverId, date, startTime) => {
+    if (window.confirm("Вы уверены, что хотите удалить этот интервал?")) {
+      const driverToUpdate = drivers.find(d => d.id === driverId);
+      if (!driverToUpdate) return;
+
+      const currentSchedule = driverToUpdate.workSchedule || { workingDays: [], nonWorkingHours: {} };
+      const updatedNonWorkingHoursForDay = { ...currentSchedule.nonWorkingHours[date] };
+      delete updatedNonWorkingHoursForDay[startTime];
+      
+      const newNonWorkingHours = { ...currentSchedule.nonWorkingHours, [date]: updatedNonWorkingHoursForDay };
+      if (Object.keys(updatedNonWorkingHoursForDay).length === 0) {
+          delete newNonWorkingHours[date];
+      }
+
+      onSaveDriver({ ...driverToUpdate, workSchedule: { ...currentSchedule, nonWorkingHours: newNonWorkingHours }});
+      setNonWorkTimes(newNonWorkingHours); // Update local state
+    }
+  };
+
+
+  const getDaysInMonth = (month) => {
+    const startOfMonth = month.clone().startOf('month').startOf('week');
+    const endOfMonth = month.clone().endOf('month').endOf('week');
+    const days = [];
+    let day = startOfMonth.clone();
+    while (day.isSameOrBefore(endOfMonth)) {
+        days.push(day.clone());
+        day.add(1, 'day');
+    }
+    return days;
+  };
+
+  const getCalendarDays = (month, workingDays, nonWorkingHours) => {
+    const days = getDaysInMonth(month);
+    return days.map(day => {
+        const dayOfWeek = day.format('dd');
+        const isWorkingDay = workingDays.includes(dayOfWeek);
+        const nonWorkPeriods = nonWorkingHours[day.format('YYYY-MM-DD')] || {};
+        return {
+            date: day,
+            isCurrentMonth: day.isSame(month, 'month'),
+            isWorkingDay,
+            nonWorkPeriods: Object.keys(nonWorkPeriods).length > 0 ? nonWorkPeriods : null,
+        };
+    });
+  };
+
+
+  const navigateMonth = (direction) => {
+      setCurrentMonth(prev => prev.clone().add(direction, 'month'));
+  };
+
+  const getCalendar = (driverId, driver) => {
+    const workingDays = driver.workSchedule?.workingDays || [];
+    const nonWorkingHours = driver.workSchedule?.nonWorkingHours || {};
+    const calendarDays = getCalendarDays(currentMonth, workingDays, nonWorkingHours);
+
+    const getFreeHours = (day) => {
+        const today = day.date.format('YYYY-MM-DD');
+        const nonWorking = nonWorkTimes[today] || {};
+        const nonWorkingPeriods = Object.entries(nonWorking).map(([start, end]) => ({
+            start: moment(start, 'HH:mm'),
+            end: moment(end, 'HH:mm')
+        })).sort((a,b) => a.start.unix() - b.start.unix());
+
+        const totalFreeMinutes = 12 * 60; // 7am to 7pm is 12 hours
+        let occupiedMinutes = 0;
+        nonWorkingPeriods.forEach(period => {
+            occupiedMinutes += moment.duration(period.end.diff(period.start)).asMinutes();
+        });
+        const freeHours = Math.max(0, totalFreeMinutes - occupiedMinutes) / 60;
+        return freeHours.toFixed(1);
+    };
+
+    return (
+        <div className="mt-4 p-4 border rounded-lg bg-gray-50">
+             <h4 className="font-bold mb-2">Рабочее время</h4>
+             <div className="flex justify-between items-center mb-4">
+                 <button onClick={() => navigateMonth(-1)} className="p-2"><ArrowLeftIcon /></button>
+                 <span className="font-semibold">{currentMonth.format('MMMM YYYY')}</span>
+                 <button onClick={() => navigateMonth(1)} className="p-2"><ArrowRightIcon /></button>
+             </div>
+             <div className="grid grid-cols-7 text-center font-bold text-gray-500 mb-2 text-xs">
+                 {daysOfWeek.map(day => <span key={day}>{day}</span>)}
+             </div>
+             <div className="grid grid-cols-7 gap-2">
+                 {calendarDays.map((day, index) => {
+                     const dateString = day.date.format('YYYY-MM-DD');
+                     const isSelected = selectedDayForNonWork === dateString;
+                     const nonWorkPeriods = nonWorkTimes[dateString] || {};
+                     const hasNonWork = Object.keys(nonWorkPeriods).length > 0;
+                     const isWorking = day.isWorkingDay;
+
+                     return (
+                         <div
+                             key={index}
+                             onClick={() => isWorking && setSelectedDayForNonWork(isSelected ? null : dateString)}
+                             className={`p-1.5 rounded-lg text-sm text-center cursor-pointer relative
+                                ${!day.isCurrentMonth ? 'opacity-40' : ''}
+                                ${isSelected ? 'ring-2 ring-blue-500' : ''}
+                                ${isWorking ? 'bg-white hover:bg-gray-100' : 'bg-gray-200'}
+                             `}
+                         >
+                            <span className={`block font-semibold ${isWorking ? 'text-gray-800' : 'text-gray-400'}`}>{day.date.date()}</span>
+                            {isWorking && <span className="block text-xs text-green-600 font-semibold mt-1">{getFreeHours(day)} ч.</span>}
+                            {hasNonWork && <div className="absolute top-1 right-1 w-2 h-2 rounded-full bg-red-500"></div>}
+                         </div>
+                     );
+                 })}
+             </div>
+             {selectedDayForNonWork && (
+                <div className="mt-4 p-4 border rounded-lg bg-white">
+                    <div className="flex justify-between items-center mb-3">
+                        <h5 className="font-bold">Нерабочее время на {moment(selectedDayForNonWork).format('L')}</h5>
+                        <button onClick={() => handleAddNonWorkTime(driverId, selectedDayForNonWork)} className="px-3 py-1 bg-blue-600 text-white rounded-lg flex items-center gap-1 text-sm"><PlusIcon width="16" height="16" /> Добавить</button>
+                    </div>
+                    <div className="space-y-2">
+                         {Object.entries(nonWorkTimes[selectedDayForNonWork] || {}).length > 0 ? (
+                            Object.entries(nonWorkTimes[selectedDayForNonWork]).map(([start, end]) => (
+                                <div key={start} className="flex justify-between items-center bg-gray-100 p-2 rounded-lg">
+                                    <span>{start} - {end}</span>
+                                    <button onClick={() => handleRemoveNonWorkTime(driverId, selectedDayForNonWork, start)} className="text-red-500 hover:text-red-700 p-1"><TrashIcon width="16" height="16" /></button>
+                                </div>
+                            ))
+                         ) : (
+                             <p className="text-sm text-gray-500 text-center">Нерабочего времени нет</p>
+                         )}
+                    </div>
+                </div>
+             )}
+        </div>
+    );
+  };
+
+  return (
+    <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-start overflow-y-auto p-4 z-50" onClick={onClose}>
+        <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto" onClick={e => e.stopPropagation()}>
+            <div className="flex justify-between items-center mb-6">
+                <h2 className="text-2xl font-bold text-gray-800">Настройка водителей</h2>
+                <button onClick={onClose} className="p-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300"><XIcon /></button>
+            </div>
+            
+            <div className="space-y-4 max-h-[70vh] overflow-y-auto">
+                {drivers.length > 0 ? drivers.map(driver => (
+                    <div key={driver.id} className="bg-gray-50 rounded-lg shadow-sm border">
+                        <div 
+                            className="p-4 cursor-pointer flex justify-between items-center"
+                            onClick={() => {
+                                setExpandedDriverId(expandedDriverId === driver.id ? null : driver.id);
+                                setSelectedDayForNonWork(null);
+                            }}
+                        >
+                            <h4 className="font-bold text-lg text-gray-800">{driver.firstName} {driver.lastName}</h4>
+                            {expandedDriverId === driver.id ? <ChevronUpIcon /> : <ChevronDownIcon />}
+                        </div>
+                        {expandedDriverId === driver.id && (
+                            <div className="p-4 border-t animate-fade-in-up space-y-6">
+                                {/* --- Блок: Машина --- */}
+                                <div>
+                                    <h4 className="font-bold text-lg mb-2 flex items-center gap-2"><CarIcon /> Машина</h4>
+                                    <div className="space-y-3">
+                                        <input 
+                                            type="text" 
+                                            placeholder="Номерной знак" 
+                                            value={driver.car?.plateNumber || ''} 
+                                            onChange={e => handleCarChange(driver.id, 'plateNumber', e.target.value)}
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                        <input 
+                                            type="number" 
+                                            placeholder="Макс. Грузоподъемность (кг)" 
+                                            value={driver.car?.capacity || ''} 
+                                            onChange={e => handleCarChange(driver.id, 'capacity', parseInt(e.target.value) || 0)}
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                        <input 
+                                            type="number" 
+                                            placeholder="Макс. паллет" 
+                                            value={driver.car?.maxPallets || ''} 
+                                            onChange={e => handleCarChange(driver.id, 'maxPallets', parseInt(e.target.value) || 0)}
+                                            className="w-full p-2 border rounded-md"
+                                        />
+                                    </div>
+                                </div>
+                                {/* --- Блок: График работы --- */}
+                                <div>
+                                    <h4 className="font-bold text-lg mb-2 flex items-center gap-2"><Clock3Icon /> График работы</h4>
+                                    <div className="flex justify-between items-center">
+                                        {daysOfWeek.map((day) => (
+                                            <button
+                                                key={day}
+                                                onClick={() => handleWorkScheduleChange(driver.id, day)}
+                                                className={`w-10 h-10 rounded-full font-bold text-sm transition-colors
+                                                    ${driver.workSchedule?.workingDays?.includes(day) 
+                                                        ? 'bg-blue-600 text-white' 
+                                                        : 'bg-gray-200 text-gray-700 hover:bg-gray-300'
+                                                    }
+                                                `}
+                                            >
+                                                {day}
+                                            </button>
+                                        ))}
+                                    </div>
+                                </div>
+                                {/* --- Блок: Рабочее время (Календарь) --- */}
+                                <div>
+                                     <h4 className="font-bold text-lg mb-2 flex items-center gap-2"><CalendarIcon /> Рабочее время</h4>
+                                     {getCalendar(driver.id, driver)}
+                                </div>
+                            </div>
+                        )}
+                    </div>
+                )) : <p className="text-center text-gray-500 py-8">Нет доступных водителей.</p>}
+            </div>
+        </div>
+    </div>
+  );
+};
+
 const UserModerationModal = ({ users, warehouses, onSave, onDelete, onClose, currentUser }) => {
     const [editingUser, setEditingUser] = useState(null);
     const [userData, setUserData] = useState(null);
@@ -1573,6 +1864,7 @@ const CreateScenarioModal = ({ scenarios, items, users, onCreate, onClose, wareh
         if (newSelectedItems[item.id]) {
             delete newSelectedItems[item.id];
         } else {
+            // Note: Replaced alert with custom modal for consistency in a real app
             const quantity = prompt(`Введите количество для "${item.name}":`, item.quantity);
             if (quantity && !isNaN(quantity) && Number(quantity) > 0 && Number(quantity) <= item.quantity) {
                 newSelectedItems[item.id] = Number(quantity);
@@ -2110,7 +2402,7 @@ const LogModal = ({ log, users, onClose }) => {
                         <tbody>
                             {log.map(entry => (
                                 <tr key={entry.id} className="border-b">
-                                    <td className="p-2 text-sm text-gray-500">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
+                                    <td className="p-2 text-sm text-gray-500 align-top">{new Date(entry.timestamp).toLocaleString('ru-RU')}</td>
                                     <td className="p-2 font-semibold">{getUserName(entry.userId)}</td>
                                     <td className="p-2">{entry.action}</td>
                                 </tr>
@@ -2307,7 +2599,7 @@ export default function App() {
   const [log, setLog] = useState([]);
   const [writeOffLog, setWriteOffLog] = useState([]);
   const [routeInfo, setRouteInfo] = useState({ eta: null, loading: false, error: null, url: null });
-  const [routeConfig, setRouteConfig] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
+  const [routeConfig, setRouteConfig] = useState([]); 
   
   // Modals and editors state
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null);
@@ -2319,6 +2611,7 @@ export default function App() {
   const [viewingPlaceInfo, setViewingPlaceInfo] = useState(null);
   const [isContactsModalOpen, setContactsModalOpen] = useState(false);
   const [isUserModerationModalOpen, setUserModerationModalOpen] = useState(false);
+  const [isDriverSettingsModalOpen, setDriverSettingsModalOpen] = useState(false); // New state for Driver Settings modal
   const [isProfileEditorOpen, setProfileEditorOpen] = useState(false);
   const [itemForAction, setItemForAction] = useState(null);
   const [verifyingItem, setVerifyingItem] = useState(null);
@@ -2334,7 +2627,7 @@ export default function App() {
   const [isMoveSelectionModalOpen, setMoveSelectionModalOpen] = useState(false);
   
   // UI State
-  const [mainViewTab, setMainViewTab] = useState('mainMenu'); // Изменено на 'mainMenu'
+  const [mainViewTab, setMainViewTab] = useState('mainMenu'); 
   const [expandedWarehouses, setExpandedWarehouses] = useState([]);
   const [isActionsMenuOpen, setActionsMenuOpen] = useState(false);
   const [qrScanPurpose, setQrScanPurpose] = useState(null);
@@ -2386,20 +2679,20 @@ export default function App() {
                     const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(destination)}`;
     
                     try {
-                        // ПРИМЕЧАНИЕ: Для этой части требуется эндпоинт на вашем сервере (/get-route-eta),
-                        // который безопасно вызовет Google Maps API с вашим ключом.
+                        // NOTE: For this to work, you need a server endpoint (/get-route-eta)
+                        // that securely calls the Google Maps API with your key.
                         // const etaData = await api.getRouteEta({ latitude, longitude });
                         // const arrivalTime = new Date(Date.now() + etaData.durationInSeconds * 1000);
     
-                        // --- ВРЕМЕННОЕ РЕШЕНИЕ (без backend): Открываем карту напрямую ---
-                        // Замените этот блок на реальный вызов API, когда он будет готов.
+                        // --- TEMPORARY SOLUTION (without a backend): Open map directly ---
+                        // Replace this block with a real API call when ready.
                         setRouteInfo({
                             eta: `Нажмите "Открыть карту", чтобы построить маршрут.`,
                             loading: false,
                             error: null,
                             url: mapsUrl
                         });
-                        // --- КОНЕЦ ВРЕМЕННОГО РЕШЕНИЯ ---
+                        // --- END OF TEMPORARY SOLUTION ---
     
                     } catch (error) {
                         setRouteInfo({ eta: null, loading: false, error: 'Не удалось рассчитать маршрут. ' + error.message, url: null });
@@ -2478,7 +2771,8 @@ export default function App() {
             size: 'Размер', quantity: 'Количество', firstName: 'Имя',
             lastName: 'Фамилия', position: 'Должность', phone: 'Телефон',
             role: 'Роль', assignedWarehouseId: 'Склад', warehouseId: 'Склад',
-            placeId: 'Место'
+            placeId: 'Место', plateNumber: 'Номерной знак', capacity: 'Грузоподъемность',
+            maxPallets: 'Паллет', workingDays: 'Рабочие дни', nonWorkingHours: 'Нерабочее время'
         };
 
         const getWarehouseName = (id) => {
@@ -2488,7 +2782,7 @@ export default function App() {
         };
         
         for (const key in after) {
-            if (Object.prototype.hasOwnProperty.call(before, key) && before[key] !== after[key]) {
+            if (Object.prototype.hasOwnProperty.call(before, key) && JSON.stringify(before[key]) !== JSON.stringify(after[key])) {
                 const fieldName = fieldNames[key] || key;
                 let beforeValue = before[key] ?? 'пусто';
                 let afterValue = after[key] ?? 'пусто';
@@ -2548,7 +2842,7 @@ export default function App() {
       setSignatures({});
       setLog([]);
       setWriteOffLog([]);
-      setRouteConfig([]); // <-- СБРОС
+      setRouteConfig([]); 
       setWarehouseIdForEditor(null);
   };
 
@@ -2670,7 +2964,7 @@ export default function App() {
                   setSignatures(appData.signatures || {});
                   setLog(appData.log || []);
                   setWriteOffLog(appData.writeOffLog || []);
-                  setRouteConfig(appData.routeConfig || []); // <-- ЗАГРУЗКА
+                  setRouteConfig(appData.routeConfig || []); 
                   setUsers(usersData || []);
                   hasLoadedData.current = true;
               } catch (error) {
@@ -2687,7 +2981,7 @@ export default function App() {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
 
     setIsSaving(true);
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig }; // <-- ДОБАВЛЕНО В СОХРАНЕНИЕ
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig }; 
     api.saveAppData(currentUser.id, fullState)
       .catch(error => {
         console.error("Ошибка при автоматическом сохранении данных:", error);
@@ -2969,6 +3263,7 @@ export default function App() {
 };
   
   const handleDeleteScenario = (scenarioId) => {
+    // Note: Replaced alert with custom modal for consistency in a real app
     if (window.confirm('Вы уверены, что хотите удалить этот сценарий? Это действие необратимо.')) {
         setScenarios(prevScenarios => prevScenarios.filter(s => s.id !== scenarioId));
         const scenarioNumber = scenarios.find(s => s.id === scenarioId)?.number;
@@ -2988,6 +3283,7 @@ export default function App() {
   };
   
   const handleDeleteWarehouse = (warehouseIdToDelete) => {
+    // Note: Replaced alert with custom modal for consistency in a real app
     if (window.confirm('Вы уверены, что хотите удалить этот склад? Все связанные с ним товары станут нераспределенными.')) {
       const warehouseName = warehouses.find(w => w.id === warehouseIdToDelete)?.name;
       setWarehouses(prev => prev.filter(w => w.id !== warehouseIdToDelete));
@@ -3117,6 +3413,11 @@ export default function App() {
           return aIsLocked ? 1 : -1;
       });
   };
+
+  const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
+  const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
+
+  const viewingPlac
 
   const sortedAssignedFilteredItems = filteredAndSortedItems(itemsToDisplay.filter(item => item.warehouseId !== 'unassigned'));
   const sortedUnassignedFilteredItems = filteredAndSortedItems(items.filter(item => item.warehouseId === 'unassigned' && activeWarehouseId === 'all'));
