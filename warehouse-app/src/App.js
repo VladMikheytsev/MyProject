@@ -3,7 +3,6 @@ import { useReactToPrint } from 'react-to-print';
 import QRCode from 'qrcode';
 import SignatureCanvas from 'react-signature-canvas';
 import moment from 'moment';
-import 'moment/locale/ru';
 
 // Set Russian locale for moment.js
 moment.locale('ru');
