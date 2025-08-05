@@ -1,12 +1,10 @@
 import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
-// import { useReactToPrint } from 'react-to-print';
-// import QRCode from 'qrcode';
-// import SignatureCanvas from 'react-signature-canvas';
-// import moment from 'moment'; // Удалено, так как moment будет загружаться глобально
-// import 'moment/dist/locale/ru'; // Удалено, так как locale будет устанавливаться через глобальный moment
+import { useReactToPrint } from 'react-to-print';
+import QRCode from 'qrcode';
+import SignatureCanvas from 'react-signature-canvas';
+import moment from 'moment'; // Удалено, так как moment будет загружаться глобально
+import 'moment/dist/locale/ru'; // Удалено, так как locale будет устанавливаться через глобальный moment
 
-// Load moment.js from CDN to avoid module not found errors
-// This is a temporary solution for the sandbox environment
 const moment = window.moment;
 if (moment) {
     moment.locale('ru');
