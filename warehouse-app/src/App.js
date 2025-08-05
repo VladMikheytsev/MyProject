@@ -2,11 +2,16 @@ import React, { useState, useEffect, useRef, useLayoutEffect } from 'react';
 // import { useReactToPrint } from 'react-to-print';
 // import QRCode from 'qrcode';
 // import SignatureCanvas from 'react-signature-canvas';
-import moment from 'moment';
-import 'moment/dist/locale/ru';
+// import moment from 'moment'; // Удалено, так как moment будет загружаться глобально
+// import 'moment/dist/locale/ru'; // Удалено, так как locale будет устанавливаться через глобальный moment
 
-// Set Russian locale for moment.js
-moment.locale('ru');
+// Load moment.js from CDN to avoid module not found errors
+// This is a temporary solution for the sandbox environment
+const moment = window.moment;
+if (moment) {
+    moment.locale('ru');
+}
+
 
 // --- Иконки (SVG) ---
 const PlusIcon = () => <svg xmlns="http://www.w3.org/2000/svg" width="20" height="20" viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="2" strokeLinecap="round" strokeLinejoin="round"><line x1="12" y1="5" x2="12" y2="19"></line><line x1="5" y1="12" x2="19" y2="12"></line></svg>;
@@ -2759,10 +2764,9 @@ export default function App() {
       return () => window.removeEventListener('resize', updateHeaderHeight);
     }, []);
 
-  const handlePrintScenario = useReactToPrint({
-      content: () => scenarioPrintRef.current,
-      onAfterPrint: () => setScenarioToPrint(null),
-  });
+  const handlePrintScenario = () => {
+      alert('Функция печати не поддерживается в этом окружении.');
+  };
 
   useEffect(() => {
       if (scenarioToPrint) {
