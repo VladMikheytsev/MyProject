@@ -7,9 +7,9 @@ from pydantic import BaseModel
 import json
 import uuid
 import os
-from typing import Optional, List
-import random
-from datetime import datetime, timedelta
+from typing import Optional
+import random # For simulating API response
+import datetime # For simulating API response
 
 # --- Конфигурация ---
 DB_FILE = "warehouse_db.json"
@@ -43,12 +43,6 @@ db = {
 }
 
 # --- Модели данных (Pydantic) ---
-
-class RoutePayload(BaseModel):
-    startPoint: str
-    endPoint: str
-    departureTime: str # Ожидается в формате "HH:MM"
-
 class UserRegistration(BaseModel):
     username: str
     password: str
@@ -61,6 +55,10 @@ class UserRegistration(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
+    
+class RouteETAPayload(BaseModel):
+    origin: str
+    destination: str
 
 class AppData(BaseModel):
     warehouses: list
@@ -71,7 +69,7 @@ class AppData(BaseModel):
     log: Optional[list] = None
     writeOffLog: Optional[list] = None
     routeConfig: Optional[list] = None
-    routes: Optional[List[dict]] = None # <-- ОБНОВЛЕНО
+    routes: Optional[list] = None # <-- ДОБАВЛЕНО
 
 
 def load_data():
@@ -80,8 +78,16 @@ def load_data():
         with open(DB_FILE, 'r', encoding='utf-8') as f:
             loaded_db = json.load(f)
             # Убедимся, что все ключи присутствуют
-            for key, default_value in db.items():
-                 db[key] = loaded_db.get(key, default_value)
+            db["warehouses"] = loaded_db.get("warehouses", [])
+            db["items"] = loaded_db.get("items", [])
+            db["itemTypes"] = loaded_db.get("itemTypes", [])
+            db["users"] = loaded_db.get("users", [])
+            db["scenarios"] = loaded_db.get("scenarios", [])
+            db["signatures"] = loaded_db.get("signatures", {})
+            db["log"] = loaded_db.get("log", [])
+            db["writeOffLog"] = loaded_db.get("writeOffLog", [])
+            db["routeConfig"] = loaded_db.get("routeConfig", [])
+            db["routes"] = loaded_db.get("routes", []) # <-- ДОБАВЛЕНО
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         db["users"] = [
@@ -102,7 +108,7 @@ def load_data():
 def save_data():
     with open(DB_FILE, 'w', encoding='utf-8') as f:
         json.dump(db, f, ensure_ascii=False, indent=4)
-    # print(f"💾 Данные сохранены в {DB_FILE}") # Можно закомментировать, чтобы не спамить в консоль
+    print(f"💾 Данные сохранены в {DB_FILE}")
 
 # --- Вспомогательная функция для получения пользователя по ID ---
 def get_user_by_id(user_id: str):
@@ -118,70 +124,44 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-def _get_simulated_eta(origin: str, destination: str):
+# [НОВЫЙ ЭНДПОИНТ]
+@app.post("/calculate-eta")
+async def get_route_eta(payload: RouteETAPayload):
     """
     Эмулирует вызов Google Maps API для получения времени в пути.
-    В реальном приложении здесь будет HTTP-запрос к API Google.
+    В реальном приложении здесь будет HTTP-запрос к API Google
+    с использованием библиотеки, такой как 'requests' или 'httpx'.
     """
+    # GOOGLE_API_KEY = "ВАШ_КЛЮЧ_Maps_API"
+    # url = f"https://maps.googleapis.com/maps/api/directions/json?origin={payload.origin}&destination={payload.destination}&key={GOOGLE_API_KEY}"
+    #
+    # try:
+    #     async with httpx.AsyncClient() as client:
+    #         response = await client.get(url)
+    #         response.raise_for_status()
+    #         data = response.json()
+    #         # ... (парсинг ответа)
+    # except Exception as e:
+    #     raise HTTPException(status_code=500, detail=f"Ошибка при вызове Google API: {e}")
+
     # Эмуляция: возвращаем случайное время в секундах (от 30 минут до 5 часов)
     duration_in_seconds = random.randint(30 * 60, 5 * 60 * 60)
     
     # Эмуляция: форматированный текст с временем в пути
-    duration = timedelta(seconds=duration_in_seconds)
+    duration = datetime.timedelta(seconds=duration_in_seconds)
     hours, remainder = divmod(duration.seconds, 3600)
     minutes, _ = divmod(remainder, 60)
     
     # Формируем человекочитаемую строку
     if hours > 0:
-        duration_text = f"{hours} ч {minutes} мин"
+        duration_text = f"Примерно {hours} ч {minutes} мин"
     else:
-        duration_text = f"{minutes} мин"
+        duration_text = f"Примерно {minutes} мин"
 
     return {
         "duration_seconds": duration_in_seconds,
         "duration_text": duration_text
     }
-
-@app.get("/routes", response_model=List[dict])
-async def get_all_routes():
-    """Возвращает список всех созданных маршрутов."""
-    return sorted(db.get("routes", []), key=lambda x: x.get('createdAt'), reverse=True)
-
-
-@app.post("/routes", status_code=201)
-async def create_new_route(payload: RoutePayload):
-    """Создает новый маршрут, вычисляет время прибытия и сохраняет его."""
-    
-    # 1. Получаем смоделированное время в пути
-    eta_data = _get_simulated_eta(payload.startPoint, payload.endPoint)
-    duration_seconds = eta_data["duration_seconds"]
-    
-    # 2. Вычисляем время
-    try:
-        departure_time = datetime.strptime(payload.departureTime, "%H:%M").time()
-        now_date = datetime.now().date()
-        actual_departure_datetime = datetime.combine(now_date, departure_time)
-        
-        arrival_datetime = actual_departure_datetime + timedelta(seconds=duration_seconds)
-    except ValueError:
-        raise HTTPException(status_code=400, detail="Неверный формат времени. Ожидается HH:MM.")
-
-    # 3. Создаем объект нового маршрута
-    new_route = {
-        "id": str(uuid.uuid4()),
-        "startPoint": payload.startPoint,
-        "endPoint": payload.endPoint,
-        "actualDepartureTime": actual_departure_datetime.strftime('%H:%M'),
-        "plannedArrivalTime": arrival_datetime.strftime('%H:%M'),
-        "travelDuration": eta_data["duration_text"],
-        "createdAt": datetime.utcnow().isoformat()
-    }
-
-    # 4. Сохраняем в базу данных
-    db["routes"].append(new_route)
-    save_data()
-    
-    return new_route
 
 
 @app.get("/data/for-registration")
@@ -196,12 +176,20 @@ async def get_app_data(user_id: str):
     if not user:
         raise HTTPException(status_code=403, detail="Неверный пользователь")
 
-    data_to_return = db.copy()
+    data_to_return = {
+        "warehouses": db.get("warehouses", []),
+        "items": db.get("items", []),
+        "itemTypes": db.get("itemTypes", []),
+        "scenarios": db.get("scenarios", []),
+        "signatures": db.get("signatures", {}),
+        "routeConfig": db.get("routeConfig", []),
+        "routes": db.get("routes", []) # <-- ДОБАВЛЕНО
+    }
 
-    # Удаляем журналы, если пользователь - не администратор
-    if user.get("role") != "Администратор":
-        data_to_return.pop("log", None)
-        data_to_return.pop("writeOffLog", None)
+    # Возвращаем журналы только если пользователь - администратор
+    if user.get("role") == "Администратор":
+        data_to_return["log"] = db.get("log", [])
+        data_to_return["writeOffLog"] = db.get("writeOffLog", [])
     
     return data_to_return
 
@@ -213,7 +201,6 @@ async def save_app_data(user_id: str, data: AppData):
     if not user:
         raise HTTPException(status_code=403, detail="Неверный пользователь")
 
-    # Обновляем все поля из полученных данных
     db["warehouses"] = data.warehouses
     db["items"] = data.items
     db["itemTypes"] = data.itemTypes
@@ -222,8 +209,8 @@ async def save_app_data(user_id: str, data: AppData):
     
     if data.routeConfig is not None:
         db["routeConfig"] = data.routeConfig
-    
-    if data.routes is not None:
+        
+    if data.routes is not None: # <-- ДОБАВЛЕНО
         db["routes"] = data.routes
 
     # Только администратор может обновлять журналы
