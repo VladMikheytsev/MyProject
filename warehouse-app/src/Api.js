@@ -1,6 +1,4 @@
-// api.js 
-
-///
+// api.js
 const API_BASE_URL = "https://warehouse-vlad.ngrok.io";
 
 const request = async (endpoint, method = 'GET', body = null) => {
