@@ -2263,6 +2263,186 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
     );
 };
 
+const CreateNeedModal = ({ routeConfig, onSave, onClose }) => {
+    const [step, setStep] = useState(1);
+    const [startPlaceId, setStartPlaceId] = useState(null);
+    const [endPlaceId, setEndPlaceId] = useState(null);
+    const [positions, setPositions] = useState([{ id: crypto.randomUUID(), name: '', type: 'Шт', quantity: 1 }]);
+
+    const PALLET_PRODUCT_TYPE = 'Паллет продукции';
+    const MAX_PALLET_PRODUCT_QUANTITY = 6720;
+    const POSITION_TYPES = ["Шт", "Коробка", "Паллет", "Паллет продукции"];
+
+    const handlePositionChange = (id, field, value) => {
+        const newPositions = positions.map(p => p.id === id ? { ...p, [field]: value } : p);
+
+        if (field === 'quantity' || field === 'type') {
+            const totalPalletProductQuantity = newPositions
+                .filter(p => p.type === PALLET_PRODUCT_TYPE)
+                .reduce((sum, p) => sum + (Number(p.quantity) || 0), 0);
+            
+            if (totalPalletProductQuantity > MAX_PALLET_PRODUCT_QUANTITY) {
+                alert('Уведомление: превышение веса!');
+            }
+        }
+        setPositions(newPositions);
+    };
+
+    const addPositionRow = () => {
+        setPositions([...positions, { id: crypto.randomUUID(), name: '', type: 'Шт', quantity: 1 }]);
+    };
+    
+    const removePositionRow = (id) => {
+        setPositions(positions.filter(p => p.id !== id));
+    };
+
+    const handleSaveClick = () => {
+        const startPlace = routeConfig.find(p => p.id === startPlaceId);
+        const connection = startPlace?.connections?.[endPlaceId];
+        
+        const validPositions = positions.filter(p => p.name && p.quantity > 0);
+        
+        if (!startPlaceId || !endPlaceId || validPositions.length === 0) {
+            alert("Пожалуйста, выберите маршрут и заполните хотя бы одну позицию.");
+            return;
+        }
+
+        const newNeed = {
+            id: crypto.randomUUID(),
+            startPlaceId,
+            endPlaceId,
+            positions: validPositions,
+            distance: connection?.distance || 'N/A',
+            time: connection?.time || 'N/A',
+            createdAt: new Date().toISOString()
+        };
+        onSave(newNeed);
+    };
+
+    const startPlace = routeConfig.find(p => p.id === startPlaceId);
+    const availableEndPlaces = startPlace 
+        ? routeConfig.filter(p => startPlace.connections?.[p.id]?.connected)
+        : [];
+        
+    const renderStep = () => {
+        switch (step) {
+            case 1:
+                return (
+                    <div>
+                        <h3 className="text-xl font-bold mb-4">Шаг 1: Выберите место погрузки</h3>
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                            {routeConfig.map(place => (
+                                <button key={place.id} onClick={() => { setStartPlaceId(place.id); setStep(2); }} className="w-full text-left p-3 bg-gray-100 hover:bg-blue-100 rounded-lg">
+                                    {place.name}
+                                </button>
+                            ))}
+                        </div>
+                    </div>
+                );
+            case 2:
+                return (
+                    <div>
+                        <h3 className="text-xl font-bold mb-4">Шаг 2: Выберите место выгрузки</h3>
+                        <p className="text-sm text-gray-500 mb-3">Из: <span className="font-semibold">{startPlace?.name}</span></p>
+                        <div className="space-y-2 max-h-80 overflow-y-auto">
+                            {availableEndPlaces.length > 0 ? availableEndPlaces.map(place => (
+                                <button key={place.id} onClick={() => { setEndPlaceId(place.id); setStep(3); }} className="w-full text-left p-3 bg-gray-100 hover:bg-blue-100 rounded-lg">
+                                    {place.name}
+                                </button>
+                            )) : <p className="text-gray-500">Для данного места нет связанных маршрутов.</p>}
+                        </div>
+                    </div>
+                );
+            case 3:
+                return (
+                    <div>
+                        <h3 className="text-xl font-bold mb-4">Шаг 3: Заполните позиции</h3>
+                        <div className="space-y-3 max-h-64 overflow-y-auto pr-2">
+                           {positions.map((pos, index) => (
+                               <div key={pos.id} className="grid grid-cols-[1fr,auto,auto,auto] gap-2 items-center p-2 bg-gray-50 rounded-lg">
+                                   <input type="text" placeholder={`Позиция #${index + 1}`} value={pos.name} onChange={e => handlePositionChange(pos.id, 'name', e.target.value)} className="w-full p-2 border rounded-md" />
+                                   <select value={pos.type} onChange={e => handlePositionChange(pos.id, 'type', e.target.value)} className="p-2 border rounded-md bg-white">
+                                       {POSITION_TYPES.map(t => <option key={t} value={t}>{t}</option>)}
+                                   </select>
+                                   <input type="number" min="1" value={pos.quantity} onChange={e => handlePositionChange(pos.id, 'quantity', e.target.value)} className="w-20 p-2 border rounded-md" />
+                                   <button onClick={() => removePositionRow(pos.id)} className="p-2 text-red-500 hover:text-red-700"><TrashIcon width="20" height="20"/></button>
+                               </div>
+                           ))}
+                        </div>
+                        <button onClick={addPositionRow} className="mt-4 px-4 py-2 bg-blue-100 text-blue-700 rounded-lg text-sm font-semibold flex items-center gap-2"><PlusIcon/> Добавить позицию</button>
+                    </div>
+                );
+            default:
+                return null;
+        }
+    }
+    
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-2xl p-6 animate-fade-in-up my-auto flex flex-col" style={{ maxHeight: '90vh' }}>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">Создать потребность</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="flex-grow overflow-y-auto">
+                    {renderStep()}
+                </div>
+                <div className="flex justify-between items-center mt-6 pt-4 border-t">
+                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Отмена</button>
+                    {step > 1 && <button onClick={() => setStep(s => s - 1)} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Назад</button>}
+                    {step === 3 && <button onClick={handleSaveClick} className="px-6 py-2 rounded-lg text-white bg-green-600 hover:bg-green-700 font-semibold">Сохранить</button>}
+                </div>
+            </div>
+        </div>
+    );
+};
+
+const RequestsListModal = ({ needs, routeConfig, onClose }) => {
+    const getPlaceName = (placeId) => {
+        return routeConfig.find(p => p.id === placeId)?.name || 'Неизвестное место';
+    }
+
+    const sortedNeeds = [...needs].sort((a,b) => new Date(b.createdAt) - new Date(a.createdAt));
+
+    return (
+        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
+            <div className="bg-white rounded-xl shadow-2xl w-full max-w-3xl p-6 animate-fade-in-up my-auto flex flex-col" style={{ maxHeight: '90vh' }}>
+                <div className="flex justify-between items-center mb-4">
+                    <h2 className="text-2xl font-bold text-gray-800">Созданные заявки</h2>
+                    <button onClick={onClose} className="text-gray-400 hover:text-gray-700"><XIcon /></button>
+                </div>
+                <div className="flex-grow overflow-y-auto space-y-4">
+                    {sortedNeeds.length > 0 ? sortedNeeds.map(need => (
+                        <div key={need.id} className="bg-gray-50 rounded-lg p-4 border">
+                           <div className="flex justify-between items-start mb-2">
+                               <div>
+                                    <p className="font-bold text-lg">{getPlaceName(need.startPlaceId)} → {getPlaceName(need.endPlaceId)}</p>
+                                    <p className="text-xs text-gray-400">Создано: {new Date(need.createdAt).toLocaleString('ru-RU')}</p>
+                               </div>
+                               <div className="text-right text-sm">
+                                   <p>Расстояние: <span className="font-semibold">{need.distance}</span></p>
+                                   <p>Время: <span className="font-semibold">{need.time}</span></p>
+                               </div>
+                           </div>
+                           <div className="border-t pt-2">
+                               <h4 className="font-semibold mb-1">Позиции:</h4>
+                               <ul className="list-disc list-inside text-sm space-y-1">
+                                   {need.positions.map(pos => (
+                                       <li key={pos.id}>{pos.name} - {pos.quantity} {pos.type}</li>
+                                   ))}
+                               </ul>
+                           </div>
+                        </div>
+                    )) : <p className="text-center text-gray-500 py-10">Нет созданных заявок.</p>}
+                </div>
+                 <div className="flex justify-end items-center mt-6 pt-4 border-t">
+                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
+                </div>
+            </div>
+        </div>
+    );
+};
+
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -2279,7 +2459,8 @@ export default function App() {
   const [signatures, setSignatures] = useState({});
   const [log, setLog] = useState([]);
   const [writeOffLog, setWriteOffLog] = useState([]);
-  const [routeConfig, setRouteConfig] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
+  const [routeConfig, setRouteConfig] = useState([]);
+  const [createdNeeds, setCreatedNeeds] = useState([]);
   
   // Modals and editors state
   const [warehouseIdForEditor, setWarehouseIdForEditor] = useState(null);
@@ -2304,6 +2485,8 @@ export default function App() {
   const [isWriteOffLogOpen, setWriteOffLogOpen] = useState(false);
   const [isWriteOffModalOpen, setWriteOffModalOpen] = useState(false);
   const [isMoveSelectionModalOpen, setMoveSelectionModalOpen] = useState(false);
+  const [isCreateNeedModalOpen, setCreateNeedModalOpen] = useState(false);
+  const [isRequestsListModalOpen, setRequestsListModalOpen] = useState(false);
   
   // UI State
   const [mainViewTab, setMainViewTab] = useState('mainMenu'); // Изменено на 'mainMenu'
@@ -2464,7 +2647,8 @@ export default function App() {
       setSignatures({});
       setLog([]);
       setWriteOffLog([]);
-      setRouteConfig([]); // <-- СБРОС
+      setRouteConfig([]);
+      setCreatedNeeds([]);
       setWarehouseIdForEditor(null);
   };
 
@@ -2586,7 +2770,8 @@ export default function App() {
                   setSignatures(appData.signatures || {});
                   setLog(appData.log || []);
                   setWriteOffLog(appData.writeOffLog || []);
-                  setRouteConfig(appData.routeConfig || []); // <-- ЗАГРУЗКА
+                  setRouteConfig(appData.routeConfig || []);
+                  setCreatedNeeds(appData.createdNeeds || []);
                   setUsers(usersData || []);
                   hasLoadedData.current = true;
               } catch (error) {
@@ -2603,7 +2788,7 @@ export default function App() {
     if (!hasLoadedData.current || !currentUser || (loading && !hasLoadedData.current)) return;
 
     setIsSaving(true);
-    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig }; // <-- ДОБАВЛЕНО В СОХРАНЕНИЕ
+    const fullState = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, createdNeeds };
     api.saveAppData(currentUser.id, fullState)
       .catch(error => {
         console.error("Ошибка при автоматическом сохранении данных:", error);
@@ -2611,10 +2796,10 @@ export default function App() {
       .finally(() => {
         setIsSaving(false);
       });
-  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, currentUser, loading]);
+  }, [warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, createdNeeds, currentUser, loading]);
 
     const stateRef = useRef();
-    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
+    stateRef.current = { warehouses, items, itemTypes, scenarios, signatures, log, writeOffLog, routeConfig, createdNeeds, users, editingWarehouse, isPlacesEditorOpen, isItemEditorOpen, isItemTypesManagerOpen, itemForAction, isCreateScenarioModalOpen, verifyingItem, editingItem, isScenariosModalOpen, isSaving };
 
     useEffect(() => {
         if (!currentUser || currentUser.role === 'На модерации') {
@@ -2632,7 +2817,7 @@ export default function App() {
             try {
                 const [newData, newUsers] = await Promise.all([api.fetchAppData(currentUser.id), api.fetchUsers()]);
 
-                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog, routeConfig: currentState.routeConfig };
+                const currentAppData = { warehouses: currentState.warehouses, items: currentState.items, itemTypes: currentState.itemTypes, scenarios: currentState.scenarios, signatures: currentState.signatures, log: currentState.log, writeOffLog: currentState.writeOffLog, routeConfig: currentState.routeConfig, createdNeeds: currentState.createdNeeds };
                 if (JSON.stringify(newData) !== JSON.stringify(currentAppData)) {
                     setWarehouses(newData.warehouses || []);
                     setItems(newData.items || []);
@@ -2642,6 +2827,7 @@ export default function App() {
                     setLog(newData.log || []);
                     setWriteOffLog(newData.writeOffLog || []);
                     setRouteConfig(newData.routeConfig || []);
+                    setCreatedNeeds(newData.createdNeeds || []);
                 }
 
                 if (JSON.stringify(newUsers) !== JSON.stringify(currentState.users)) {
@@ -2941,6 +3127,14 @@ export default function App() {
     setPendingWriteOff({ item: item });
   };
 
+  const handleSaveNeed = (newNeed) => {
+      setCreatedNeeds(prev => [...prev, newNeed]);
+      const startPlace = routeConfig.find(p => p.id === newNeed.startPlaceId)?.name;
+      const endPlace = routeConfig.find(p => p.id === newNeed.endPlaceId)?.name;
+      addLogEntry(`Создал потребность: ${startPlace} -> ${endPlace}`);
+      setCreateNeedModalOpen(false);
+  };
+
   const useSwipeNavigation = (itemCount) => {
     const [activeIndex, setActiveIndex] = useState(0);
     const touchStartX = useRef(0);
@@ -3143,11 +3337,18 @@ export default function App() {
                                 <h3 className="text-xl font-bold text-gray-800 mb-6">Управление складом:</h3>
                                 <div className="space-y-4 max-w-md mx-auto">
                                     <button
-                                        onClick={() => setItemEditorOpen(true)}
+                                        onClick={() => setCreateNeedModalOpen(true)}
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
                                     >
                                         <div className="p-2 bg-blue-100 text-blue-600 rounded-lg"><FilePlusIcon /></div>
-                                        <span className="font-semibold text-gray-700">Создать позицию</span>
+                                        <span className="font-semibold text-gray-700">Создать потребность</span>
+                                    </button>
+                                     <button
+                                        onClick={() => setRequestsListModalOpen(true)}
+                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
+                                    >
+                                        <div className="p-2 bg-indigo-100 text-indigo-600 rounded-lg"><JournalIcon /></div>
+                                        <span className="font-semibold text-gray-700">Созданные заявки</span>
                                     </button>
                                     <button
                                         onClick={() => setMoveSelectionModalOpen(true)}
@@ -3156,7 +3357,6 @@ export default function App() {
                                         <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
                                         <span className="font-semibold text-gray-700">Переместить/удалить позицию</span>
                                     </button>
-                                    {/* --- НОВАЯ КНОПКА --- */}
                                     <button
                                         onClick={() => setMainViewTab('routeConfig')}
                                         className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
@@ -3333,7 +3533,6 @@ export default function App() {
                                 </div>
                             </div>
                         )}
-                        {/* --- НОВЫЙ РАЗДЕЛ --- */}
                         {mainViewTab === 'routeConfig' && (
                             <RouteConfigurator 
                                 initialConfig={routeConfig}
@@ -3387,6 +3586,8 @@ export default function App() {
             setMoveSelectionModalOpen(false);
         }} 
       />}
+      {isCreateNeedModalOpen && <CreateNeedModal routeConfig={routeConfig} onSave={handleSaveNeed} onClose={() => setCreateNeedModalOpen(false)} />}
+      {isRequestsListModalOpen && <RequestsListModal needs={createdNeeds} routeConfig={routeConfig} onClose={() => setRequestsListModalOpen(false)} />}
 
       
       {/* --- Print Documents (Hidden) --- */}
