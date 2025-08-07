@@ -2077,6 +2077,12 @@
     },
     "log": [
         {
+            "id": "7eabbe5b-5249-4208-90d5-dbbc52b847ae",
+            "timestamp": "2025-08-07T05:00:39.412Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Создал потребность: SAN -> FCA"
+        },
+        {
             "id": "31841278-70b6-4045-bc18-8755cc134eaa",
             "timestamp": "2025-08-07T03:05:45.450Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
@@ -3495,5 +3501,5 @@
             }
         }
     ],
-    "routes": []
+    "createdNeeds": []
 }

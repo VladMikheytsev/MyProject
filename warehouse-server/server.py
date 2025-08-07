@@ -8,8 +8,6 @@ import json
 import uuid
 import os
 from typing import Optional
-import random # For simulating API response
-import datetime # For simulating API response
 
 # --- Конфигурация ---
 DB_FILE = "warehouse_db.json"
@@ -39,7 +37,7 @@ db = {
     "log": [],
     "writeOffLog": [],
     "routeConfig": [],
-    "routes": [] # <-- ДОБАВЛЕНО
+    "createdNeeds": [] # <-- ИЗМЕНЕНО ДЛЯ ХРАНЕНИЯ ЗАЯВОК
 }
 
 # --- Модели данных (Pydantic) ---
@@ -55,10 +53,6 @@ class UserRegistration(BaseModel):
 class UserLogin(BaseModel):
     username: str
     password: str
-    
-class RouteETAPayload(BaseModel):
-    origin: str
-    destination: str
 
 class AppData(BaseModel):
     warehouses: list
@@ -69,7 +63,7 @@ class AppData(BaseModel):
     log: Optional[list] = None
     writeOffLog: Optional[list] = None
     routeConfig: Optional[list] = None
-    routes: Optional[list] = None # <-- ДОБАВЛЕНО
+    createdNeeds: Optional[list] = None # <-- ДОБАВЛЕНО ДЛЯ ЗАЯВОК
 
 
 def load_data():
@@ -87,7 +81,7 @@ def load_data():
             db["log"] = loaded_db.get("log", [])
             db["writeOffLog"] = loaded_db.get("writeOffLog", [])
             db["routeConfig"] = loaded_db.get("routeConfig", [])
-            db["routes"] = loaded_db.get("routes", []) # <-- ДОБАВЛЕНО
+            db["createdNeeds"] = loaded_db.get("createdNeeds", []) # <-- ДОБАВЛЕНО
         print(f"✅ Данные загружены из {DB_FILE}")
     else:
         db["users"] = [
@@ -124,46 +118,6 @@ async def startup_event():
 
 # --- Эндпоинты (маршруты) API ---
 
-# [НОВЫЙ ЭНДПОИНТ]
-@app.post("/calculate-eta")
-async def get_route_eta(payload: RouteETAPayload):
-    """
-    Эмулирует вызов Google Maps API для получения времени в пути.
-    В реальном приложении здесь будет HTTP-запрос к API Google
-    с использованием библиотеки, такой как 'requests' или 'httpx'.
-    """
-    # GOOGLE_API_KEY = "ВАШ_КЛЮЧ_Maps_API"
-    # url = f"https://maps.googleapis.com/maps/api/directions/json?origin={payload.origin}&destination={payload.destination}&key={GOOGLE_API_KEY}"
-    #
-    # try:
-    #     async with httpx.AsyncClient() as client:
-    #         response = await client.get(url)
-    #         response.raise_for_status()
-    #         data = response.json()
-    #         # ... (парсинг ответа)
-    # except Exception as e:
-    #     raise HTTPException(status_code=500, detail=f"Ошибка при вызове Google API: {e}")
-
-    # Эмуляция: возвращаем случайное время в секундах (от 30 минут до 5 часов)
-    duration_in_seconds = random.randint(30 * 60, 5 * 60 * 60)
-    
-    # Эмуляция: форматированный текст с временем в пути
-    duration = datetime.timedelta(seconds=duration_in_seconds)
-    hours, remainder = divmod(duration.seconds, 3600)
-    minutes, _ = divmod(remainder, 60)
-    
-    # Формируем человекочитаемую строку
-    if hours > 0:
-        duration_text = f"Примерно {hours} ч {minutes} мин"
-    else:
-        duration_text = f"Примерно {minutes} мин"
-
-    return {
-        "duration_seconds": duration_in_seconds,
-        "duration_text": duration_text
-    }
-
-
 @app.get("/data/for-registration")
 async def get_data_for_registration():
     # Этот эндпоинт возвращает только неконфиденциальные данные, необходимые для регистрации
@@ -183,7 +137,7 @@ async def get_app_data(user_id: str):
         "scenarios": db.get("scenarios", []),
         "signatures": db.get("signatures", {}),
         "routeConfig": db.get("routeConfig", []),
-        "routes": db.get("routes", []) # <-- ДОБАВЛЕНО
+        "createdNeeds": db.get("createdNeeds", []) # <-- ДОБАВЛЕНО
     }
 
     # Возвращаем журналы только если пользователь - администратор
@@ -210,8 +164,8 @@ async def save_app_data(user_id: str, data: AppData):
     if data.routeConfig is not None:
         db["routeConfig"] = data.routeConfig
         
-    if data.routes is not None: # <-- ДОБАВЛЕНО
-        db["routes"] = data.routes
+    if data.createdNeeds is not None: # <-- ДОБАВЛЕНО
+        db["createdNeeds"] = data.createdNeeds
 
     # Только администратор может обновлять журналы
     if user.get("role") == "Администратор":
