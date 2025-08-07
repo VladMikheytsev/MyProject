@@ -28,7 +28,5 @@ export const api = {
   registerUser: (userData) => request('/register', 'POST', userData),
   updateUser: (userData) => request(`/users/${userData.id}`, 'PUT', userData),
   deleteUser: (userId) => request(`/users/${userId}`, 'DELETE'),
-
-  // 🔧 Добавлен метод для получения складов
-  api.fetchWarehouses: () => request('/warehouses')
+  fetchWarehouses: () => request('/warehouses'),
 };
