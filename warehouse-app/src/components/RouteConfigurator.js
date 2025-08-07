@@ -1,7 +1,8 @@
+// components/RouteConfigurator.js
 import React, { useState } from 'react';
-import { PlusIcon, XIcon, ChevronUpIcon, ChevronDownIcon, SaveIcon, TrashIcon } from './Icons';
+import { PlusIcon, SaveIcon, TrashIcon, XIcon, ChevronUpIcon, ChevronDownIcon } from '../icons';
 
-const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
+export default function RouteConfigurator({ initialConfig, onSave, onClose }) {
   const [places, setPlaces] = useState(initialConfig || []);
   const [expandedPlaceId, setExpandedPlaceId] = useState(null);
 
@@ -16,32 +17,27 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
       employeePosition: '',
       ordinalNumber: places.length,
       characteristic: 'Погрузка',
-      connections: {},
+      connections: {}
     };
     setPlaces(prev => [...prev, newPlace]);
     setExpandedPlaceId(newPlace.id);
   };
 
   const handlePlaceChange = (placeId, field, value) => {
-    setPlaces(prev => prev.map(p => {
-      if (p.id === placeId) {
-        return { ...p, [field]: value };
-      }
-      return p;
-    }));
+    setPlaces(prev => prev.map(p => p.id === placeId ? { ...p, [field]: value } : p));
   };
 
   const handleConnectionChange = (sourceId, targetId, field, value) => {
     setPlaces(prev => prev.map(p => {
-      if (p.id === sourceId) {
-        const updatedConnections = { ...p.connections };
-        if (!updatedConnections[targetId]) {
-          updatedConnections[targetId] = { connected: false, distance: '', time: '' };
+      if (p.id !== sourceId) return p;
+      const updated = { ...p.connections[targetId], [field]: value };
+      return {
+        ...p,
+        connections: {
+          ...p.connections,
+          [targetId]: { connected: true, distance: '', time: '', ...updated }
         }
-        updatedConnections[targetId] = { ...updatedConnections[targetId], [field]: value };
-        return { ...p, connections: updatedConnections };
-      }
-      return p;
+      };
     }));
   };
 
@@ -56,19 +52,21 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
     alert('Конфигурация маршрута сохранена!');
   };
 
-  const sortedPlaces = [...places].sort((a, b) => (a.ordinalNumber || 0) - (b.ordinalNumber || 0));
+  const sortedPlaces = [...places].sort((a, b) => a.ordinalNumber - b.ordinalNumber);
 
   return (
     <div className="p-4 bg-gray-50 rounded-b-xl">
       <div className="flex justify-between items-center mb-6">
         <h3 className="text-xl font-bold text-gray-800">Настройка маршрутов</h3>
-        <button onClick={onClose} className="p-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300"><XIcon /></button>
+        <button onClick={onClose} className="p-2 rounded-lg text-gray-600 bg-gray-200 hover:bg-gray-300">
+          <XIcon />
+        </button>
       </div>
 
       <div className="space-y-4">
         {sortedPlaces.map(place => (
           <div key={place.id} className="bg-white rounded-lg shadow-sm border">
-            <div
+            <div 
               className="p-4 cursor-pointer flex justify-between items-center"
               onClick={() => setExpandedPlaceId(expandedPlaceId === place.id ? null : place.id)}
             >
@@ -104,7 +102,7 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
                       return (
                         <div key={targetPlace.id} className="grid grid-cols-[1fr,auto,auto,auto] gap-2 items-center text-sm">
                           <span className="font-medium">{targetPlace.name}</span>
-                          <button
+                          <button 
                             onClick={() => handleConnectionChange(place.id, targetPlace.id, 'connected', !connection.connected)}
                             className={`px-3 py-1 rounded-full text-xs font-bold ${connection.connected ? 'bg-green-500 text-white' : 'bg-gray-200 text-gray-700'}`}
                           >
@@ -122,7 +120,9 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
                   </div>
                 </div>
                 <div className="flex justify-end pt-4 border-t">
-                  <button onClick={() => handleDeletePlace(place.id)} className="p-2 text-red-500 hover:text-red-700"><TrashIcon /></button>
+                  <button onClick={() => handleDeletePlace(place.id)} className="p-2 text-red-500 hover:text-red-700">
+                    <TrashIcon />
+                  </button>
                 </div>
               </div>
             )}
@@ -140,6 +140,4 @@ const RouteConfigurator = ({ initialConfig, onSave, onClose }) => {
       </div>
     </div>
   );
-};
-
-export default RouteConfigurator;
+}
