@@ -10,7 +10,7 @@ import ItemEditModal from './components/ItemEditModal';
 import ItemTypesManager from './components/ItemTypesManager';
 import ItemsOnPlaceModal from './components/ItemsOnPlaceModal';
 import ContactsModal from './components/ContactsModal';
-import * as api from './api';
+import { api } from './api';
 
 export default function App() {
   const [warehouses, setWarehouses] = useState([]);
@@ -60,14 +60,14 @@ export default function App() {
             <div className="overflow-x-auto border rounded bg-white p-4 shadow">
               <div className="relative" style={{ minWidth: '1000px' }}>
                 {[...Array(15)].map((_, hour) => (
-                  <div key={hour} className="absolute top-0 left-[${hour * 60}px] w-[60px] border-l border-gray-300 text-xs text-center">
+                  <div key={hour} className="absolute top-0 left-[" + (hour * 60) + "px] w-[60px] border-l border-gray-300 text-xs text-center">
                     {7 + hour}:00
                   </div>
                 ))}
                 <div className="mt-8 space-y-4">
                   {[...items].sort((a, b) => b.name.localeCompare(a.name)).map((item, index) => {
-                    const start = Math.floor(Math.random() * 9) * 60; // случайное начало
-                    const width = Math.max(60, Math.min(180, item.quantity * 10)); // ширина полоски
+                    const start = Math.floor(Math.random() * 9) * 60;
+                    const width = Math.max(60, Math.min(180, item.quantity * 10));
                     return (
                       <div key={item.id} className="relative h-8">
                         <div
