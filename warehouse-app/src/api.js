@@ -27,5 +27,6 @@ export const api = {
   loginUser: (credentials) => request('/login', 'POST', credentials),
   registerUser: (userData) => request('/register', 'POST', userData),
   updateUser: (userData) => request(`/users/${userData.id}`, 'PUT', userData),
-  deleteUser: (userId) => request(`/users/${userId}`, 'DELETE')
+  deleteUser: (userId) => request(`/users/${userId}`, 'DELETE'),
+  fetchWarehouses: () => request('/warehouses')
 };
