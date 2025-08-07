@@ -30,5 +30,5 @@ export const api = {
   deleteUser: (userId) => request(`/users/${userId}`, 'DELETE'),
 
   // 🔧 Добавлен метод для получения складов
-  fetchWarehouses: () => request('/warehouses')
+  api.fetchWarehouses: () => request('/warehouses')
 };
