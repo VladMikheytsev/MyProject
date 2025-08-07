@@ -1,34 +1,27 @@
 // api.js
-const API_BASE_URL = "https://warehouse-vlad.ngrok.io";
 
-const request = async (endpoint, method = 'GET', body = null) => {
-  const url = `${API_BASE_URL}${endpoint}`;
-  const headers = { 'Content-Type': 'application/json' };
-  const options = { method, headers };
-  if (body) options.body = JSON.stringify(body);
+const API_BASE = 'https://warehouse-vlad.ngrok.io';
 
-  try {
-    const response = await fetch(url, options);
-    if (!response.ok) {
-      const errorData = await response.json().catch(() => ({ message: response.statusText }));
-      throw new Error(errorData.message || 'Ошибка сети');
-    }
-    return await response.json();
-  } catch (error) {
-    console.error(`Ошибка при запросе к ${endpoint}:`, error);
-    throw error;
-  }
-};
+export async function fetchWarehouses() {
+  const res = await fetch(`${API_BASE}/warehouses`);
+  if (!res.ok) throw new Error('Failed to fetch warehouses');
+  return res.json();
+}
 
-export const api = {
-  fetchAppData: (userId) => request(`/data/${userId}`),
-  saveAppData: (userId, data) => request(`/data/${userId}`, 'POST', data),
-  fetchUsers: () => request('/users'),
-  loginUser: (credentials) => request('/login', 'POST', credentials),
-  registerUser: (userData) => request('/register', 'POST', userData),
-  updateUser: (userData) => request(`/users/${userData.id}`, 'PUT', userData),
-  deleteUser: (userId) => request(`/users/${userId}`, 'DELETE'),
+export async function fetchItems() {
+  const res = await fetch(`${API_BASE}/items`);
+  if (!res.ok) throw new Error('Failed to fetch items');
+  return res.json();
+}
 
-  // 🔧 Добавлен метод для получения складов
-  fetchWarehouses: () => request('/warehouses')
-};
+export async function fetchItemTypes() {
+  const res = await fetch(`${API_BASE}/item-types`);
+  if (!res.ok) throw new Error('Failed to fetch item types');
+  return res.json();
+}
+
+export async function fetchUser() {
+  const res = await fetch(`${API_BASE}/user`);
+  if (!res.ok) throw new Error('Failed to fetch user');
+  return res.json();
+}
