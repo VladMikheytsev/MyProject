@@ -123,7 +123,7 @@ export default function App() {
           }}
           onCancel={() => closeModal('editPlaces')}
           onReset={() => {
-            const reset = confirm('Сбросить все места?');
+            const reset = window.confirm('Сбросить все места?');
             if (reset) {
               setWarehouses(prev => prev.map(w => w.id === modals.editPlaces.id ? { ...w, places: [] } : w));
               closeModal('editPlaces');
