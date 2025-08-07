@@ -2077,6 +2077,12 @@
     },
     "log": [
         {
+            "id": "2f53e6b6-e501-4e07-a3a8-06fad1ede358",
+            "timestamp": "2025-08-07T06:19:42.819Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Создал потребность: SAN -> FCA"
+        },
+        {
             "id": "7923195f-cd10-4e37-83bc-8a84940488b9",
             "timestamp": "2025-08-07T05:05:13.082Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
@@ -3529,6 +3535,40 @@
             "distance": "100",
             "time": "100",
             "createdAt": "2025-08-07T05:05:13.082Z"
+        },
+        {
+            "id": "a2e5f5e9-bdd8-4f4b-8afe-a3ca14f215bb",
+            "startPlaceId": "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7",
+            "endPlaceId": "1012a663-8b95-4436-a383-df29bb1fecf8",
+            "positions": [
+                {
+                    "id": "f9c9d1f9-795b-4521-8aa9-94c62db380b1",
+                    "name": "1",
+                    "type": "Шт",
+                    "quantity": "7"
+                },
+                {
+                    "id": "a4c5a5ce-1a0e-428b-97bc-c8877b2f8c94",
+                    "name": "1",
+                    "type": "Шт",
+                    "quantity": 1
+                },
+                {
+                    "id": "a09b7651-ff38-441d-9446-7a3dbffa33ab",
+                    "name": "1",
+                    "type": "Шт",
+                    "quantity": 1
+                },
+                {
+                    "id": "0ed6819d-baa2-4d2e-84bc-894381b23f1e",
+                    "name": "1",
+                    "type": "Шт",
+                    "quantity": 1
+                }
+            ],
+            "distance": "100",
+            "time": "100",
+            "createdAt": "2025-08-07T06:19:42.818Z"
         }
     ]
 }
