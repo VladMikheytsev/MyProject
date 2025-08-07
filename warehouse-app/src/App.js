@@ -10,7 +10,7 @@ import ItemEditModal from './components/ItemEditModal';
 import ItemTypesManager from './components/ItemTypesManager';
 import ItemsOnPlaceModal from './components/ItemsOnPlaceModal';
 import ContactsModal from './components/ContactsModal';
-import { api } from './api';
+import * as api from './api';
 
 export default function App() {
   const [warehouses, setWarehouses] = useState([]);
@@ -60,8 +60,10 @@ export default function App() {
             <div className="overflow-x-auto border rounded bg-white p-4 shadow">
               <div className="relative" style={{ minWidth: '1000px' }}>
                 {[...Array(15)].map((_, hour) => (
-                  <div key={hour} className="absolute top-0 left-[" + (hour * 60) + "px] w-[60px] border-l border-gray-300 text-xs text-center">
-                    {7 + hour}:00
+                  <div key={hour} className="absolute top-0" style={{ left: `${hour * 60}px`, width: '60px' }}>
+                    <div className="border-l border-gray-300 text-xs text-center">
+                      {7 + hour}:00
+                    </div>
                   </div>
                 ))}
                 <div className="mt-8 space-y-4">
