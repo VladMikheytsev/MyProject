@@ -67,7 +67,6 @@ const api = {
   registerUser: (userData) => api.request('/register', 'POST', userData),
   updateUser: (userData) => api.request(`/users/${userData.id}`, 'PUT', userData),
   deleteUser: (userId) => api.request(`/users/${userId}`, 'DELETE'),
-  getRouteEta: (origin) => api.request('/get-route-eta', 'POST', { origin }),
 };
 
 // --- [НОВЫЙ КОМПОНЕНТ] RouteConfigurator ---
@@ -458,7 +457,7 @@ const LabelsToPrint = React.forwardRef(({ item, user, qrCodeUrl }, ref) => {
                     {qrCodeUrl && <img src={qrCodeUrl} alt="QR Code" className="label-qr" />}
                     <p className="label-unique-code">{formatCode(item.uniqueCode)}</p>
                     <p className="label-datetime">
-                        {printTime.toLocaleDateString('ru-RU')} &nbsp; {printTime.toLocaleTimeString('ru-RU')}
+                        {printTime.toLocaleDateString('ru-RU')}   {printTime.toLocaleTimeString('ru-RU')}
                     </p>
                     <p className="label-user">
                         {user.firstName} {user.lastName}
@@ -2264,32 +2263,6 @@ const WriteOffModal = ({ title, warehouses, items, itemTypes, onSelectItem, onCl
     );
 };
 
-const RouteInfoModal = ({ routeInfo, onClose, onOpenMap }) => {
-    return (
-        <div className="fixed inset-0 bg-black bg-opacity-60 flex justify-center items-center p-4 z-50">
-            <div className="bg-white rounded-xl shadow-2xl w-full max-w-sm p-6 animate-fade-in-up text-center">
-                <h2 className="text-2xl font-bold mb-4 text-gray-800">Маршрут</h2>
-                {routeInfo.loading && <p>Получение данных о маршруте...</p>}
-                {routeInfo.error && <p className="text-red-600">{routeInfo.error}</p>}
-                {routeInfo.eta && (
-                    <div className="space-y-4">
-                        <p className="text-lg">{routeInfo.eta}</p>
-                        <button 
-                            onClick={onOpenMap}
-                            className="w-full px-6 py-3 rounded-lg text-white bg-blue-600 hover:bg-blue-700 font-semibold"
-                        >
-                            Открыть карту
-                        </button>
-                    </div>
-                )}
-                <div className="mt-6">
-                    <button onClick={onClose} className="px-6 py-2 rounded-lg text-gray-700 bg-gray-200 hover:bg-gray-300 font-semibold">Закрыть</button>
-                </div>
-            </div>
-        </div>
-    );
-};
-
 
 // --- Основной компонент приложения ---
 export default function App() {
@@ -2306,7 +2279,6 @@ export default function App() {
   const [signatures, setSignatures] = useState({});
   const [log, setLog] = useState([]);
   const [writeOffLog, setWriteOffLog] = useState([]);
-  const [routeInfo, setRouteInfo] = useState({ eta: null, loading: false, error: null, url: null });
   const [routeConfig, setRouteConfig] = useState([]); // <-- НОВОЕ СОСТОЯНИЕ
   
   // Modals and editors state
@@ -2371,62 +2343,6 @@ export default function App() {
     const formatCode = (code) => {
         if (!code || code.length !== 8) return '';
         return `${code.substring(0, 4)} ${code.substring(4, 8)}`;
-    };
-
-    const handleRouteClick = () => {
-        const destination = "10681 Production Ave, Fontana, CA 92337";
-    
-        if (navigator.geolocation) {
-            setRouteInfo({ eta: null, loading: true, error: null, url: null });
-    
-            navigator.geolocation.getCurrentPosition(
-                async (position) => {
-                    const { latitude, longitude } = position.coords;
-                    const origin = `${latitude},${longitude}`;
-                    const mapsUrl = `https://www.google.com/maps/dir/?api=1&origin=${origin}&destination=${encodeURIComponent(destination)}`;
-    
-                    try {
-                        // ПРИМЕЧАНИЕ: Для этой части требуется эндпоинт на вашем сервере (/get-route-eta),
-                        // который безопасно вызовет Google Maps API с вашим ключом.
-                        // const etaData = await api.getRouteEta({ latitude, longitude });
-                        // const arrivalTime = new Date(Date.now() + etaData.durationInSeconds * 1000);
-    
-                        // --- ВРЕМЕННОЕ РЕШЕНИЕ (без backend): Открываем карту напрямую ---
-                        // Замените этот блок на реальный вызов API, когда он будет готов.
-                        setRouteInfo({
-                            eta: `Нажмите "Открыть карту", чтобы построить маршрут.`,
-                            loading: false,
-                            error: null,
-                            url: mapsUrl
-                        });
-                        // --- КОНЕЦ ВРЕМЕННОГО РЕШЕНИЯ ---
-    
-                    } catch (error) {
-                        setRouteInfo({ eta: null, loading: false, error: 'Не удалось рассчитать маршрут. ' + error.message, url: null });
-                    }
-                },
-                (error) => {
-                    let errorMessage = "Не удалось получить вашу геолокацию. ";
-                    switch (error.code) {
-                        case error.PERMISSION_DENIED:
-                            errorMessage += "Вы запретили доступ к геолокации.";
-                            break;
-                        case error.POSITION_UNAVAILABLE:
-                            errorMessage += "Информация о местоположении недоступна.";
-                            break;
-                        case error.TIMEOUT:
-                            errorMessage += "Время запроса на геолокацию истекло.";
-                            break;
-                        default:
-                            errorMessage += "Произошла неизвестная ошибка.";
-                            break;
-                    }
-                    setRouteInfo({ eta: null, loading: false, error: errorMessage, url: null });
-                }
-            );
-        } else {
-            alert("Геолокация не поддерживается вашим браузером.");
-        }
     };
 
     useEffect(() => {
@@ -3240,13 +3156,6 @@ export default function App() {
                                         <div className="p-2 bg-green-100 text-green-600 rounded-lg"><TruckIcon width="18" height="18" /></div>
                                         <span className="font-semibold text-gray-700">Переместить/удалить позицию</span>
                                     </button>
-                                    <button
-                                        onClick={handleRouteClick}
-                                        className="w-full text-left p-4 bg-white rounded-lg shadow hover:bg-gray-100 transition flex items-center gap-4"
-                                    >
-                                        <div className="p-2 bg-orange-100 text-orange-600 rounded-lg"><MapPinIcon /></div>
-                                        <span className="font-semibold text-gray-700">Маршрут</span>
-                                    </button>
                                     {/* --- НОВАЯ КНОПКА --- */}
                                     <button
                                         onClick={() => setMainViewTab('routeConfig')}
@@ -3461,13 +3370,6 @@ export default function App() {
       {verifyingItem && <QRScannerModal itemToVerify={verifyingItem} allItems={items} onSuccess={handleVerificationSuccess} onCancel={() => setVerifyingItem(null)} />}
       {itemForAction && <ItemActionModal itemToAction={itemForAction} warehouses={warehouses} items={items} itemTypes={itemTypes} onMove={handleItemActionMove} onWriteOff={handleItemActionWriteOff} onCancel={() => setItemForAction(null)} />}
       {itemToPrint && <QRCodePrintModal item={itemToPrint} user={currentUser} onClose={() => setItemToPrint(null)} />}
-      {(routeInfo.loading || routeInfo.eta || routeInfo.error) && 
-        <RouteInfoModal 
-            routeInfo={routeInfo} 
-            onClose={() => setRouteInfo({ eta: null, loading: false, error: null, url: null })}
-            onOpenMap={() => window.open(routeInfo.url, '_blank')}
-        />
-      }
       {isScenariosModalOpen && <ScenariosModal scenarios={scenarios} warehouses={warehouses} items={items} users={users} currentUser={currentUser} onUpdateStatus={(scenario, newStatus) => setPendingAction({ scenario, newStatus })} onOpenCreate={() => { setScenariosModalOpen(false); setCreateScenarioModalOpen(true); }} onDelete={handleDeleteScenario} onClose={() => setScenariosModalOpen(false)} onPrint={(scenario) => setScenarioToPrint(scenario)} />}
       {isCreateScenarioModalOpen && <CreateScenarioModal warehouses={warehouses} items={items} users={users} scenarios={scenarios} onCreate={handleCreateScenario} onClose={() => setCreateScenarioModalOpen(false)} />}
       {pendingAction && <ActionConfirmationModal title={pendingAction.newStatus === 'accepted' ? 'Подтверждение принятия' : 'Подтверждение завершения'} onConfirm={handleConfirmActionWithSignature} onCancel={() => setPendingAction(null)} />}
