@@ -2077,6 +2077,18 @@
     },
     "log": [
         {
+            "id": "7923195f-cd10-4e37-83bc-8a84940488b9",
+            "timestamp": "2025-08-07T05:05:13.082Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Создал потребность: SAN -> FCA"
+        },
+        {
+            "id": "144b846b-e15e-485b-9b96-d5de13558ca9",
+            "timestamp": "2025-08-07T05:04:59.095Z",
+            "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
+            "action": "Обновил конфигурацию маршрутов"
+        },
+        {
             "id": "7eabbe5b-5249-4208-90d5-dbbc52b847ae",
             "timestamp": "2025-08-07T05:00:39.412Z",
             "userId": "f3fc545f-4736-4f98-bf2e-daf0680f6cda",
@@ -3346,8 +3358,8 @@
             "connections": {
                 "1012a663-8b95-4436-a383-df29bb1fecf8": {
                     "connected": true,
-                    "distance": "",
-                    "time": ""
+                    "distance": "100",
+                    "time": "100"
                 },
                 "fcedbf70-88b6-4b2b-9e7c-4b20ebf197d2": {
                     "connected": true,
@@ -3501,5 +3513,22 @@
             }
         }
     ],
-    "createdNeeds": []
+    "createdNeeds": [
+        {
+            "id": "b0e8c045-00f5-437a-bafd-09879cdb74a2",
+            "startPlaceId": "7a6f3a05-0dc9-49b1-94a2-7bdd6a1794a7",
+            "endPlaceId": "1012a663-8b95-4436-a383-df29bb1fecf8",
+            "positions": [
+                {
+                    "id": "5f011a7f-1604-4a44-b5ce-d2601bafa740",
+                    "name": "asdas",
+                    "type": "Шт",
+                    "quantity": 1
+                }
+            ],
+            "distance": "100",
+            "time": "100",
+            "createdAt": "2025-08-07T05:05:13.082Z"
+        }
+    ]
 }
